@@ -1,0 +1,134 @@
+// Re-Viva by IGZ Trainer - Esquema de base de datos
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── USUARIO ────────────────────────────────────────────────────────────────
+model User {
+  id       String   @id @default(cuid())
+  nombre   String
+  email    String   @unique
+  password String   // Contraseña encriptada con bcrypt
+  creadoEn DateTime @default(now())
+
+  perfil       NutritionalProfile?
+  plan         NutritionalPlan?
+  resetTokens  ResetToken[]
+}
+
+// ─── CÓDIGO DE RECUPERACIÓN DE CONTRASEÑA ────────────────────────────────────
+// Se genera un código de 6 dígitos, se envía por email y expira en 15 minutos.
+model ResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  codigo    String
+  expiresAt DateTime
+  usado     Boolean  @default(false)
+  creadoEn  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+// ─── PERFIL NUTRICIONAL ──────────────────────────────────────────────────────
+// Se crea cuando el cliente completa el formulario de onboarding
+model NutritionalProfile {
+  id                String      @id @default(cuid())
+  userId            String      @unique
+  genero            Genero
+  edad              Int
+  altura            Float       // en centímetros
+  peso              Float       // en kilogramos
+  objetivo          Objetivo
+  diasEntrenamiento Int
+  nivelEstres       NivelEstres
+  horasSueno        Float
+  adherencia        Adherencia
+  preferenciasAlimentarias String?
+  lesiones          String?
+  creadoEn          DateTime    @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+// ─── PLAN NUTRICIONAL ────────────────────────────────────────────────────────
+// El trainer activa este plan luego del pago del cliente
+model NutritionalPlan {
+  id            String         @id @default(cuid())
+  userId        String         @unique
+  estado        EstadoPlan     @default(PENDIENTE)
+
+  // Valores que el trainer define (pueden diferir del pre-cálculo IGZ)
+  clasificacion Clasificacion?
+  calorias      Float?
+  proteina      Float?
+  hidratos      Float?
+  grasas        Float?
+  notasTrainer  String?        // El trainer puede agregar notas personalizadas
+  activadoEn    DateTime?
+
+  // Pre-cálculo del motor IGZ (solo visible para el trainer en el email y admin)
+  igzClasificacion Clasificacion?
+  igzCalorias      Float?
+  igzProteina      Float?
+  igzHidratos      Float?
+  igzGrasas        Float?
+
+  // ── Componentes del proceso integral ─────────────────────────────────────
+  // Cada cliente activo recibe los 5 componentes. El trainer lleva el seguimiento aquí.
+  estadoAlimentacion    EstadoEntrega @default(PENDIENTE)
+  estadoEntrenamiento   EstadoEntrega @default(PENDIENTE)
+  estadoSuplementacion  EstadoEntrega @default(PENDIENTE)
+  estadoMealPrep        EstadoEntrega @default(PENDIENTE)
+  estadoListaCompras    EstadoEntrega @default(PENDIENTE)
+
+  creadoEn DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+// ─── ENUMS ───────────────────────────────────────────────────────────────────
+enum Genero {
+  MASCULINO
+  FEMENINO
+}
+
+enum Objetivo {
+  VOLUMEN
+  DEFINICION
+  RECOMPOSICION
+}
+
+enum NivelEstres {
+  BAJO
+  MEDIO
+  ALTO
+}
+
+enum Adherencia {
+  BAJA
+  MEDIA
+  ALTA
+}
+
+enum EstadoPlan {
+  PENDIENTE
+  ACTIVO
+  ARCHIVADO
+}
+
+enum Clasificacion {
+  VOLUMEN
+  DEFINICION
+  RECOMPOSICION
+}
+
+enum EstadoEntrega {
+  PENDIENTE
+  EN_PROGRESO
+  ENTREGADO
+}

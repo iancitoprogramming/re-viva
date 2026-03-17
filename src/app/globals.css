@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   REVIVA · IGZ Trainer — Design Tokens
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@theme {
+  /* Fuentes */
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-playfair);
+
+  /* ── Verde Bosque: vida, arraigo, profundidad natural ── */
+  --color-primary:       #2D5A3D;
+  --color-primary-dark:  #1C3D28;
+  --color-primary-light: #4A7C5F;
+
+  /* ── Oliva: sofisticación, textos secundarios ── */
+  --color-secondary: #8B9E7A;
+
+  /* ── Dorado Arena: valor, logro, calidez sobria ── */
+  --color-gold:       #C9A96E;
+  --color-gold-light: #E8D5B0;
+
+  /* ── Fondos: marfil cálido, no clínico ── */
+  --color-ivory:        #F8F5EF;
+  --color-surface:      #FFFFFF;
+  --color-surface-warm: #F2EDE3;
+
+  /* ── Textos: tono verde oscuro, no negro puro ── */
+  --color-ink:           #1A2416;
+  --color-ink-secondary: #6B7B64;
+  --color-ink-muted:     #9B9589;
+
+  /* ── Bordes elegantes, cálidos ── */
+  --color-edge: #DDD8CC;
+}
+
+html, body {
+  background-color: #F8F5EF;
+  color: #1A2416;
+}
+
+/* Scrollbar invisible para tabs horizontales */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
