@@ -12,7 +12,7 @@ function crearCliente() {
     connectionString: process.env.DATABASE_URL!,
     ssl: { rejectUnauthorized: false }, // Necesario para conectar a Supabase
   })
-  const adapter = new PrismaPg(pool)
+  const adapter = new PrismaPg(pool as any)
   return new PrismaClient({ adapter })
 }
 
