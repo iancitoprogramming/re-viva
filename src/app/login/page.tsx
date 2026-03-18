@@ -47,8 +47,12 @@ function LoginContent() {
 
       if (data.esAdmin) {
         router.push('/admin')
+      } else if (!data.tienePerfil) {
+        router.push('/onboarding')
+      } else if (data.planEstado === 'PENDIENTE') {
+        router.push('/pendiente')
       } else {
-        router.push(data.tienePerfil ? '/dashboard' : '/onboarding')
+        router.push('/dashboard')
       }
     } catch {
       setError('Error de conexión. Revisá tu internet e intentá de nuevo.')
