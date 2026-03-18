@@ -12,7 +12,9 @@ function LoginContent() {
   const router       = useRouter()
   const searchParams = useSearchParams()
   const resetOk      = searchParams.get('resetOk') === '1'
-  const [modo, setModo] = useState<'login' | 'registro'>('login')
+  const [modo, setModo] = useState<'login' | 'registro'>(
+    searchParams.get('modo') === 'registro' ? 'registro' : 'login'
+  )
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState('')
   const [form, setForm]       = useState({ nombre: '', email: '', password: '' })

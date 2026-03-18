@@ -40,6 +40,37 @@ html, body {
   color: #1A2416;
 }
 
+/* ─── DARK MODE ─────────────────────────────────────────────────────────────── */
+
+.dark {
+  /* REVIVA tokens */
+  --color-ivory:        #1B2118;
+  --color-surface:      #212A1E;
+  --color-surface-warm: #191F16;
+  --color-ink:          #EDE8DF;
+  --color-ink-secondary:#9DAF94;
+  --color-ink-muted:    #6F7C68;
+  --color-edge:         #333F2E;
+
+  /* Tailwind gray palette override */
+  --color-gray-50:  #1C211B;
+  --color-gray-100: #242D22;
+  --color-gray-200: #2E3A2C;
+  --color-gray-300: #3E4E3C;
+  --color-gray-400: #5A6E58;
+  --color-gray-500: #748A72;
+  --color-gray-600: #8EA48C;
+  --color-gray-700: #A8BEA6;
+  --color-gray-900: #EDE8DF;
+  --color-white:    #212A1E;
+}
+
+html.dark,
+html.dark body {
+  background-color: #1B2118;
+  color: #EDE8DF;
+}
+
 /* Scrollbar invisible para tabs horizontales */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

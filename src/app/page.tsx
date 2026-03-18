@@ -4,6 +4,7 @@
 import Link from 'next/link'
 import PlanesTabs from '@/components/PlanesTabs'
 import CopiarAlias from '@/components/CopiarAlias'
+import ThemeToggle from '@/components/ThemeToggle'
 
 // ─── HEADER ──────────────────────────────────────────────────────────────────
 
@@ -15,12 +16,15 @@ function Header() {
           <span className="font-serif font-bold text-xl text-primary tracking-wide">REVIVA</span>
           <span className="text-ink-muted text-xs ml-2 tracking-widest uppercase">by IGZ Trainer</span>
         </div>
-        <Link
-          href="/login"
-          className="text-sm text-ink-secondary hover:text-primary font-medium transition-colors"
-        >
-          Ingresar
-        </Link>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <Link
+            href="/login"
+            className="text-sm text-ink-secondary hover:text-primary font-medium transition-colors"
+          >
+            Ingresar
+          </Link>
+        </div>
       </div>
     </header>
   )
@@ -60,7 +64,7 @@ function Hero() {
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link
-            href="/login"
+            href="/login?modo=registro"
             className="w-full sm:w-auto bg-primary hover:bg-primary-dark text-ivory font-semibold px-8 py-4 rounded-2xl text-base transition-all duration-200 active:scale-[0.98] text-center"
           >
             Empezar ahora
@@ -349,7 +353,7 @@ function CTAFinal() {
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link
-            href="/login"
+            href="/login?modo=registro"
             className="w-full sm:w-auto inline-block bg-gold hover:bg-gold/90 text-ink font-semibold px-10 py-4 rounded-2xl text-base transition-all duration-200 active:scale-[0.98] text-center"
           >
             Empezar ahora
