@@ -4,7 +4,8 @@
 import { Resend } from 'resend'
 import type { OnboardingData, IGZResult } from '@/types'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Proveemos un string de fallback para que no falle el "npm run build" en Vercel si falta la variable de entorno
+const resend = new Resend(process.env.RESEND_API_KEY || 're_123')
 const TRAINER_EMAIL = process.env.TRAINER_EMAIL!
 
 // Etiquetas legibles para los enums
