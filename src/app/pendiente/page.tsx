@@ -2,21 +2,43 @@
 
 'use client'
 
-import { useState } from 'react'
-import Link from 'next/link'
-import Button from '@/components/Button'
+import { useEffect, useState } from 'react'
+
+function QRImage() {
+  const [error, setError] = useState(false)
+  if (error) {
+    return (
+      <div className="w-32 h-32 bg-gray-100 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center p-3 text-center">
+        <span className="text-xs text-gray-400 font-medium leading-snug">Subir qr-pago.png a /public</span>
+      </div>
+    )
+  }
+  return (
+    <img
+      src="/qr-pago.png"
+      alt="QR de Pago REVIVA.IGZ"
+      className="w-32 h-32 rounded-xl object-cover"
+      onError={() => setError(true)}
+    />
+  )
+}
 
 export default function PendientePage() {
   const [aliasCopiado, setAliasCopiado] = useState(false)
   const [mostrarQR, setMostrarQR] = useState(false)
+  const [nombre, setNombre] = useState('')
 
   const alias = "REVIVA.IGZ"
   const whatsappNumber = "5491122835621"
   const whatsappMessage = encodeURIComponent("Hola Ian, te envío mi comprobante de pago para comenzar con REVIVA.")
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`
-  
-  // Link a Instagram proporcionado por el usuario o usando el arroba
   const instagramLink = "https://instagram.com/igztrainer"
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.nombre) setNombre(d.nombre.split(' ')[0]) })
+  }, [])
 
   const copiarAlias = () => {
     navigator.clipboard.writeText(alias)
@@ -36,7 +58,7 @@ export default function PendientePage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Ya estás dentro de REVIVA</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{nombre ? `${nombre}, ya estás dentro de REVIVA` : 'Ya estás dentro de REVIVA'}</h1>
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm font-medium">
             <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
             Pendiente de activación
@@ -68,15 +90,7 @@ export default function PendientePage() {
             {/* QR Animado (se muestra al copiar el alias) */}
             <div className={`transition-all duration-500 ease-in-out overflow-hidden flex flex-col items-center ${mostrarQR ? 'max-h-64 opacity-100 mt-4' : 'max-h-0 opacity-0'}`}>
                <p className="text-xs text-gray-500 mb-2">O escaneá el código QR:</p>
-               <div className="w-32 h-32 bg-gray-100 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center relative overflow-hidden">
-                 {/* Dejamos preparado el QR para que suba la imagen */}
-                 <img src="/qr-pago.png" alt="QR de Pago" className="absolute inset-0 w-full h-full object-cover" onError={(e) => {
-                   // Fallback visual si la imagen no existe
-                   e.currentTarget.style.display = 'none';
-                   e.currentTarget.parentElement?.classList.add('p-4', 'text-center');
-                 }} />
-                 <span className="text-xs text-gray-400 font-medium z-0 px-2 text-center">Reemplazar por qr-pago.png en /public</span>
-               </div>
+               <QRImage />
             </div>
 
             <hr className="my-6 border-gray-100" />
@@ -102,6 +116,17 @@ export default function PendientePage() {
               Enviar comprobante
             </a>
           </div>
+        </div>
+
+        {/* Paso 3: Esperar activación */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+          <h2 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs">3</span>
+            Esperá el contacto
+          </h2>
+          <p className="text-sm text-gray-600 leading-relaxed">
+            Una vez que confirme tu pago, te contacto en las próximas <strong>24 a 72 horas hábiles</strong> para activar tu plan personalizado.
+          </p>
         </div>
 
         {/* Cierre / Espera - Instagram */}
