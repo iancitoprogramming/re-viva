@@ -7,10 +7,10 @@ export default function CTAFinal() {
     <section className="px-6 py-24 text-center" style={{ background: 'linear-gradient(to bottom, #1C3D28, #2D5A3D)' }}>
       <div className="max-w-xl mx-auto">
         <p className="text-gold text-xs font-semibold tracking-widest uppercase mb-5">Proceso real. Resultados reales.</p>
-        <h2 className="font-serif text-3xl sm:text-4xl text-ivory mb-4 leading-tight">
+        <h2 className="font-serif text-3xl sm:text-4xl text-[#EDE8DF] mb-4 leading-tight">
           Tu proceso empieza<br />cuando vos decidís.
         </h2>
-        <p className="text-ivory/60 text-base mb-10">Sin presión. Solo el primer paso.</p>
+        <p className="text-[#EDE8DF]/60 text-base mb-10">Sin presión. Solo el primer paso.</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link
             href="/login?modo=registro"
@@ -22,7 +22,7 @@ export default function CTAFinal() {
             href="https://wa.me/5491122835621?text=Hola%20Ian%2C%20tengo%20una%20consulta%20sobre%20REVIVA."
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-ivory font-medium px-8 py-4 rounded-2xl text-base transition-all text-center"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#EDE8DF]/10 hover:bg-[#EDE8DF]/20 border border-[#EDE8DF]/20 text-[#EDE8DF] font-medium px-8 py-4 rounded-2xl text-base transition-all text-center"
           >
             <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path d={WA_ICON} />

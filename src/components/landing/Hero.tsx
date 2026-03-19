@@ -4,7 +4,7 @@ export default function Hero() {
   return (
     <section
       className="min-h-[calc(100svh-64px)] flex flex-col justify-center px-6 py-20"
-      style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(45,90,61,0.07) 0%, transparent 65%), #F8F5EF' }}
+      style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(45,90,61,0.07) 0%, transparent 65%), var(--color-ivory)' }}
     >
       <div className="max-w-xl mx-auto w-full text-center">
         <div className="inline-flex items-center gap-2 bg-gold-light text-primary-dark text-xs font-semibold px-4 py-1.5 rounded-full mb-8 border border-gold/40 tracking-wider uppercase">
