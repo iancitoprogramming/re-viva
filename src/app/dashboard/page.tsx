@@ -148,7 +148,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Mientras esperás: Instagram */}
-            <div className="bg-emerald-900 text-white rounded-2xl p-6 text-center relative overflow-hidden">
+            <div className="bg-emerald-900 text-[#EDE8DF] rounded-2xl p-6 text-center relative overflow-hidden">
               <div className="absolute -top-8 -right-8 w-24 h-24 bg-emerald-800 rounded-full blur-2xl opacity-50" />
               <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-emerald-800 rounded-full blur-2xl opacity-50" />
               <div className="relative z-10">
@@ -158,7 +158,7 @@ export default function DashboardPage() {
                   href={INSTAGRAM_LINK}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 py-2.5 rounded-xl font-medium transition-colors text-sm"
+                  className="inline-flex items-center gap-2 bg-[#EDE8DF]/10 hover:bg-[#EDE8DF]/20 border border-[#EDE8DF]/20 text-[#EDE8DF] px-5 py-2.5 rounded-xl font-medium transition-colors text-sm"
                 >
                   Ver en Instagram
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -130,7 +130,7 @@ export default function PendientePage() {
         </div>
 
         {/* Cierre / Espera - Instagram */}
-        <div className="bg-emerald-900 text-white rounded-3xl p-6 sm:p-8 text-center relative overflow-hidden">
+        <div className="bg-emerald-900 text-[#EDE8DF] rounded-3xl p-6 sm:p-8 text-center relative overflow-hidden">
           {/* Decals background */}
           <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-800 rounded-full blur-2xl opacity-50"></div>
           <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-emerald-800 rounded-full blur-2xl opacity-50"></div>
@@ -144,7 +144,7 @@ export default function PendientePage() {
               href={instagramLink} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 py-2.5 rounded-xl font-medium transition-colors text-sm"
+              className="inline-flex items-center gap-2 bg-[#EDE8DF]/10 hover:bg-[#EDE8DF]/20 border border-[#EDE8DF]/20 text-[#EDE8DF] px-5 py-2.5 rounded-xl font-medium transition-colors text-sm"
             >
               Mirá mis contenidos
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
