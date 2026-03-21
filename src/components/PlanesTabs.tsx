@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { PLAN_CTA_HREF } from '@/lib/constants'
 
 // ─── DATOS ────────────────────────────────────────────────────────────────────
 
@@ -121,7 +122,7 @@ export default function PlanesTabs() {
               </div>
 
               <Link
-                href="/login?modo=registro"
+                href={PLAN_CTA_HREF}
                 className="text-center bg-primary/8 hover:bg-primary/15 text-primary font-semibold py-3 rounded-xl text-sm transition-all"
               >
                 Quiero este plan
@@ -178,7 +179,7 @@ export default function PlanesTabs() {
                 </div>
 
                 <Link
-                  href="/login?modo=registro"
+                  href={PLAN_CTA_HREF}
                   className="text-center bg-primary/8 hover:bg-primary/15 text-primary font-semibold py-3 rounded-xl text-sm transition-all"
                 >
                   Quiero este plan

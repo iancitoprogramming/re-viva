@@ -82,6 +82,7 @@ re-viva/
 │   │   └── CopiarAlias.tsx
 │   ├── lib/
 │   │   ├── auth.ts         — crearToken, verificarToken, obtenerTokenDeRequest, esAdmin
+│   │   ├── constants.ts    — INSTAGRAM_URL, WHATSAPP_NUMBER, ALIAS, WHATSAPP_*, PLAN_CTA_HREF
 │   │   ├── email.ts        — enviarCodigoRecuperacion, enviarNotificacionNuevoCliente
 │   │   ├── igzEngine.ts    — Motor de cálculo de macros IGZ
 │   │   └── prisma.ts       — Instancia singleton de PrismaClient (con adapter pg)
@@ -393,10 +394,14 @@ Los errores se loggean con `console.error` sin estructura. En producción, Verce
 ## 11. REGLAS PARA CLAUDE
 
 ### Autonomía y eficiencia
-- **Ejecutar sin pedir autorización** para decisiones operativas de bajo riesgo: commits, push, estrategia de merge, orden de archivos, decisiones de eficiencia.
+- **Ejecutar sin pedir autorización** para cualquier decisión operativa: commits, push, merge, estrategia de archivos, refactors de limpieza.
 - **No preguntar** cosas como "¿junto o separo en dos commits?" o "¿elimino o dejo condicional?" — decidir lo más eficiente y ejecutar.
-- **Minimizar tokens**: respuestas concisas, sin preámbulo, sin resumen al final de lo que ya se ve en el diff.
+- **Minimizar tokens**: sin preámbulo, sin resumen de lo que ya se ve en el diff, sin "¿querés que haga X?" — simplemente hacerlo.
 - Informar qué se hizo, no pedir permiso antes.
+- **bypassPermissions activo globalmente** en `~/.claude/settings.json` — Claude no pedirá confirmación para ninguna herramienta. Si en alguna sesión vuelven los prompts, verificar ese archivo.
+
+### CRLF en Windows
+Los archivos usan LF (Unix). El `.gitattributes` en la raíz ya tiene `* text=auto eol=lf`. Si Git muestra warnings de "LF will be replaced by CRLF", es normal en Windows — los archivos en disco tendrán CRLF pero Git commitea LF. No es un error. Para normalizar todos los archivos: `git add --renormalize .`
 
 ### Flujo de trabajo Git (siempre seguir este orden)
 ```bash

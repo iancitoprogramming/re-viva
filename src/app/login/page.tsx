@@ -50,7 +50,8 @@ function LoginContent() {
       } else if (!data.tienePerfil) {
         router.push('/onboarding')
       } else if (data.planEstado === 'PENDIENTE') {
-        router.push('/pendiente')
+        const nombre = data.nombre ? `?nombre=${encodeURIComponent(data.nombre.split(' ')[0])}` : ''
+        router.push(`/pendiente${nombre}`)
       } else {
         router.push('/dashboard')
       }

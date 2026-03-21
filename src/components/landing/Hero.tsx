@@ -1,6 +1,5 @@
 import Link from 'next/link'
-
-const INSTAGRAM_URL = 'https://instagram.com/igztrainer'
+import { INSTAGRAM_URL } from '@/lib/constants'
 
 export default function Hero() {
   return (

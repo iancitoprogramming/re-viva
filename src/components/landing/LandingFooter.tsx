@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { INSTAGRAM_URL } from '@/lib/constants'
 
 export default function LandingFooter() {
   return (
@@ -11,7 +12,7 @@ export default function LandingFooter() {
         <div className="flex gap-6">
           <Link href="#planes" className="text-xs text-ivory/40 hover:text-ivory/70 transition-colors">Planes</Link>
           <Link href="#pagos"  className="text-xs text-ivory/40 hover:text-ivory/70 transition-colors">Pagos</Link>
-          <a href="https://instagram.com/igztrainer" target="_blank" rel="noopener noreferrer" className="text-xs text-ivory/40 hover:text-ivory/70 transition-colors">Instagram</a>
+          <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="text-xs text-ivory/40 hover:text-ivory/70 transition-colors">Instagram</a>
           <Link href="/contact" className="text-xs text-ivory/40 hover:text-ivory/70 transition-colors">Contacto</Link>
           <Link href="/login"  className="text-xs text-ivory/40 hover:text-ivory/70 transition-colors">Ingresar</Link>
         </div>
