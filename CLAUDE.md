@@ -392,21 +392,63 @@ Los errores se loggean con `console.error` sin estructura. En producción, Verce
 
 ## 11. REGLAS PARA CLAUDE
 
+### Autonomía y eficiencia
+- **Ejecutar sin pedir autorización** para decisiones operativas de bajo riesgo: commits, push, estrategia de merge, orden de archivos, decisiones de eficiencia.
+- **No preguntar** cosas como "¿junto o separo en dos commits?" o "¿elimino o dejo condicional?" — decidir lo más eficiente y ejecutar.
+- **Minimizar tokens**: respuestas concisas, sin preámbulo, sin resumen al final de lo que ya se ve en el diff.
+- Informar qué se hizo, no pedir permiso antes.
+
+### Flujo de trabajo Git (siempre seguir este orden)
+```bash
+# 1. Verificar estado
+git status
+
+# 2. Stagear solo los archivos del task (nunca git add -A ciego)
+git add <archivos específicos>
+
+# 3. Commit con mensaje descriptivo
+git commit -m "tipo: descripción corta
+
+- detalle 1
+- detalle 2
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+
+# 4. Antes de pushear, sincronizar con remote
+git pull --rebase origin main   # Si hay conflictos, resolverlos y continuar
+
+# 5. Push
+git push origin main
+```
+
+**Convenciones de commit:**
+- `feat:` — nueva feature
+- `fix:` — bug fix
+- `refactor:` — refactor sin cambio de comportamiento
+- `merge:` — resolución de merge con cambios propios
+- `chore:` — tareas de mantenimiento (deps, config)
+
+**Si hay conflictos en el merge/rebase:**
+1. Abortar con `git rebase --abort` o `git merge --abort`
+2. Hacer `git fetch origin` para ver qué cambió en el remote
+3. Analizar ambas versiones antes de resolver
+4. Tomar lo mejor de cada lado (no simplemente "ours" o "theirs")
+5. Si Ian modificó un archivo, respetar su intención — solo sobreescribir si hay razón clara
+
 ### Siempre
 - Priorizar simplicidad y legibilidad
-- Pensar en escalabilidad desde el diseño
 - Optimizar UX — reducir fricción
 - Proponer mejoras si se detecta fricción técnica o de usuario
 - Detectar incongruencias entre el código y el comportamiento esperado
-- Sugerir automatizaciones cuando ahorren tiempo operativo de Ian
 
 ### Nunca
 - Complejizar sin necesidad
-- Usar lenguaje genérico o inexpresivo
 - Alejarse de la identidad de marca (tono argentino, directo, premium)
 - Crear abstracciones para código que se usa una sola vez
 - Agregar dependencias sin justificación clara
 - Cambiar el schema de Prisma sin evaluar el impacto en las migraciones
+- Usar `git add -A` o `git add .` sin revisar qué se está incluyendo
+- Commitear `.claude/`, `.env`, archivos de credenciales
 
 ### Al modificar código
 - Leer el archivo antes de editarlo
@@ -418,6 +460,7 @@ Los errores se loggean con `console.error` sin estructura. En producción, Verce
 ### Al agregar features
 - Mantener el patrón existente: Server Components donde sea posible, Client Components solo donde se necesite estado o interactividad
 - Los componentes de UI van en `src/components/`
+- Los componentes de la landing van en `src/components/landing/`
 - La lógica de negocio va en `src/lib/`
 - Los tipos compartidos van en `src/types/index.ts`
 
