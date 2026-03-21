@@ -68,58 +68,83 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* Lista de clientes */}
+        {/* Lista de clientes — cards mobile, tabla desktop */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           {clientes.length === 0 ? (
             <div className="p-12 text-center text-gray-400">
               Aún no hay clientes registrados.
             </div>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-100 bg-gray-50">
-                  <th className="text-left px-5 py-3 font-semibold text-gray-600">Cliente</th>
-                  <th className="text-left px-5 py-3 font-semibold text-gray-600 hidden sm:table-cell">Registrado</th>
-                  <th className="text-left px-5 py-3 font-semibold text-gray-600">Estado</th>
-                  <th className="px-5 py-3" />
-                </tr>
-              </thead>
-              <tbody>
-                {clientes.map((cliente, i) => (
-                  <tr
-                    key={cliente.id}
-                    className={`border-b border-gray-50 hover:bg-gray-50 transition-colors ${i === clientes.length - 1 ? 'border-0' : ''}`}
-                  >
-                    <td className="px-5 py-4">
-                      <p className="font-medium text-gray-900">{cliente.nombre}</p>
-                      <p className="text-gray-400 text-xs">{cliente.email}</p>
-                    </td>
-                    <td className="px-5 py-4 text-gray-500 hidden sm:table-cell">
-                      {new Date(cliente.creadoEn).toLocaleDateString('es-AR')}
-                    </td>
-                    <td className="px-5 py-4">
+            <>
+              {/* Mobile: cards */}
+              <div className="sm:hidden divide-y divide-gray-50">
+                {clientes.map((cliente) => (
+                  <div key={cliente.id} className="p-4 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-medium text-gray-900 text-sm truncate">{cliente.nombre}</p>
+                      <p className="text-gray-400 text-xs truncate">{cliente.email}</p>
+                      <p className="text-gray-400 text-xs mt-0.5">{new Date(cliente.creadoEn).toLocaleDateString('es-AR')}</p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       {!cliente.tienePerfil ? (
-                        <span className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-500">Sin perfil</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">Sin perfil</span>
                       ) : (
-                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${estadoColores[cliente.plan?.estado ?? 'PENDIENTE']}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${estadoColores[cliente.plan?.estado ?? 'PENDIENTE']}`}>
                           {cliente.plan?.estado ?? 'PENDIENTE'}
                         </span>
                       )}
-                    </td>
-                    <td className="px-5 py-4 text-right">
                       {cliente.tienePerfil && (
-                        <Link
-                          href={`/admin/cliente/${cliente.id}`}
-                          className="text-emerald-600 hover:text-emerald-700 font-medium text-xs"
-                        >
-                          Ver →
-                        </Link>
+                        <Link href={`/admin/cliente/${cliente.id}`} className="text-emerald-600 font-semibold text-sm">→</Link>
                       )}
-                    </td>
-                  </tr>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+
+              {/* Desktop: tabla */}
+              <table className="w-full text-sm hidden sm:table">
+                <thead>
+                  <tr className="border-b border-gray-100 bg-gray-50">
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600">Cliente</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600">Registrado</th>
+                    <th className="text-left px-5 py-3 font-semibold text-gray-600">Estado</th>
+                    <th className="px-5 py-3" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {clientes.map((cliente, i) => (
+                    <tr
+                      key={cliente.id}
+                      className={`border-b border-gray-50 hover:bg-gray-50 transition-colors ${i === clientes.length - 1 ? 'border-0' : ''}`}
+                    >
+                      <td className="px-5 py-4">
+                        <p className="font-medium text-gray-900">{cliente.nombre}</p>
+                        <p className="text-gray-400 text-xs">{cliente.email}</p>
+                      </td>
+                      <td className="px-5 py-4 text-gray-500">
+                        {new Date(cliente.creadoEn).toLocaleDateString('es-AR')}
+                      </td>
+                      <td className="px-5 py-4">
+                        {!cliente.tienePerfil ? (
+                          <span className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-500">Sin perfil</span>
+                        ) : (
+                          <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${estadoColores[cliente.plan?.estado ?? 'PENDIENTE']}`}>
+                            {cliente.plan?.estado ?? 'PENDIENTE'}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-5 py-4 text-right">
+                        {cliente.tienePerfil && (
+                          <Link href={`/admin/cliente/${cliente.id}`} className="text-emerald-600 hover:text-emerald-700 font-medium text-xs">
+                            Ver →
+                          </Link>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
           )}
         </div>
       </main>

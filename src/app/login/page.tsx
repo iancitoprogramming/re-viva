@@ -6,16 +6,13 @@ import Link from 'next/link'
 import FormInput from '@/components/FormInput'
 import Button from '@/components/Button'
 
-// Separamos el contenido que usa useSearchParams en su propio componente
-// para que Next.js pueda envolverlo en Suspense correctamente
 function LoginContent() {
   const router       = useRouter()
   const searchParams = useSearchParams()
   const resetOk      = searchParams.get('resetOk') === '1'
-  // Si el usuario llega desde "Quiero este plan", pre-seleccionamos registro
-  const modoInicial  = searchParams.get('modo') === 'registro' ? 'registro' : 'login'
-
-  const [modo, setModo] = useState<'login' | 'registro'>(modoInicial)
+  const [modo, setModo] = useState<'login' | 'registro'>(
+    searchParams.get('modo') === 'registro' ? 'registro' : 'login'
+  )
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState('')
   const [form, setForm]       = useState({ nombre: '', email: '', password: '' })
@@ -50,8 +47,12 @@ function LoginContent() {
 
       if (data.esAdmin) {
         router.push('/admin')
+      } else if (!data.tienePerfil) {
+        router.push('/onboarding')
+      } else if (data.planEstado === 'PENDIENTE') {
+        router.push('/pendiente')
       } else {
-        router.push(data.tienePerfil ? '/dashboard' : '/onboarding')
+        router.push('/dashboard')
       }
     } catch {
       setError('Error de conexión. Revisá tu internet e intentá de nuevo.')
@@ -156,7 +157,6 @@ function LoginContent() {
 
           </div>
 
-          {/* Tranquilizador debajo del form */}
           {modo === 'registro' && (
             <p className="text-center text-xs text-ink-muted mt-4 px-4">
               Tu cuenta queda lista al instante. El plan se activa una vez confirmado el pago.
@@ -170,7 +170,6 @@ function LoginContent() {
   )
 }
 
-// Envolvemos en Suspense porque LoginContent usa useSearchParams
 export default function LoginPage() {
   return (
     <Suspense>

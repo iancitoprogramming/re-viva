@@ -24,6 +24,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('theme');if(t==='dark'||(t===null&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}})()` }} />
+      </head>
       <body className={`${inter.variable} ${playfair.variable} font-sans bg-ivory text-ink antialiased`}>
         {children}
       </body>

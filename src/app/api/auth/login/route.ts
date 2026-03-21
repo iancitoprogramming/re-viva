@@ -13,7 +13,7 @@ export async function POST(request: Request) {
 
     const usuario = await prisma.user.findUnique({
       where: { email },
-      include: { perfil: true },
+      include: { perfil: true, plan: true },
     })
 
     if (!usuario || !(await bcrypt.compare(password, usuario.password))) {
@@ -26,6 +26,7 @@ export async function POST(request: Request) {
       ok: true,
       tienePerfil: !!usuario.perfil,
       esAdmin: esAdmin(usuario.email),
+      planEstado: usuario.plan?.estado ?? null,
     })
     response.cookies.set('re-viva-token', token, {
       httpOnly: true,

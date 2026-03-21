@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import ThemeToggle from './ThemeToggle'
 
 interface NavbarProps {
   nombreUsuario?: string
@@ -25,7 +26,7 @@ export default function Navbar({ nombreUsuario, esAdmin }: NavbarProps) {
           <span className="text-gray-400 text-xs font-medium">by IGZ Trainer</span>
         </Link>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {esAdmin && (
             <Link
               href="/admin"
@@ -39,6 +40,7 @@ export default function Navbar({ nombreUsuario, esAdmin }: NavbarProps) {
               Hola, <strong>{nombreUsuario}</strong>
             </span>
           )}
+          <ThemeToggle />
           <button
             onClick={cerrarSesion}
             className="text-xs text-gray-500 hover:text-red-500 transition-colors"
