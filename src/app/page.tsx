@@ -341,18 +341,18 @@ function Planes() {
 const pasos = [
   {
     num: '01',
-    titulo: 'Elegís tu plan',
-    desc: 'Revisás los precios, elegís el que mejor se adapta a tu objetivo y hacés clic en "Quiero este plan".',
+    titulo: 'Primero elegís el plan',
+    desc: 'Ves los precios acá abajo, elegís el que mejor se adapta a tu objetivo y recién ahí hacés clic en "Quiero este plan". Sin cuenta previa.',
   },
   {
     num: '02',
-    titulo: 'Creás tu cuenta y completás tu perfil',
-    desc: 'Respondés preguntas sobre tu cuerpo, hábitos y objetivo. Tarda menos de 5 minutos. El motor IGZ analiza tu situación.',
+    titulo: 'Después te registrás y completás tu perfil',
+    desc: 'Creás tu cuenta y respondés preguntas sobre tu cuerpo, hábitos y objetivo. Tarda menos de 5 minutos.',
   },
   {
     num: '03',
     titulo: 'Tu plan llega personalizado',
-    desc: 'Ian diseña tu protocolo completo. Lo recibís dentro de las 24–72 horas hábiles de acreditado el pago.',
+    desc: 'Ian diseña tu protocolo completo: alimentación, entrenamiento, suplementación, meal prep y lista de compras. Lo recibís en 24–72 hs.',
   },
 ]
 
@@ -364,8 +364,11 @@ function ComoFunciona() {
         <div className="text-center mb-12">
           <p className="text-gold text-xs font-semibold tracking-widest uppercase mb-3">El proceso</p>
           <h2 className="font-serif text-3xl sm:text-4xl text-ink mb-3">
-            Tres pasos. Un proceso real.
+            Así funciona.
           </h2>
+          <p className="text-ink-secondary text-base max-w-sm mx-auto">
+            Primero entendés qué ofrezco. Después decidís.
+          </p>
         </div>
 
         <div className="flex flex-col">
@@ -537,9 +540,8 @@ export default function LandingPage() {
         <Hero />
         <Problemas />
         <QueIncluye />
-        <PropuestaDeValor />
-        <Planes />
         <ComoFunciona />
+        <Planes />
         <Terminos />
         <Pagos />
         <CTAFinal />
