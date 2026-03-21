@@ -12,7 +12,10 @@ function LoginContent() {
   const router       = useRouter()
   const searchParams = useSearchParams()
   const resetOk      = searchParams.get('resetOk') === '1'
-  const [modo, setModo] = useState<'login' | 'registro'>('login')
+  // Si el usuario llega desde "Quiero este plan", pre-seleccionamos registro
+  const modoInicial  = searchParams.get('modo') === 'registro' ? 'registro' : 'login'
+
+  const [modo, setModo] = useState<'login' | 'registro'>(modoInicial)
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState('')
   const [form, setForm]       = useState({ nombre: '', email: '', password: '' })
@@ -72,12 +75,12 @@ function LoginContent() {
           <div className="bg-surface rounded-3xl border border-edge shadow-sm p-8">
 
             <h1 className="font-serif text-2xl text-ink mb-1">
-              {modo === 'login' ? 'Bienvenido de vuelta.' : 'Empezar el proceso.'}
+              {modo === 'login' ? 'Bienvenido de vuelta.' : 'Creá tu cuenta.'}
             </h1>
             <p className="text-ink-secondary text-sm mb-7">
               {modo === 'login'
-                ? 'Ingresá con tu email y contraseña.'
-                : 'Completá los datos para crear tu cuenta.'}
+                ? 'Ingresá con tu email y contraseña para acceder a tu plan.'
+                : 'Es el primer paso. Tarda menos de un minuto.'}
             </p>
 
             {resetOk && (
@@ -128,7 +131,7 @@ function LoginContent() {
               )}
 
               <Button type="submit" loading={loading} className="w-full py-4 mt-1 text-base rounded-2xl">
-                {modo === 'login' ? 'Ingresar' : 'Crear cuenta'}
+                {modo === 'login' ? 'Ingresar' : 'Crear cuenta y empezar'}
               </Button>
 
             </form>
@@ -145,13 +148,21 @@ function LoginContent() {
               {modo === 'login' ? '¿No tenés cuenta?' : '¿Ya tenés cuenta?'}{' '}
               <button
                 onClick={() => { setModo(modo === 'login' ? 'registro' : 'login'); setError('') }}
-                className="text-primary font-semibold hover:underline"
+                className="text-primary font-semibold hover:underline cursor-pointer"
               >
-                {modo === 'login' ? 'Registrate' : 'Iniciá sesión'}
+                {modo === 'login' ? 'Registrate gratis' : 'Iniciá sesión'}
               </button>
             </p>
 
           </div>
+
+          {/* Tranquilizador debajo del form */}
+          {modo === 'registro' && (
+            <p className="text-center text-xs text-ink-muted mt-4 px-4">
+              Tu cuenta queda lista al instante. El plan se activa una vez confirmado el pago.
+            </p>
+          )}
+
         </div>
       </main>
 

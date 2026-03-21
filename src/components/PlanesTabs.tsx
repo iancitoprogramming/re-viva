@@ -121,7 +121,7 @@ export default function PlanesTabs() {
               </div>
 
               <Link
-                href="/login"
+                href="/login?modo=registro"
                 className="text-center bg-primary/8 hover:bg-primary/15 text-primary font-semibold py-3 rounded-xl text-sm transition-all"
               >
                 Quiero este plan
@@ -178,7 +178,7 @@ export default function PlanesTabs() {
                 </div>
 
                 <Link
-                  href="/login"
+                  href="/login?modo=registro"
                   className="text-center bg-primary/8 hover:bg-primary/15 text-primary font-semibold py-3 rounded-xl text-sm transition-all"
                 >
                   Quiero este plan

@@ -38,6 +38,7 @@
 html, body {
   background-color: #F8F5EF;
   color: #1A2416;
+  color-scheme: light;
 }
 
 /* Scrollbar invisible para tabs horizontales */
