@@ -29,6 +29,7 @@ function QRImage() {
 function PendienteContent() {
   const searchParams = useSearchParams()
   const nombre = searchParams.get('nombre') ?? ''
+  const plan   = searchParams.get('plan') ?? ''
 
   const [aliasCopiado, setAliasCopiado] = useState(false)
   const [mostrarQR, setMostrarQR] = useState(false)
@@ -39,6 +40,8 @@ function PendienteContent() {
     setMostrarQR(true)
     setTimeout(() => setAliasCopiado(false), 3000)
   }
+
+  const checkoutHref = plan ? `/checkout?plan=${plan}` : '/checkout'
 
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-8">
@@ -58,6 +61,30 @@ function PendienteContent() {
             <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
             Pendiente de activación
           </div>
+        </div>
+
+        {/* Opción 1: Pagar con Mercado Pago */}
+        <a
+          href={checkoutHref}
+          className="w-full flex items-center justify-between bg-[#009EE3] hover:bg-[#0088cc] text-white px-6 py-4 rounded-2xl font-semibold transition-all shadow-sm active:scale-[0.98] cursor-pointer mb-4 no-underline"
+        >
+          <div className="flex items-center gap-3">
+            <svg className="w-6 h-6" viewBox="0 0 48 48" fill="currentColor">
+              <path d="M44 24c0 11.05-8.95 20-20 20S4 35.05 4 24 12.95 4 24 4s20 8.95 20 20z" opacity=".2"/>
+              <path d="M34.1 17.5H13.9c-1.6 0-2.9 1.3-2.9 2.9v7.2c0 1.6 1.3 2.9 2.9 2.9h4.6l1.5 2.6c.3.5 1 .5 1.3 0l1.5-2.6h11.3c1.6 0 2.9-1.3 2.9-2.9v-7.2c0-1.6-1.3-2.9-2.9-2.9z"/>
+            </svg>
+            Pagar con Mercado Pago
+          </div>
+          <svg className="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+
+        {/* Separador */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="text-xs text-gray-400 font-medium">o pagá por transferencia</span>
+          <div className="flex-1 h-px bg-gray-200" />
         </div>
 
         {/* Pasos 1 y 2 */}

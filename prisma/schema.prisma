@@ -19,6 +19,7 @@ model User {
   perfil       NutritionalProfile?
   plan         NutritionalPlan?
   resetTokens  ResetToken[]
+  payments     Payment[]
 }
 
 // ─── CÓDIGO DE RECUPERACIÓN DE CONTRASEÑA ────────────────────────────────────
@@ -131,4 +132,21 @@ enum EstadoEntrega {
   PENDIENTE
   EN_PROGRESO
   ENTREGADO
+}
+
+// ─── PAGO (Mercado Pago) ─────────────────────────────────────────────────────
+// Registra cada intento de pago online. Un usuario puede tener múltiples pagos.
+model Payment {
+  id           String   @id @default(cuid())
+  userId       String
+  planTipo     String                       // ej. "online-mensual", "presencial-3x-mensual"
+  preferenceId String                       // ID de preferencia MP
+  paymentId    String?                      // ID de pago MP (llega del webhook o proceso)
+  status       String   @default("pending") // pending | approved | rejected | cancelled | in_process
+  amount       Float
+  currency     String   @default("ARS")
+  creadoEn     DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
 }
