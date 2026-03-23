@@ -9,11 +9,18 @@ export async function POST(request: Request) {
     const { email } = await request.json()
     if (!email) return NextResponse.json({ error: 'Email requerido.' }, { status: 400 })
 
+    console.log(`[RECUPERAR] Solicitud para: ${email}`)
+    console.log(`[RECUPERAR] RESEND_FROM_EMAIL: ${process.env.RESEND_FROM_EMAIL ?? '(no configurado — usando onboarding@resend.dev)'}`)
+    console.log(`[RECUPERAR] RESEND_API_KEY: ${process.env.RESEND_API_KEY ? '✅ configurada' : '❌ NO CONFIGURADA'}`)
+
     // Buscamos el usuario — si no existe, respondemos igual para no filtrar información
     const usuario = await prisma.user.findUnique({ where: { email } })
     if (!usuario) {
+      console.log(`[RECUPERAR] Email no encontrado en DB, respuesta genérica.`)
       return NextResponse.json({ ok: true }) // respuesta genérica por seguridad
     }
+
+    console.log(`[RECUPERAR] Usuario encontrado: ${usuario.nombre} (${usuario.id})`)
 
     // Invalidar códigos previos del mismo usuario
     await prisma.resetToken.updateMany({
@@ -23,6 +30,7 @@ export async function POST(request: Request) {
 
     // Generar código de 6 dígitos
     const codigo = String(Math.floor(100000 + Math.random() * 900000))
+    console.log(`[RECUPERAR] Código generado (solo visible en logs del server): ${codigo}`)
 
     // Guardar en DB con expiración de 15 minutos
     await prisma.resetToken.create({
@@ -33,12 +41,23 @@ export async function POST(request: Request) {
       },
     })
 
-    // Enviar email
-    await enviarCodigoRecuperacion(usuario.nombre, email, codigo)
+    console.log(`[RECUPERAR] Token guardado en DB. Enviando email...`)
+
+    // Enviar email — si falla, el código sigue en DB (el usuario puede reintentar)
+    const emailResult = await enviarCodigoRecuperacion(usuario.nombre, email, codigo)
+
+    if (!emailResult.ok) {
+      console.error(`[RECUPERAR] ❌ Error al enviar email: ${emailResult.error}`)
+      // Igual retornamos ok:true por seguridad (no revelamos si el email existe)
+      // El código está en DB — si el usuario no recibe nada, puede reintentar
+      // Para depurar: revisar los logs de Vercel con el error de arriba
+    } else {
+      console.log(`[RECUPERAR] ✅ Email enviado correctamente`)
+    }
 
     return NextResponse.json({ ok: true })
   } catch (error) {
-    console.error('[RECUPERAR]', error)
+    console.error('[RECUPERAR] Error inesperado:', error)
     return NextResponse.json({ error: 'Error interno del servidor.' }, { status: 500 })
   }
 }
