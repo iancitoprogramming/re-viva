@@ -1,8 +1,24 @@
 const pasos = [
-  { num: '01', titulo: 'Registrate',         desc: 'Creá tu cuenta en menos de un minuto.' },
-  { num: '02', titulo: 'Completá tu perfil', desc: 'Respondé preguntas sobre tu cuerpo, hábitos y objetivo. El motor IGZ analiza tu situación.' },
-  { num: '03', titulo: 'Realizá el pago',    desc: 'Transferí al alias REVIVA.IGZ y enviá el comprobante por WhatsApp. Así se activa tu proceso.' },
-  { num: '04', titulo: 'Tu plan llega',      desc: 'Tu trainer diseña un protocolo personalizado. Lo recibís en las 24 a 72 horas hábiles siguientes.' },
+  {
+    num: '01',
+    titulo: 'Primero elegís el plan',
+    desc: 'Revisás los precios acá abajo, elegís el que mejor se adapta a tu objetivo y hacés clic en "Quiero este plan". Sin cuenta previa.',
+  },
+  {
+    num: '02',
+    titulo: 'Después te registrás y completás tu perfil',
+    desc: 'Creás tu cuenta y respondés preguntas sobre tu cuerpo, hábitos y objetivo. El motor IGZ analiza tu situación. Tarda menos de 5 minutos.',
+  },
+  {
+    num: '03',
+    titulo: 'Realizás el pago',
+    desc: 'Transferís al alias REVIVA.IGZ y enviás el comprobante por WhatsApp. Así se activa tu proceso.',
+  },
+  {
+    num: '04',
+    titulo: 'Tu plan llega personalizado',
+    desc: 'Tu trainer diseña un protocolo personalizado: alimentación, entrenamiento, suplementación, meal prep y lista de compras. Lo recibís en 24–72 hs.',
+  },
 ]
 
 export default function ComoFunciona() {
@@ -10,7 +26,11 @@ export default function ComoFunciona() {
     <section className="px-6 py-20 bg-surface-warm">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="font-serif text-3xl sm:text-4xl text-ink mb-3">Cuatro pasos. Un proceso real.</h2>
+          <p className="text-gold text-xs font-semibold tracking-widest uppercase mb-3">El proceso</p>
+          <h2 className="font-serif text-3xl sm:text-4xl text-ink mb-3">Así funciona.</h2>
+          <p className="text-ink-secondary text-base max-w-sm mx-auto">
+            Primero entendés qué ofrezco. Después decidís.
+          </p>
         </div>
         <div className="flex flex-col">
           {pasos.map((paso, i) => (

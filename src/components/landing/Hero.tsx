@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { INSTAGRAM_URL } from '@/lib/constants'
 
 export default function Hero() {
   return (
@@ -12,21 +13,36 @@ export default function Hero() {
           Método IGZ Trainer
         </div>
         <h1 className="font-serif text-4xl sm:text-5xl text-ink leading-[1.2] mb-6">
-          Re-viví tu cuerpo.<br />
-          Re-viví tus hábitos.<br />
-          <span className="text-primary">Re-viví tu energía.</span>
+          Controlá tu cuerpo.<br />
+          Controlá tu vida.<br />
+          <span className="text-primary">Sin vueltas.</span>
         </h1>
         <p className="text-ink-secondary text-base sm:text-lg leading-relaxed mb-10 max-w-md mx-auto">
-          Entrenamiento privado con foco en resultados reales, constancia y salud duradera.
+          Plan nutricional y de entrenamiento 100% personalizado.
+          Diseñado para personas con poco tiempo y resultados reales como objetivo.
         </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-          <Link href="/login?modo=registro" className="w-full sm:w-auto bg-primary hover:bg-primary-dark text-ivory font-semibold px-8 py-4 rounded-2xl text-base transition-all duration-200 active:scale-[0.98] text-center">
-            Empezar ahora
+        <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-6">
+          <Link
+            href="#planes"
+            className="w-full sm:w-auto bg-primary hover:bg-primary-dark text-ivory font-semibold px-8 py-4 rounded-2xl text-base transition-all duration-200 active:scale-[0.98] text-center"
+          >
+            Ver planes y precios
           </Link>
-          <Link href="/login" className="w-full sm:w-auto text-primary font-medium px-8 py-4 rounded-2xl text-base border border-primary/25 hover:bg-primary/5 transition-all text-center">
-            Ya tengo cuenta
-          </Link>
+          <a
+            href={INSTAGRAM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full sm:w-auto text-primary font-medium px-8 py-4 rounded-2xl text-base border border-primary/25 hover:bg-primary/5 transition-all text-center"
+          >
+            Ver más en Instagram
+          </a>
         </div>
+        <p className="text-ink-muted text-sm">
+          ¿Ya tenés cuenta?{' '}
+          <Link href="/login" className="text-primary hover:underline font-medium">
+            Ingresá acá
+          </Link>
+        </p>
       </div>
     </section>
   )

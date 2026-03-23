@@ -4,10 +4,10 @@
 import LandingHeader    from '@/components/landing/LandingHeader'
 import LandingFooter    from '@/components/landing/LandingFooter'
 import Hero             from '@/components/landing/Hero'
+import Problemas        from '@/components/landing/Problemas'
 import QueIncluye       from '@/components/landing/QueIncluye'
-import PropuestaDeValor from '@/components/landing/PropuestaDeValor'
-import Planes           from '@/components/landing/Planes'
 import ComoFunciona     from '@/components/landing/ComoFunciona'
+import Planes           from '@/components/landing/Planes'
 import Terminos         from '@/components/landing/Terminos'
 import Pagos            from '@/components/landing/Pagos'
 import CTAFinal         from '@/components/landing/CTAFinal'
@@ -18,10 +18,10 @@ export default function LandingPage() {
       <LandingHeader />
       <main>
         <Hero />
+        <Problemas />
         <QueIncluye />
-        <PropuestaDeValor />
-        <Planes />
         <ComoFunciona />
+        <Planes />
         <Terminos />
         <Pagos />
         <CTAFinal />
