@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { obtenerTokenDeRequest, verificarToken, esAdmin } from '@/lib/auth'
+import { enviarEmailActivacion } from '@/lib/email'
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const token = obtenerTokenDeRequest(request)
@@ -42,6 +43,21 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       activadoEn:   new Date(),
     },
   })
+
+  // Notificar al cliente — async, no bloquea la respuesta
+  const usuario = await prisma.user.findUnique({ where: { id }, select: { nombre: true, email: true } })
+  if (usuario) {
+    enviarEmailActivacion(
+      usuario.nombre,
+      usuario.email,
+      clasificacion,
+      Number(calorias),
+      Number(proteina),
+      Number(hidratos),
+      Number(grasas),
+      notasTrainer || null
+    ).catch(e => console.error('[ACTIVAR-PLAN] Error email activación:', e.message))
+  }
 
   return NextResponse.json({ ok: true })
 }
