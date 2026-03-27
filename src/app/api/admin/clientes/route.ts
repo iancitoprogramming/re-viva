@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     orderBy: { creadoEn: 'desc' },
     include: {
       perfil: { select: { id: true } },
-      plan:   { select: { estado: true } },
+      plan:   { select: { estado: true, activadoEn: true } },
     },
   })
 

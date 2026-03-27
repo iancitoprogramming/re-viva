@@ -34,6 +34,8 @@ interface ClienteDetalle {
     nivelEstres: string
     horasSueno: number
     adherencia: string
+    preferenciasAlimentarias?: string | null
+    lesiones?: string | null
   } | null
   plan: ({
     id: string
@@ -258,7 +260,7 @@ export default function ClienteDetallePage() {
         {cliente.perfil && (
           <div className="bg-surface rounded-2xl border border-edge shadow-sm p-6 mb-4">
             <h2 className="font-serif text-lg text-ink mb-4">Perfil del cliente</h2>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm mb-4">
               {[
                 ['Género',      labels.genero[cliente.perfil.genero]],
                 ['Edad',        `${cliente.perfil.edad} años`],
@@ -276,6 +278,18 @@ export default function ClienteDetallePage() {
                 </div>
               ))}
             </div>
+            {cliente.perfil.preferenciasAlimentarias && (
+              <div className="bg-surface-warm rounded-xl p-3 mb-2">
+                <p className="text-xs font-semibold text-ink-secondary mb-1">Preferencias alimentarias</p>
+                <p className="text-sm text-ink">{cliente.perfil.preferenciasAlimentarias}</p>
+              </div>
+            )}
+            {cliente.perfil.lesiones && (
+              <div className="bg-gold-light/50 border border-gold/30 rounded-xl p-3">
+                <p className="text-xs font-semibold text-ink-secondary mb-1">⚠️ Lesiones / condiciones médicas</p>
+                <p className="text-sm text-ink">{cliente.perfil.lesiones}</p>
+              </div>
+            )}
           </div>
         )}
 
