@@ -1,4 +1,5 @@
-import { INSTAGRAM_URL, WHATSAPP_CONSULTA } from '@/lib/constants'
+import Image from 'next/image'
+import { WHATSAPP_CONSULTA } from '@/lib/constants'
 
 const credenciales = [
   'Entrenador personal certificado',
@@ -14,31 +15,17 @@ export default function Trainer() {
 
         <div className="grid sm:grid-cols-2 gap-12 items-center">
 
-          {/* Foto placeholder */}
+          {/* Foto de Ian */}
           <div className="order-2 sm:order-1">
-            <div
-              className="aspect-[4/5] rounded-3xl overflow-hidden relative"
-              style={{ background: 'linear-gradient(135deg, rgba(45,90,61,0.08) 0%, rgba(201,169,110,0.12) 100%)' }}
-            >
-              {/* Si Ian sube su foto, reemplazar este div por un <Image /> */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center">
-                  <svg className="w-10 h-10 text-primary/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <p className="text-ink-muted text-xs text-center px-8 leading-relaxed">
-                  Foto de Ian próximamente.<br />Mientras tanto, encontralo en Instagram.
-                </p>
-                <a
-                  href={INSTAGRAM_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 text-xs font-semibold text-primary border border-primary/25 px-4 py-2 rounded-xl hover:bg-primary/5 transition-colors"
-                >
-                  @igztrainer →
-                </a>
-              </div>
+            <div className="aspect-[4/5] rounded-3xl overflow-hidden relative bg-primary/5">
+              <Image
+                src="/ian.jpg"
+                alt="Ian Gutiérrez — IGZ Trainer"
+                fill
+                className="object-cover object-top"
+                sizes="(max-width: 640px) 100vw, 50vw"
+                priority
+              />
             </div>
           </div>
 

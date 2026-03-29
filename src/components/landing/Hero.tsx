@@ -58,7 +58,7 @@ export default function Hero() {
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-1 h-1 rounded-full bg-primary/40 inline-block" />
-            Resultados en 30 días
+            Resultados en 90 días
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-1 h-1 rounded-full bg-primary/40 inline-block" />
