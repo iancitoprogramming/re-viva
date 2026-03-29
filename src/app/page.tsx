@@ -8,6 +8,7 @@ import Problemas      from '@/components/landing/Problemas'
 import Transformacion from '@/components/landing/Transformacion'
 import QueIncluye     from '@/components/landing/QueIncluye'
 import Trainer        from '@/components/landing/Trainer'
+import Resultados     from '@/components/landing/Resultados'
 import ComoFunciona   from '@/components/landing/ComoFunciona'
 import Planes         from '@/components/landing/Planes'
 import Pagos          from '@/components/landing/Pagos'
@@ -34,19 +35,22 @@ export default function LandingPage() {
         {/* 5. Confianza: quién es Ian */}
         <Trainer />
 
-        {/* 6. Proceso: cómo funciona */}
+        {/* 6. Prueba social: resultados reales */}
+        <Resultados />
+
+        {/* 7. Proceso: cómo funciona */}
         <ComoFunciona />
 
-        {/* 7. Conversión: planes y precios */}
+        {/* 8. Conversión: planes y precios */}
         <Planes />
 
-        {/* 8. Cierre emocional */}
+        {/* 9. Cierre emocional */}
         <CTAFinal />
 
-        {/* 9. Medios de pago */}
+        {/* 10. Medios de pago */}
         <Pagos />
 
-        {/* 10. Legales */}
+        {/* 11. Legales */}
         <Terminos />
       </main>
       <LandingFooter />
