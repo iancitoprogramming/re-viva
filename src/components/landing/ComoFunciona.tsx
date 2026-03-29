@@ -12,7 +12,7 @@ const pasos = [
   {
     num: '03',
     titulo: 'Realizás el pago',
-    desc: 'Transferís al alias REVIVA.IGZ y enviás el comprobante por WhatsApp. Así se activa tu proceso.',
+    desc: 'Pagás por transferencia bancaria o Mercado Pago. Enviás el comprobante y en 24–72 hs hábiles activamos tu proceso.',
   },
   {
     num: '04',
