@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
@@ -89,21 +89,135 @@ function ClienteCard({ cliente, tipo }: { cliente: Cliente; tipo: 'pendiente' | 
   )
 }
 
+// ─── Modal: Registrar cliente manualmente ────────────────────────────────────
+function ModalRegistrar({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+  const [nombre, setNombre]     = useState('')
+  const [email, setEmail]       = useState('')
+  const [password, setPassword] = useState('')
+  const [notas, setNotas]       = useState('')
+  const [loading, setLoading]   = useState(false)
+  const [error, setError]       = useState('')
+  const overlayRef              = useRef<HTMLDivElement>(null)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      const res = await fetch('/api/admin/registrar-cliente', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ nombre, email, password, notas }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error ?? 'Error al registrar.'); return }
+      onSuccess()
+    } catch {
+      setError('Error de conexión.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div
+      ref={overlayRef}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+      style={{ background: 'rgba(26,36,22,0.55)', backdropFilter: 'blur(4px)' }}
+      onClick={e => { if (e.target === overlayRef.current) onClose() }}
+    >
+      <div className="bg-ivory w-full max-w-md rounded-3xl p-6 shadow-2xl border border-edge">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h2 className="font-serif text-xl text-ink">Registrar cliente</h2>
+            <p className="text-ink-muted text-xs mt-0.5">El cliente recibe sus credenciales por email</p>
+          </div>
+          <button onClick={onClose} className="text-ink-muted hover:text-ink transition-colors text-xl leading-none">×</button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <div>
+            <label className="text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-1 block">Nombre</label>
+            <input
+              value={nombre} onChange={e => setNombre(e.target.value)}
+              placeholder="Nombre completo"
+              className="w-full bg-surface border border-edge rounded-xl px-4 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:border-primary transition-colors"
+              required
+            />
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-1 block">Email</label>
+            <input
+              type="email" value={email} onChange={e => setEmail(e.target.value)}
+              placeholder="email@ejemplo.com"
+              className="w-full bg-surface border border-edge rounded-xl px-4 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:border-primary transition-colors"
+              required
+            />
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-1 block">Contraseña temporal</label>
+            <input
+              value={password} onChange={e => setPassword(e.target.value)}
+              placeholder="Mínimo 6 caracteres"
+              className="w-full bg-surface border border-edge rounded-xl px-4 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:border-primary transition-colors"
+              required
+            />
+            <p className="text-xs text-ink-muted mt-1">Se envía al cliente con el email de bienvenida.</p>
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-1 block">Notas del plan <span className="normal-case font-normal text-ink-muted">(opcional)</span></label>
+            <textarea
+              value={notas} onChange={e => setNotas(e.target.value)}
+              placeholder="Ej: Plan trimestral ya pago · Promo 2x1 - $75.000/mes - 2 veces por semana"
+              rows={2}
+              className="w-full bg-surface border border-edge rounded-xl px-4 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:border-primary transition-colors resize-none"
+            />
+          </div>
+
+          {error && (
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">{error}</p>
+          )}
+
+          <div className="flex gap-2 mt-1">
+            <button
+              type="button" onClick={onClose}
+              className="flex-1 border border-edge text-ink-secondary font-medium py-2.5 rounded-xl text-sm hover:border-primary hover:text-primary transition-all"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit" disabled={loading}
+              className="flex-1 bg-primary hover:bg-primary-dark text-ivory font-semibold py-2.5 rounded-xl text-sm transition-all disabled:opacity-60"
+            >
+              {loading ? 'Registrando...' : 'Registrar y enviar acceso'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 export default function AdminPage() {
   const router = useRouter()
-  const [clientes, setClientes] = useState<Cliente[]>([])
-  const [loading, setLoading] = useState(true)
+  const [clientes, setClientes]       = useState<Cliente[]>([])
+  const [loading, setLoading]         = useState(true)
   const [nombreAdmin, setNombreAdmin] = useState('')
+  const [modalOpen, setModalOpen]     = useState(false)
+
+  function cargarClientes() {
+    fetch('/api/admin/clientes')
+      .then(res => { if (!res.ok) { router.push('/dashboard'); return null } return res.json() })
+      .then(data => { if (data) { setClientes(data); setLoading(false) } })
+  }
 
   useEffect(() => {
     fetch('/api/auth/me').then(res => res.json()).then(data => {
       if (!data.esAdmin) { router.push('/dashboard'); return }
       setNombreAdmin(data.nombre)
     })
-
-    fetch('/api/admin/clientes')
-      .then(res => { if (!res.ok) { router.push('/dashboard'); return null } return res.json() })
-      .then(data => { if (data) { setClientes(data); setLoading(false) } })
+    cargarClientes()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router])
 
   if (loading) {
@@ -122,14 +236,33 @@ export default function AdminPage() {
     <div className="min-h-screen bg-ivory">
       <Navbar nombreUsuario={nombreAdmin} esAdmin />
 
+      {modalOpen && (
+        <ModalRegistrar
+          onClose={() => setModalOpen(false)}
+          onSuccess={() => {
+            setModalOpen(false)
+            setLoading(true)
+            cargarClientes()
+          }}
+        />
+      )}
+
       <main className="max-w-3xl mx-auto px-4 py-8">
 
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="font-serif text-2xl text-ink">Panel REVIVA</h1>
-          <p className="text-ink-muted text-sm mt-0.5">
-            {new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
-          </p>
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h1 className="font-serif text-2xl text-ink">Panel REVIVA</h1>
+            <p className="text-ink-muted text-sm mt-0.5">
+              {new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </p>
+          </div>
+          <button
+            onClick={() => setModalOpen(true)}
+            className="bg-primary hover:bg-primary-dark text-ivory text-xs font-semibold px-4 py-2 rounded-xl transition-all whitespace-nowrap mt-1"
+          >
+            + Registrar cliente
+          </button>
         </div>
 
         {/* Métricas */}
