@@ -13,6 +13,12 @@ const mp = new MercadoPagoConfig({
 })
 
 export async function POST(request: Request) {
+  // Guard: verificar que MP_ACCESS_TOKEN esté configurado
+  if (!process.env.MP_ACCESS_TOKEN) {
+    console.error('[create-preference] MP_ACCESS_TOKEN no está configurado')
+    return NextResponse.json({ error: 'Configuración de pagos incompleta' }, { status: 500 })
+  }
+
   const token = obtenerTokenDeRequest(request)
   if (!token) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
@@ -67,8 +73,9 @@ export async function POST(request: Request) {
     })
 
     return NextResponse.json({ preferenceId: result.id })
-  } catch (error) {
-    console.error('[create-preference]', error)
+  } catch (error: unknown) {
+    const e = error as { message?: string; cause?: unknown; status?: number }
+    console.error('[create-preference] Error:', e?.message, JSON.stringify(e?.cause ?? error))
     return NextResponse.json({ error: 'Error al crear la preferencia de pago' }, { status: 500 })
   }
 }
