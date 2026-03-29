@@ -2,10 +2,10 @@ import Image from 'next/image'
 import { WHATSAPP_CONSULTA } from '@/lib/constants'
 
 const credenciales = [
-  'Entrenador personal certificado',
-  'Coach ontológico',
-  'Especialista en nutrición aplicada',
-  'Años de experiencia transformando cuerpos y mentalidades',
+  'Entrenador personal — años de práctica real con personas reales',
+  'Nutrición aplicada — aprendida desde la experiencia y los resultados',
+  'Mentalidad y hábitos — el trabajo que nadie te enseña en un aula',
+  'Transformaciones que hablan más que cualquier título',
 ]
 
 export default function Trainer() {
@@ -25,6 +25,7 @@ export default function Trainer() {
                 className="object-cover object-top"
                 sizes="(max-width: 640px) 100vw, 50vw"
                 priority
+                unoptimized
               />
             </div>
           </div>
