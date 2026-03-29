@@ -10,18 +10,20 @@ import type { OnboardingData, IGZResult } from '@/types'
 
 function crearTransporter() {
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT ?? 587),
-    secure: Number(process.env.SMTP_PORT ?? 587) === 465, // true solo para puerto 465 (SSL)
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // TLS
     auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD,
     },
   })
 }
 
 const TRAINER_EMAIL = process.env.TRAINER_EMAIL!
-const FROM_EMAIL    = process.env.EMAIL_FROM || process.env.SMTP_USER || 'REVIVA IGZ <noreply@reviva.com>'
+const FROM_EMAIL    = process.env.GMAIL_USER
+  ? `REVIVA IGZ <${process.env.GMAIL_USER}>`
+  : 'REVIVA IGZ <noreply@reviva.com>'
 
 // Etiquetas legibles para los enums
 const labels = {
