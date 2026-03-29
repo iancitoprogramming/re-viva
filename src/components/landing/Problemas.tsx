@@ -1,55 +1,60 @@
 const problemas = [
   {
-    titulo: 'Probás todo sin saber por dónde empezar',
+    num: '01',
+    titulo: 'Llevás meses intentando cambiar y siempre terminás en el mismo lugar',
     desc: 'YouTube, apps genéricas, rutinas de Instagram. Nada funciona porque nada fue diseñado para vos.',
   },
   {
-    titulo: 'Los resultados tardan o no llegan',
+    num: '02',
+    titulo: 'Los resultados no llegan y no sabés qué estás haciendo mal',
     desc: 'Sin estructura calórica clara ni seguimiento real, el cuerpo no responde. La motivación cae sola.',
   },
   {
-    titulo: 'Te falta tiempo para entender la nutrición',
-    desc: 'Tenés trabajo, familia y responsabilidades. La alimentación queda siempre en segundo plano.',
+    num: '03',
+    titulo: 'No tenés tiempo para entender todo lo que rodea al entrenamiento',
+    desc: 'Tenés trabajo, familia y responsabilidades. La alimentación y la recuperación siempre quedan en segundo plano.',
   },
   {
-    titulo: 'Arrancás bien y a los 30 días abandonás',
+    num: '04',
+    titulo: 'Arrancás bien y a los 30 días ya no existe el hábito',
     desc: 'Sin acompañamiento ni plan claro, el ciclo se repite. No es falta de voluntad — es falta de estructura.',
   },
 ]
 
 export default function Problemas() {
   return (
-    <section className="px-6 py-20 bg-ivory border-b border-edge">
-      <div className="max-w-4xl mx-auto">
+    <section className="px-6 py-24 bg-ivory">
+      <div className="max-w-3xl mx-auto">
 
-        <div className="text-center mb-12">
-          <p className="text-gold text-xs font-semibold tracking-widest uppercase mb-3">El problema real</p>
-          <h2 className="font-serif text-3xl sm:text-4xl text-ink mb-3">¿Te suena conocido?</h2>
-          <p className="text-ink-secondary text-base max-w-md mx-auto">
-            La mayoría arranca con motivación y termina en el mismo lugar.
-            No porque no puedan — sino porque nadie les explicó cómo hacerlo bien.
+        {/* Header */}
+        <div className="mb-14">
+          <p className="text-gold text-xs font-semibold tracking-widest uppercase mb-4">El problema real</p>
+          <h2 className="font-serif text-3xl sm:text-4xl text-ink leading-tight mb-4">
+            ¿Cuánto tiempo llevás<br className="hidden sm:block" /> intentando cambiar?
+          </h2>
+          <p className="text-ink-secondary text-base max-w-md leading-relaxed">
+            La mayoría arranca con motivación y termina en el mismo lugar. No porque no pueda — sino porque nadie le dio la estructura correcta.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-4">
-          {problemas.map((p, i) => (
-            <div key={i} className="bg-surface-warm rounded-2xl p-6 border border-edge flex gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
-                <svg className="w-4 h-4 text-primary/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </div>
+        {/* Lista de problemas */}
+        <div className="flex flex-col divide-y divide-edge">
+          {problemas.map((p) => (
+            <div key={p.num} className="py-6 flex gap-5 items-start group">
+              <span className="font-mono text-xs font-bold text-gold/70 mt-1 flex-shrink-0 w-6">{p.num}</span>
               <div>
-                <h3 className="font-semibold text-ink text-sm mb-1">{p.titulo}</h3>
-                <p className="text-ink-secondary text-xs leading-relaxed">{p.desc}</p>
+                <h3 className="font-semibold text-ink text-base mb-1.5 leading-snug">{p.titulo}</h3>
+                <p className="text-ink-secondary text-sm leading-relaxed">{p.desc}</p>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-10 text-center">
-          <p className="font-serif text-xl text-ink">
-            Para eso existe <span className="text-primary">REVIVA.</span>
+        {/* Cierre */}
+        <div className="mt-12 pt-8 border-t border-edge">
+          <p className="font-serif text-xl sm:text-2xl text-ink leading-snug">
+            Si llegaste hasta acá, ya sabés que algo tiene que cambiar.{' '}
+            <span className="text-primary">Para eso existe REVIVA.</span>
           </p>
         </div>
 
