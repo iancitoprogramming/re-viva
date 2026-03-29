@@ -5,7 +5,7 @@
 import { Suspense, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import WhatsAppIcon from '@/components/WhatsAppIcon'
-import { ALIAS, WHATSAPP_COMPROBANTE, INSTAGRAM_URL } from '@/lib/constants'
+import { ALIAS, WHATSAPP_COMPROBANTE, INSTAGRAM_URL, WHATSAPP_NUMBER } from '@/lib/constants'
 
 function QRImage() {
   const [error, setError] = useState(false)
@@ -148,6 +148,24 @@ function PendienteContent() {
           <p className="text-sm text-gray-600 leading-relaxed">
             Una vez que confirme tu pago, te contacto en las próximas <strong>24 a 72 horas hábiles</strong> para activar tu plan personalizado.
           </p>
+        </div>
+
+        {/* Ya tengo plan pago */}
+        <div className="bg-gold-light border border-gold/40 rounded-2xl p-5 mb-4 text-center">
+          <p className="font-semibold text-ink text-sm mb-1">¿Ya tenés plan activo o pagaste anteriormente?</p>
+          <p className="text-ink-secondary text-xs mb-4 leading-relaxed">
+            Si ya realizaste un pago anterior o tenés un plan trimestral / semestral vigente, no necesitás pagar de nuevo.<br />
+            Avisale a Ian y activa tu acceso en minutos.
+          </p>
+          <a
+            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola Ian, ya soy cliente de REVIVA y ya realicé mi pago. Quiero activar mi acceso.')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all"
+          >
+            <WhatsAppIcon />
+            Ya pagué, avisarle a Ian
+          </a>
         </div>
 
         {/* Instagram mientras esperan */}
