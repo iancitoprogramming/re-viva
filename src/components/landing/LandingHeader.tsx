@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import ThemeToggle from '@/components/ThemeToggle'
 
 export default function LandingHeader() {
   return (
@@ -9,12 +8,9 @@ export default function LandingHeader() {
           <span className="font-serif font-bold text-xl text-primary tracking-wide">REVIVA</span>
           <span className="text-ink-muted text-xs ml-2 tracking-widest uppercase">by IGZ Trainer</span>
         </div>
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <Link href="/login" className="text-sm text-ink-secondary hover:text-primary font-medium transition-colors">
-            Ingresar
-          </Link>
-        </div>
+        <Link href="/login" className="text-sm text-ink-secondary hover:text-primary font-medium transition-colors">
+          Ingresar
+        </Link>
       </div>
     </header>
   )

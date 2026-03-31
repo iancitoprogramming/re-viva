@@ -10,22 +10,47 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Acceso denegado.' }, { status: 403 })
   }
 
-  const clientes = await prisma.user.findMany({
-    orderBy: { creadoEn: 'desc' },
-    include: {
-      perfil: { select: { id: true } },
-      plan:   { select: { estado: true, activadoEn: true } },
-    },
-  })
+  const { searchParams } = new URL(request.url)
+  const busqueda = searchParams.get('busqueda')?.trim() ?? ''
+  const page     = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10))
+  const limit    = Math.min(30, Math.max(10, parseInt(searchParams.get('limit') ?? '20', 10)))
+  const skip     = (page - 1) * limit
 
-  return NextResponse.json(
-    clientes.map(c => ({
-      id:         c.id,
-      nombre:     c.nombre,
-      email:      c.email,
-      creadoEn:   c.creadoEn,
+  const where = busqueda
+    ? {
+        OR: [
+          { nombre: { contains: busqueda, mode: 'insensitive' as const } },
+          { email:  { contains: busqueda, mode: 'insensitive' as const } },
+        ],
+      }
+    : {}
+
+  const [clientes, total] = await Promise.all([
+    prisma.user.findMany({
+      where,
+      orderBy: { creadoEn: 'desc' },
+      skip,
+      take: limit,
+      include: {
+        perfil: { select: { id: true } },
+        plan:   { select: { estado: true, activadoEn: true, fechaVencimiento: true, tipoPlan: true } },
+      },
+    }),
+    prisma.user.count({ where }),
+  ])
+
+  return NextResponse.json({
+    clientes: clientes.map(c => ({
+      id:          c.id,
+      nombre:      c.nombre,
+      email:       c.email,
+      creadoEn:    c.creadoEn,
       tienePerfil: !!c.perfil,
-      plan:       c.plan,
-    }))
-  )
+      plan:        c.plan,
+    })),
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  })
 }

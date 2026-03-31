@@ -20,6 +20,7 @@ export interface OnboardingData {
   adherencia: Adherencia
   preferenciasAlimentarias?: string
   lesiones?: string
+  fechaNacimiento?: string
 }
 
 // Resultado del motor IGZ

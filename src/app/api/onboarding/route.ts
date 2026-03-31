@@ -44,6 +44,7 @@ export async function POST(request: Request) {
         adherencia:        body.adherencia,
         preferenciasAlimentarias: body.preferenciasAlimentarias,
         lesiones:          body.lesiones,
+        fechaNacimiento:   body.fechaNacimiento ? new Date(body.fechaNacimiento) : null,
       },
     })
 

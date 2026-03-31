@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Button from '@/components/Button'
 import FormInput from '@/components/FormInput'
+import { PLAN_LABELS, PLAN_DURACIONES_DIAS, WHATSAPP_NUMBER } from '@/lib/constants'
 
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
 
@@ -36,6 +37,7 @@ interface ClienteDetalle {
     adherencia: string
     preferenciasAlimentarias?: string | null
     lesiones?: string | null
+    fechaNacimiento?: string | null
   } | null
   plan: ({
     id: string
@@ -46,6 +48,9 @@ interface ClienteDetalle {
     hidratos?: number
     grasas?: number
     notasTrainer?: string
+    tipoPlan?: string | null
+    activadoEn?: string | null
+    fechaVencimiento?: string | null
     igzClasificacion?: string
     igzCalorias?: number
     igzProteina?: number
@@ -93,6 +98,7 @@ export default function ClienteDetallePage() {
     clasificacion: '',
     calorias: '', proteina: '', hidratos: '', grasas: '',
     notasTrainer: '',
+    tipoPlan: '',
   })
 
   async function cargarCliente() {
@@ -107,6 +113,7 @@ export default function ClienteDetallePage() {
         hidratos:     String(data.plan.hidratos  ?? data.plan.igzHidratos  ?? ''),
         grasas:       String(data.plan.grasas    ?? data.plan.igzGrasas    ?? ''),
         notasTrainer: data.plan.notasTrainer ?? '',
+        tipoPlan:     data.plan.tipoPlan ?? '',
       })
     }
     setLoading(false)
@@ -134,6 +141,7 @@ export default function ClienteDetallePage() {
         hidratos:  Number(planForm.hidratos),
         grasas:    Number(planForm.grasas),
         notasTrainer: planForm.notasTrainer,
+        tipoPlan:  planForm.tipoPlan || null,
       }),
     })
     if (res.ok) {
@@ -172,6 +180,16 @@ export default function ClienteDetallePage() {
 
   if (!cliente) return null
 
+  // Estado del plan con vencimiento (fuera de función para evitar null issues)
+  const planVenc = cliente.plan?.fechaVencimiento
+  const diasVenc = planVenc ? Math.ceil((new Date(planVenc).getTime() - Date.now()) / 86400000) : null
+  const estadoPlanCalc =
+    !cliente.plan || cliente.plan.estado !== 'ACTIVO' ? null
+    : !planVenc ? 'ACTIVO'
+    : diasVenc! <= 0 ? 'VENCIDO'
+    : diasVenc! <= 7 ? 'PROXIMO'
+    : 'ACTIVO'
+
   // Contar entregas
   const entregados = cliente.plan
     ? componentes.filter(c => cliente.plan![c.key] === 'ENTREGADO').length
@@ -188,20 +206,48 @@ export default function ClienteDetallePage() {
 
         {/* ── Info del cliente ── */}
         <div className="bg-surface rounded-2xl border border-edge shadow-sm p-6 mb-4">
-          <div className="flex items-start justify-between">
-            <div>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
               <h1 className="font-serif text-2xl text-ink">{cliente.nombre}</h1>
-              <p className="text-ink-muted text-sm mt-0.5">
+              <p className="text-ink-muted text-sm mt-0.5 break-all">
                 {cliente.email} · Registrado el {new Date(cliente.creadoEn).toLocaleDateString('es-AR')}
               </p>
+              {cliente.plan?.tipoPlan && (
+                <p className="text-ink-secondary text-xs mt-1">
+                  Plan: <strong>{PLAN_LABELS[cliente.plan.tipoPlan] ?? cliente.plan.tipoPlan}</strong>
+                </p>
+              )}
+              {cliente.plan?.activadoEn && (
+                <p className="text-ink-secondary text-xs mt-0.5">
+                  Activado: {new Date(cliente.plan.activadoEn).toLocaleDateString('es-AR')}
+                  {cliente.plan?.fechaVencimiento && (
+                    <> · Vence: <strong className={estadoPlanCalc === 'VENCIDO' ? 'text-red-600' : estadoPlanCalc === 'PROXIMO' ? 'text-amber-600' : 'text-ink'}>
+                      {new Date(cliente.plan.fechaVencimiento).toLocaleDateString('es-AR')}
+                    </strong></>
+                  )}
+                </p>
+              )}
             </div>
-            <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${
-              cliente.plan?.estado === 'ACTIVO'
-                ? 'bg-primary/10 text-primary border-primary/20'
-                : 'bg-gold-light text-ink border-gold/40'
-            }`}>
-              {cliente.plan?.estado ?? 'PENDIENTE'}
-            </span>
+            <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+              <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${
+                estadoPlanCalc === 'VENCIDO'  ? 'bg-red-50 text-red-700 border-red-200' :
+                estadoPlanCalc === 'PROXIMO'  ? 'bg-amber-100 text-amber-800 border-amber-300' :
+                cliente.plan?.estado === 'ACTIVO' ? 'bg-primary/10 text-primary border-primary/20' :
+                'bg-gold-light text-ink border-gold/40'
+              }`}>
+                {estadoPlanCalc === 'VENCIDO' ? 'Vencido' :
+                 estadoPlanCalc === 'PROXIMO' ? '⚠ Próximo a vencer' :
+                 cliente.plan?.estado ?? 'PENDIENTE'}
+              </span>
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola ${cliente.nombre}, te habla Ian de REVIVA.`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-[#25D366] border border-[#25D366]/30 rounded-lg px-2.5 py-1 hover:bg-[#25D366]/10 transition-all"
+              >
+                WhatsApp →
+              </a>
+            </div>
           </div>
         </div>
 
@@ -250,9 +296,11 @@ export default function ClienteDetallePage() {
               })}
             </div>
 
-            <p className="text-ink-muted text-xs mt-4">
-              Presioná → para avanzar al siguiente estado: Pendiente → En progreso → Entregado → Pendiente
-            </p>
+            <div className="mt-4 bg-surface-warm border border-edge rounded-xl p-3">
+              <p className="text-ink-muted text-xs">
+                <strong className="text-ink-secondary">Recordatorio:</strong> Todos los archivos (plan alimentario, rutina, guía de suplementación, meal prep y lista de compras) se envían al cliente por <strong>WhatsApp</strong>.
+              </p>
+            </div>
           </div>
         )}
 
@@ -271,6 +319,9 @@ export default function ClienteDetallePage() {
                 ['Estrés',      labels.estres[cliente.perfil.nivelEstres]],
                 ['Sueño',       `${cliente.perfil.horasSueno} hs`],
                 ['Adherencia',  labels.adherencia[cliente.perfil.adherencia]],
+                ...(cliente.perfil.fechaNacimiento
+                  ? [['Cumpleaños', new Date(cliente.perfil.fechaNacimiento).toLocaleDateString('es-AR', { day: 'numeric', month: 'long' })]]
+                  : []),
               ].map(([k, v]) => (
                 <div key={k} className="flex justify-between py-1.5 border-b border-edge last:border-0">
                   <span className="text-ink-secondary">{k}</span>
@@ -321,6 +372,25 @@ export default function ClienteDetallePage() {
           </h2>
 
           <div className="flex flex-col gap-4">
+            <div>
+              <label className="text-sm font-medium text-ink-secondary block mb-1.5">Tipo de plan</label>
+              <select
+                value={planForm.tipoPlan}
+                onChange={e => setPlanForm(p => ({ ...p, tipoPlan: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl border border-edge text-sm text-ink bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              >
+                <option value="">Sin especificar</option>
+                {Object.entries(PLAN_LABELS).map(([k, v]) => (
+                  <option key={k} value={k}>{v} ({PLAN_DURACIONES_DIAS[k] ?? 30} días)</option>
+                ))}
+              </select>
+              {planForm.tipoPlan && (
+                <p className="text-xs text-ink-muted mt-1">
+                  Duración: <strong>{PLAN_DURACIONES_DIAS[planForm.tipoPlan] ?? 30} días</strong>. La fecha de vencimiento se calcula automáticamente al activar.
+                </p>
+              )}
+            </div>
+
             <div>
               <label className="text-sm font-medium text-ink-secondary block mb-1.5">Clasificación</label>
               <select
