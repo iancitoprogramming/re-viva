@@ -6,6 +6,21 @@ import { PLAN_CTA_HREF } from '@/lib/constants'
 
 // ─── DATOS ────────────────────────────────────────────────────────────────────
 
+const planOnDemand = {
+  nombre: 'On Demand',
+  precio: '$30.000',
+  unidad: 'pago único',
+  duracion: '8 a 10 semanas',
+  desc: 'Tu plan personalizado, sin seguimiento directo. Autoguiado y autodidacta. 100% responsabilidad propia.',
+  items: [
+    'Plan alimentario completo',
+    'Rutina de entrenamiento',
+    'Guía de suplementación',
+    'Meal prep + lista de compras',
+    'Evaluación física puntual por fotos',
+  ],
+}
+
 const planesOnline = [
   {
     nombre: 'Online 100%',
@@ -67,11 +82,11 @@ const notaPresencial: Record<string, string> = {
 
 // ─── COMPONENTE ──────────────────────────────────────────────────────────────
 
-type TabMain = 'online' | 'presencial'
+type TabMain = 'on-demand' | 'online' | 'presencial'
 type TabPres = 'mensual' | 'trimestral' | 'semestral'
 
 export default function PlanesTabs() {
-  const [tabMain, setTabMain] = useState<TabMain>('online')
+  const [tabMain, setTabMain] = useState<TabMain>('on-demand')
   const [tabPres, setTabPres]  = useState<TabPres>('mensual')
 
   return (
@@ -79,7 +94,11 @@ export default function PlanesTabs() {
 
       {/* ── Tabs principales ── */}
       <div className="flex gap-1.5 mb-8 p-1 bg-surface-warm rounded-2xl border border-edge">
-        {(['online', 'presencial'] as TabMain[]).map((tab) => (
+        {([
+          ['on-demand', 'On Demand'],
+          ['online',    'Online'],
+          ['presencial','Presencial'],
+        ] as [TabMain, string][]).map(([tab, label]) => (
           <button
             key={tab}
             onClick={() => setTabMain(tab)}
@@ -89,10 +108,56 @@ export default function PlanesTabs() {
                 : 'text-ink-secondary hover:text-ink'
             }`}
           >
-            {tab === 'online' ? 'Online' : 'Presencial'}
+            {label}
           </button>
         ))}
       </div>
+
+      {/* ── ON DEMAND ── */}
+      {tabMain === 'on-demand' && (
+        <div className="max-w-md mx-auto">
+          <div className="bg-surface border border-edge rounded-2xl p-6 flex flex-col gap-5">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="font-serif text-xl text-ink leading-tight">{planOnDemand.nombre}</h3>
+              <span className="text-xs font-semibold text-gold bg-gold-light px-3 py-1 rounded-full whitespace-nowrap flex-shrink-0 border border-gold/30">
+                {planOnDemand.unidad}
+              </span>
+            </div>
+
+            <p className="text-ink-secondary text-sm leading-relaxed">{planOnDemand.desc}</p>
+
+            <ul className="flex flex-col gap-2">
+              {planOnDemand.items.map((item) => (
+                <li key={item} className="flex items-center gap-2.5 text-sm text-ink-secondary">
+                  <span className="w-4 h-4 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-2.5 h-2.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+
+            <p className="text-xs text-ink-muted border-t border-edge pt-3">
+              Duración: <strong className="text-ink">{planOnDemand.duracion}</strong>. Sin seguimiento directo. Los materiales se entregan por WhatsApp.
+            </p>
+
+            <div>
+              <div className="flex items-baseline gap-1 mb-4">
+                <span className="font-serif text-3xl font-bold text-ink">{planOnDemand.precio}</span>
+                <span className="text-ink-muted text-sm">{planOnDemand.unidad}</span>
+              </div>
+              <Link
+                href={PLAN_CTA_HREF}
+                className="block text-center bg-primary hover:bg-primary-dark text-ivory font-semibold py-3.5 rounded-xl text-sm transition-all"
+              >
+                Quiero este plan
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── ONLINE ── */}
       {tabMain === 'online' && (

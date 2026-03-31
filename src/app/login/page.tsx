@@ -10,6 +10,9 @@ function LoginContent() {
   const router       = useRouter()
   const searchParams = useSearchParams()
   const resetOk      = searchParams.get('resetOk') === '1'
+  // redirect: solo aceptar paths internos (empieza con / y no contiene ://)
+  const redirectRaw  = searchParams.get('redirect') ?? ''
+  const redirectTo   = redirectRaw.startsWith('/') && !redirectRaw.includes('://') ? redirectRaw : null
   const [modo, setModo] = useState<'login' | 'registro'>(
     searchParams.get('modo') === 'registro' ? 'registro' : 'login'
   )
@@ -45,7 +48,9 @@ function LoginContent() {
         return
       }
 
-      if (data.esAdmin) {
+      if (redirectTo && data.tienePerfil && (data.planEstado === 'ACTIVO' || data.esAdmin)) {
+        router.push(redirectTo)
+      } else if (data.esAdmin) {
         router.push('/admin')
       } else if (!data.tienePerfil) {
         router.push('/onboarding')

@@ -27,6 +27,7 @@ export default function OnboardingPage() {
     adherencia: '',
     preferenciasAlimentarias: '',
     lesiones: '',
+    fechaNacimiento: '',
   })
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
@@ -64,22 +65,22 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-10">
+    <main className="min-h-screen bg-ivory px-4 py-10">
       <div className="max-w-xl mx-auto">
 
         {/* Header */}
         <div className="text-center mb-8">
-          <span className="text-emerald-600 font-bold text-xl">Re-Viva</span>
-          <h1 className="text-2xl font-bold text-gray-900 mt-4 mb-2">
+          <span className="font-serif font-bold text-xl text-primary">REVIVA</span>
+          <h1 className="text-2xl font-bold text-ink mt-4 mb-2">
             Tu perfil nutricional
           </h1>
-          <p className="text-gray-500 text-sm">
+          <p className="text-ink-muted text-sm">
             Completá el formulario para que tu trainer pueda armar tu plan personalizado.
           </p>
         </div>
 
         {/* Formulario */}
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8">
+        <div className="bg-surface rounded-3xl shadow-sm border border-edge p-6 sm:p-8">
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
             <FormSelect
@@ -181,11 +182,27 @@ export default function OnboardingPage() {
               required
             />
 
-            <div className="flex flex-col gap-1.5 border-t border-gray-100 pt-5 mt-2">
-              <label className="text-sm font-medium text-emerald-700">
+            <div className="flex flex-col gap-1.5 border-t border-edge pt-5 mt-2">
+              <label className="text-sm font-medium text-ink-secondary">
+                Fecha de nacimiento <span className="text-ink-muted font-normal">(opcional)</span>
+              </label>
+              <p className="text-xs text-ink-muted mb-1">
+                La usamos para enviarte un saludo en tu cumpleaños.
+              </p>
+              <input
+                type="date"
+                name="fechaNacimiento"
+                value={form.fechaNacimiento}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-xl border border-edge text-sm text-ink bg-surface-warm focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-ink-secondary">
                 Preferencias o restricciones alimentarias
               </label>
-              <p className="text-xs text-gray-500 mb-1">
+              <p className="text-xs text-ink-muted mb-1">
                 Ej: Soy vegetariano, no como pescado, soy celíaco, no me gusta el brócoli.
               </p>
               <textarea
@@ -193,15 +210,15 @@ export default function OnboardingPage() {
                 value={form.preferenciasAlimentarias}
                 onChange={handleChange}
                 placeholder="Escribí acá todo lo que el trainer deba saber sobre tu alimentación..."
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 bg-gray-50 focus:bg-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors resize-none min-h-[100px]"
+                className="w-full px-4 py-3 rounded-xl border border-edge text-sm text-ink bg-surface-warm focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors resize-none min-h-[100px]"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-emerald-700">
+              <label className="text-sm font-medium text-ink-secondary">
                 Lesiones o condiciones médicas
               </label>
-              <p className="text-xs text-gray-500 mb-1">
+              <p className="text-xs text-ink-muted mb-1">
                 Ej: Me duele la rodilla al correr, operado de hernia, tengo hipertensión.
               </p>
               <textarea
@@ -209,7 +226,7 @@ export default function OnboardingPage() {
                 value={form.lesiones}
                 onChange={handleChange}
                 placeholder="Detallá cualquier dolor, lesión pasada/actual o condición médica..."
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 bg-gray-50 focus:bg-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors resize-none min-h-[100px]"
+                className="w-full px-4 py-3 rounded-xl border border-edge text-sm text-ink bg-surface-warm focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors resize-none min-h-[100px]"
               />
             </div>
 

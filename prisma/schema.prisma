@@ -23,7 +23,6 @@ model User {
 }
 
 // ─── CÓDIGO DE RECUPERACIÓN DE CONTRASEÑA ────────────────────────────────────
-// Se genera un código de 6 dígitos, se envía por email y expira en 15 minutos.
 model ResetToken {
   id        String   @id @default(cuid())
   userId    String
@@ -36,14 +35,13 @@ model ResetToken {
 }
 
 // ─── PERFIL NUTRICIONAL ──────────────────────────────────────────────────────
-// Se crea cuando el cliente completa el formulario de onboarding
 model NutritionalProfile {
   id                String      @id @default(cuid())
   userId            String      @unique
   genero            Genero
   edad              Int
-  altura            Float       // en centímetros
-  peso              Float       // en kilogramos
+  altura            Float
+  peso              Float
   objetivo          Objetivo
   diasEntrenamiento Int
   nivelEstres       NivelEstres
@@ -51,36 +49,37 @@ model NutritionalProfile {
   adherencia        Adherencia
   preferenciasAlimentarias String?
   lesiones          String?
+  fechaNacimiento   DateTime?   // Para cumpleaños automáticos
   creadoEn          DateTime    @default(now())
 
   user User @relation(fields: [userId], references: [id])
 }
 
 // ─── PLAN NUTRICIONAL ────────────────────────────────────────────────────────
-// El trainer activa este plan luego del pago del cliente
 model NutritionalPlan {
   id            String         @id @default(cuid())
   userId        String         @unique
   estado        EstadoPlan     @default(PENDIENTE)
+  tipoPlan      String?        // Ej: "online-mensual", "on-demand", etc.
+  activadoEn    DateTime?
+  fechaVencimiento DateTime?   // Se calcula en base al tipoPlan al activar
 
-  // Valores que el trainer define (pueden diferir del pre-cálculo IGZ)
+  // Valores que el trainer define
   clasificacion Clasificacion?
   calorias      Float?
   proteina      Float?
   hidratos      Float?
   grasas        Float?
-  notasTrainer  String?        // El trainer puede agregar notas personalizadas
-  activadoEn    DateTime?
+  notasTrainer  String?
 
-  // Pre-cálculo del motor IGZ (solo visible para el trainer en el email y admin)
+  // Pre-cálculo del motor IGZ
   igzClasificacion Clasificacion?
   igzCalorias      Float?
   igzProteina      Float?
   igzHidratos      Float?
   igzGrasas        Float?
 
-  // ── Componentes del proceso integral ─────────────────────────────────────
-  // Cada cliente activo recibe los 5 componentes. El trainer lleva el seguimiento aquí.
+  // Componentes del proceso integral
   estadoAlimentacion    EstadoEntrega @default(PENDIENTE)
   estadoEntrenamiento   EstadoEntrega @default(PENDIENTE)
   estadoSuplementacion  EstadoEntrega @default(PENDIENTE)
@@ -135,14 +134,13 @@ enum EstadoEntrega {
 }
 
 // ─── PAGO (Mercado Pago) ─────────────────────────────────────────────────────
-// Registra cada intento de pago online. Un usuario puede tener múltiples pagos.
 model Payment {
   id           String   @id @default(cuid())
   userId       String
-  planTipo     String                       // ej. "online-mensual", "presencial-3x-mensual"
-  preferenceId String                       // ID de preferencia MP
-  paymentId    String?                      // ID de pago MP (llega del webhook o proceso)
-  status       String   @default("pending") // pending | approved | rejected | cancelled | in_process
+  planTipo     String
+  preferenceId String
+  paymentId    String?
+  status       String   @default("pending")
   amount       Float
   currency     String   @default("ARS")
   creadoEn     DateTime @default(now())

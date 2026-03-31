@@ -1,5 +1,4 @@
 // ─── Constantes globales del proyecto ─────────────────────────────────────────
-// Cualquier cambio de URL, número o alias se hace UNA sola vez acá.
 
 export const INSTAGRAM_URL = 'https://instagram.com/igztrainer'
 export const WHATSAPP_NUMBER = '5491122835621'
@@ -10,9 +9,14 @@ export const WHATSAPP_CONSULTA   = `https://wa.me/${WHATSAPP_NUMBER}?text=${enco
 
 export const PLAN_CTA_HREF = '/login?modo=registro'
 
-// ─── Planes disponibles para Mercado Pago ────────────────────────────────────
-// Mantener sincronizado con los precios de PlanesTabs.tsx
+// ─── Planes disponibles ────────────────────────────────────────────────────────
 export const PLANES_MP = {
+  'on-demand': {
+    titulo: 'Plan On Demand',
+    descripcion: 'Autoguiado y autodidacta. 8 a 10 semanas de proceso con 100% responsabilidad propia.',
+    monto: 30000,
+    badge: 'Pago único',
+  },
   'online-mensual': {
     titulo: 'Plan Online 100% — Mensual',
     descripcion: 'Seguimiento nutricional y de entrenamiento completo desde donde estés.',
@@ -58,3 +62,41 @@ export const PLANES_MP = {
 } as const
 
 export type PlanMPKey = keyof typeof PLANES_MP
+
+// ─── Duración en días por tipo de plan ────────────────────────────────────────
+// Se usa al activar para calcular fechaVencimiento
+export const PLAN_DURACIONES_DIAS: Record<string, number> = {
+  'on-demand':                    70,   // ~10 semanas
+  'online-mensual':               30,
+  'online-presencial-mensual':    30,
+  'online-trimestral':            90,
+  'online-presencial-trimestral': 90,
+  'presencial-3x-mensual':        30,
+  'presencial-4x-mensual':        30,
+  'presencial-5x-mensual':        30,
+  'presencial-3x-trimestral':     90,
+  'presencial-4x-trimestral':     90,
+  'presencial-5x-trimestral':     90,
+  'presencial-3x-semestral':      180,
+  'presencial-4x-semestral':      180,
+  'presencial-5x-semestral':      180,
+}
+
+// ─── Etiquetas legibles de tipos de plan ──────────────────────────────────────
+export const PLAN_LABELS: Record<string, string> = {
+  'on-demand':                    'On Demand (pago único)',
+  'online-mensual':               'Online 100% — Mensual',
+  'online-presencial-mensual':    'Online + Presencial — Mensual',
+  'online-trimestral':            'Online 100% — Trimestral',
+  'online-presencial-trimestral': 'Online + Presencial — Trimestral',
+  'presencial-3x-mensual':        'Presencial 3x/sem — Mensual',
+  'presencial-4x-mensual':        'Presencial 4x/sem — Mensual',
+  'presencial-5x-mensual':        'Presencial 5x/sem — Mensual',
+  'presencial-3x-trimestral':     'Presencial 3x/sem — Trimestral',
+  'presencial-4x-trimestral':     'Presencial 4x/sem — Trimestral',
+  'presencial-5x-trimestral':     'Presencial 5x/sem — Trimestral',
+  'presencial-3x-semestral':      'Presencial 3x/sem — Semestral',
+  'presencial-4x-semestral':      'Presencial 4x/sem — Semestral',
+  'presencial-5x-semestral':      'Presencial 5x/sem — Semestral',
+}
+

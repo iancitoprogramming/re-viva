@@ -259,11 +259,14 @@ export async function enviarEmailActivacion(
             ` : ''}
 
             <div style="text-align: center;">
-              <a href="${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://reviva.vercel.app'}/dashboard"
+              <a href="${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://reviva.igztrainer.com'}/login?redirect=/dashboard"
                  style="display: inline-block; background: #2D5A3D; color: white; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 700; font-size: 15px;">
                 Ver mi plan →
               </a>
             </div>
+            <p style="color: #9B9589; font-size: 12px; text-align: center; margin-top: 12px;">
+              Si ya estás logueado, entrás directo. Si no, iniciá sesión primero.
+            </p>
           </div>
 
           <p style="color: #9B9589; font-size: 11px; text-align: center; margin-top: 20px;">
@@ -344,5 +347,112 @@ export async function enviarCredencialesCliente(
     console.log(`[EMAIL] Credenciales enviadas a: ${email}`)
   } catch (err: unknown) {
     console.error('[EMAIL] Error enviando credenciales:', (err as Error).message)
+  }
+}
+
+// ─── EMAIL: felicitación de cumpleaños ────────────────────────────────────────
+export async function enviarFelicitacionCumpleanos(
+  nombre: string,
+  email: string
+): Promise<void> {
+  const dashUrl = `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://reviva.igztrainer.com'}/login?redirect=/dashboard`
+  try {
+    const transporter = crearTransporter()
+    await transporter.sendMail({
+      from:    FROM_EMAIL,
+      to:      email,
+      subject: `¡Feliz cumpleaños, ${nombre}! — REVIVA`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; background: #F8F5EF; padding: 32px 20px;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <span style="font-size: 22px; font-weight: 700; color: #2D5A3D; letter-spacing: 2px;">REVIVA</span>
+            <span style="font-size: 12px; color: #9B9589; margin-left: 6px;">by IGZ Trainer</span>
+          </div>
+          <div style="background: #FFFFFF; border-radius: 16px; border: 1px solid #DDD8CC; padding: 32px; text-align: center;">
+            <p style="font-size: 40px; margin: 0 0 16px 0;">🎂</p>
+            <h1 style="color: #1A2416; font-size: 22px; margin: 0 0 12px 0;">¡Feliz cumpleaños, ${nombre}!</h1>
+            <p style="color: #6B7B64; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+              Hoy es un buen día para recordar hasta dónde llegaste.<br/>
+              Seguí construyendo — el mejor año está por venir.
+            </p>
+            <p style="color: #6B7B64; font-size: 14px; margin: 0 0 24px 0;">
+              — Ian, IGZ Trainer
+            </p>
+            <a href="${dashUrl}"
+               style="display: inline-block; background: #2D5A3D; color: white; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: 700; font-size: 14px;">
+              Ver mi plan →
+            </a>
+          </div>
+          <p style="color: #9B9589; font-size: 11px; text-align: center; margin-top: 20px;">
+            REVIVA · IGZ Trainer · Email automático
+          </p>
+        </div>
+      `,
+    })
+    console.log(`[EMAIL] Cumpleaños enviado a: ${email}`)
+  } catch (err: unknown) {
+    console.error('[EMAIL] Error cumpleaños:', (err as Error).message)
+  }
+}
+
+// ─── EMAIL: recordatorio de vencimiento ──────────────────────────────────────
+export async function enviarRecordatorioVencimiento(
+  nombre: string,
+  email: string,
+  fechaVencimiento: Date
+): Promise<void> {
+  const diasRestantes = Math.ceil((fechaVencimiento.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+  const fechaStr = fechaVencimiento.toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })
+  const dashUrl  = `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://reviva.igztrainer.com'}/login?redirect=/dashboard`
+  const waUrl    = `https://wa.me/${process.env.WHATSAPP_NUMBER ?? '5491122835621'}?text=${encodeURIComponent(`Hola Ian, quiero renovar mi plan de REVIVA.`)}`
+
+  try {
+    const transporter = crearTransporter()
+    await transporter.sendMail({
+      from:    FROM_EMAIL,
+      to:      email,
+      subject: `Tu plan REVIVA vence en ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; background: #F8F5EF; padding: 32px 20px;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <span style="font-size: 22px; font-weight: 700; color: #2D5A3D; letter-spacing: 2px;">REVIVA</span>
+            <span style="font-size: 12px; color: #9B9589; margin-left: 6px;">by IGZ Trainer</span>
+          </div>
+          <div style="background: #FFFFFF; border-radius: 16px; border: 1px solid #DDD8CC; padding: 32px;">
+            <div style="background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 10px; padding: 16px; margin-bottom: 24px; text-align: center;">
+              <p style="color: #92400E; font-weight: 700; font-size: 15px; margin: 0;">
+                ⏰ Tu plan vence en ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}
+              </p>
+              <p style="color: #B45309; font-size: 13px; margin: 4px 0 0 0;">${fechaStr}</p>
+            </div>
+            <p style="color: #1A2416; font-size: 16px; margin: 0 0 8px 0;">Hola, <strong>${nombre}</strong></p>
+            <p style="color: #6B7B64; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0;">
+              Tu plan de REVIVA está por vencer. Si querés continuar con tu proceso, este es el momento de renovar.
+            </p>
+            <p style="color: #6B7B64; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0;">
+              Hablame por WhatsApp y coordinamos la continuidad de tu proceso.
+            </p>
+            <div style="text-align: center; margin-bottom: 16px;">
+              <a href="${waUrl}"
+                 style="display: inline-block; background: #25D366; color: white; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: 700; font-size: 14px;">
+                Renovar mi plan por WhatsApp →
+              </a>
+            </div>
+            <div style="text-align: center;">
+              <a href="${dashUrl}"
+                 style="display: inline-block; color: #2D5A3D; text-decoration: none; font-size: 13px;">
+                Ver mi plan actual →
+              </a>
+            </div>
+          </div>
+          <p style="color: #9B9589; font-size: 11px; text-align: center; margin-top: 20px;">
+            REVIVA · IGZ Trainer · Email automático
+          </p>
+        </div>
+      `,
+    })
+    console.log(`[EMAIL] Recordatorio vencimiento enviado a: ${email}`)
+  } catch (err: unknown) {
+    console.error('[EMAIL] Error recordatorio vencimiento:', (err as Error).message)
   }
 }
