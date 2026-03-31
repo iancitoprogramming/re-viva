@@ -9,38 +9,83 @@
   --font-sans: var(--font-inter);
   --font-serif: var(--font-playfair);
 
-  /* ── Verde Bosque: vida, arraigo, profundidad natural ── */
+  /* ── Verde Bosque — usado en admin/dashboard ── */
   --color-primary:       #2D5A3D;
   --color-primary-dark:  #1C3D28;
   --color-primary-light: #4A7C5F;
 
-  /* ── Oliva: sofisticación, textos secundarios ── */
+  /* ── Oliva ── */
   --color-secondary: #8B9E7A;
 
-  /* ── Dorado Arena: valor, logro, calidez sobria ── */
-  --color-gold:       #C9A96E;
-  --color-gold-light: #E8D5B0;
+  /* ── Dorado Marca — ajustado al brand gold exacto ── */
+  --color-gold:       #C9A84C;
+  --color-gold-light: rgba(201,168,76,0.15);
 
-  /* ── Fondos: marfil cálido, no clínico ── */
+  /* ── Fondos claros — usados en admin/dashboard ── */
   --color-ivory:        #F8F5EF;
   --color-surface:      #FFFFFF;
   --color-surface-warm: #F2EDE3;
 
-  /* ── Textos: tono verde oscuro, no negro puro ── */
+  /* ── Textos oscuros — usados en admin/dashboard ── */
   --color-ink:           #1A2416;
   --color-ink-secondary: #6B7B64;
   --color-ink-muted:     #9B9589;
 
-  /* ── Bordes elegantes, cálidos ── */
+  /* ── Bordes claros ── */
   --color-edge: #DDD8CC;
+
+  /* ── Brand dark palette ── */
+  --color-base:        #0a0a08;
+  --color-green-deep:  #1B3D2F;
 }
 
+/* ── Glass system + glow — CSS custom properties (no Tailwind utilities) ── */
+:root {
+  --glass-bg:         rgba(255, 255, 255, 0.035);
+  --glass-bg-hi:      rgba(255, 255, 255, 0.055);
+  --glass-border:     rgba(201, 168, 76, 0.13);
+  --glass-border-hi:  rgba(201, 168, 76, 0.30);
+  --glass-blur:       blur(14px);
+  --glow-gold:        0 0 48px rgba(201, 168, 76, 0.22);
+  --glow-gold-sm:     0 0 20px rgba(201, 168, 76, 0.18);
+  --gradient-subtle:
+    radial-gradient(ellipse at 15% 70%, rgba(201,168,76,0.05) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 30%, rgba(27,61,47,0.08) 0%, transparent 55%);
+}
+
+/* ── Base: toda la app usa fondo oscuro ── */
 html, body {
-  background-color: #F8F5EF;
-  color: #1A2416;
-  color-scheme: light;
+  background-color: #0a0a08;
+  color: #F5F2E7;
+  color-scheme: light; /* native controls mantienen estilo legible */
 }
 
-/* Scrollbar invisible para tabs horizontales */
+/* ── Noise / grain — overlay global, no bloquea clicks ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+  opacity: 0.032;
+  mix-blend-mode: overlay;
+}
+
+/* ── Custom scrollbar ── */
+::-webkit-scrollbar            { width: 6px; }
+::-webkit-scrollbar-track      { background: #0a0a08; }
+::-webkit-scrollbar-thumb      { background: rgba(201,168,76,0.22); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover{ background: rgba(201,168,76,0.40); }
+
+/* ── Scrollbar invisible para tabs horizontales ── */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

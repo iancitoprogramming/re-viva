@@ -1,3 +1,7 @@
+const GOLD    = '#C9A84C'
+const IVORY   = '#F5F2E7'
+const IVORY60 = 'rgba(245,242,231,0.60)'
+
 const pasos = [
   {
     num: '01',
@@ -23,27 +27,58 @@ const pasos = [
 
 export default function ComoFunciona() {
   return (
-    <section className="px-6 py-20 bg-surface-warm">
+    <section
+      className="px-6 py-20"
+      style={{
+        background:
+          'radial-gradient(ellipse at 80% 20%, rgba(201,168,76,0.05) 0%, transparent 50%), #0a0a08',
+      }}
+    >
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-12">
-          <p className="text-gold text-xs font-semibold tracking-widest uppercase mb-3">El proceso</p>
-          <h2 className="font-serif text-3xl sm:text-4xl text-ink mb-3">Así funciona.</h2>
-          <p className="text-ink-secondary text-base max-w-sm mx-auto">
+          <p className="text-xs font-semibold tracking-widest uppercase mb-3"
+             style={{ color: GOLD }}>
+            El proceso
+          </p>
+          <h2 className="font-serif text-3xl sm:text-4xl mb-3"
+              style={{ color: IVORY }}>
+            Así funciona.
+          </h2>
+          <p className="text-base max-w-sm mx-auto"
+             style={{ color: IVORY60 }}>
             Primero entendés qué ofrezco. Después decidís.
           </p>
         </div>
+
         <div className="flex flex-col">
           {pasos.map((paso, i) => (
             <div key={paso.num} className="flex gap-5">
+              {/* Indicador de paso */}
               <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                  <span className="text-ivory text-xs font-bold font-mono">{paso.num}</span>
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ background: '#1B3D2F', border: `1px solid rgba(201,168,76,0.25)` }}
+                >
+                  <span className="text-xs font-bold font-mono" style={{ color: GOLD }}>
+                    {paso.num}
+                  </span>
                 </div>
-                {i < pasos.length - 1 && <div className="w-px flex-1 bg-primary/20 my-2" />}
+                {i < pasos.length - 1 && (
+                  <div
+                    className="w-px flex-1 my-2"
+                    style={{ background: 'rgba(201,168,76,0.15)' }}
+                  />
+                )}
               </div>
+
+              {/* Contenido del paso */}
               <div className={i < pasos.length - 1 ? 'pb-10' : 'pb-0'}>
-                <h3 className="font-serif text-xl text-ink mb-1">{paso.titulo}</h3>
-                <p className="text-ink-secondary text-sm leading-relaxed">{paso.desc}</p>
+                <h3 className="font-serif text-xl mb-1" style={{ color: IVORY }}>
+                  {paso.titulo}
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: IVORY60 }}>
+                  {paso.desc}
+                </p>
               </div>
             </div>
           ))}

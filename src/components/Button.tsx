@@ -21,7 +21,7 @@ export default function Button({
     primary:   'bg-primary text-ivory hover:bg-primary-dark',
     secondary: 'bg-surface text-primary border border-primary/25 hover:bg-primary/5',
     ghost:     'text-primary hover:bg-primary/8',
-    gold:      'bg-gold text-ink hover:bg-gold/90',
+    gold:      'bg-gold text-[#0a0a08] hover:bg-gold/90',
     danger:    'bg-red-600 text-white hover:bg-red-700',
   }
 
