@@ -5,7 +5,6 @@ import LandingHeader  from '@/components/landing/LandingHeader'
 import LandingFooter  from '@/components/landing/LandingFooter'
 import Hero           from '@/components/landing/Hero'
 import Problemas      from '@/components/landing/Problemas'
-import Transformacion from '@/components/landing/Transformacion'
 import QueIncluye     from '@/components/landing/QueIncluye'
 import Trainer        from '@/components/landing/Trainer'
 import Resultados     from '@/components/landing/Resultados'
@@ -26,10 +25,7 @@ export default function LandingPage() {
         {/* 2. Dolor: el lector se reconoce */}
         <Problemas />
 
-        {/* 3. Visión: cómo luce el cambio */}
-        <Transformacion />
-
-        {/* 4. Propuesta: qué recibís */}
+        {/* 3. Propuesta: qué recibís */}
         <QueIncluye />
 
         {/* 5. Confianza: quién es Ian */}
