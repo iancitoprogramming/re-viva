@@ -67,31 +67,54 @@ function LoginContent() {
     }
   }
 
+  const GOLD    = '#C9A84C'
+  const IVORY   = '#F5F2E7'
+  const IVORY60 = 'rgba(245,242,231,0.60)'
+  const IVORY35 = 'rgba(245,242,231,0.35)'
+  const GLASS   = 'rgba(255,255,255,0.04)'
+  const BORDER  = 'rgba(201,168,76,0.15)'
+
   return (
-    <div className="min-h-screen bg-ivory flex flex-col">
+    <div
+      className="min-h-screen flex flex-col"
+      style={{
+        background:
+          'radial-gradient(ellipse at 60% 10%, rgba(201,168,76,0.06) 0%, transparent 50%), radial-gradient(ellipse at 20% 80%, rgba(27,61,47,0.10) 0%, transparent 50%), #0a0a08',
+      }}
+    >
 
       <header className="px-6 py-5 flex items-center justify-between max-w-5xl mx-auto w-full">
         <Link href="/">
-          <span className="font-serif font-bold text-xl text-primary tracking-wide">REVIVA</span>
-          <span className="text-ink-muted text-xs ml-2 tracking-widest uppercase">by IGZ Trainer</span>
+          <span className="font-serif font-bold text-xl tracking-wide" style={{ color: GOLD }}>REVIVA</span>
+          <span className="text-xs ml-2 tracking-widest uppercase" style={{ color: IVORY35 }}>by IGZ Trainer</span>
         </Link>
       </header>
 
       <main className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
-          <div className="bg-surface rounded-3xl border border-edge shadow-sm p-8">
+          <div
+            className="rounded-3xl p-8"
+            style={{ background: GLASS, border: `1px solid ${BORDER}`, backdropFilter: 'blur(16px)' }}
+          >
 
-            <h1 className="font-serif text-2xl text-ink mb-1">
+            <h1 className="font-serif text-2xl mb-1" style={{ color: IVORY }}>
               {modo === 'login' ? 'Bienvenido de vuelta.' : 'Creá tu cuenta.'}
             </h1>
-            <p className="text-ink-secondary text-sm mb-7">
+            <p className="text-sm mb-7" style={{ color: IVORY60 }}>
               {modo === 'login'
                 ? 'Ingresá con tu email y contraseña para acceder a tu plan.'
                 : 'Es el primer paso. Tarda menos de un minuto.'}
             </p>
 
             {resetOk && (
-              <p className="text-sm text-primary bg-primary/8 px-4 py-3 rounded-xl border border-primary/20 mb-5">
+              <p
+                className="text-sm px-4 py-3 rounded-xl mb-5"
+                style={{
+                  color: GOLD,
+                  background: 'rgba(201,168,76,0.08)',
+                  border: '1px solid rgba(201,168,76,0.22)',
+                }}
+              >
                 ✓ Contraseña actualizada. Podés iniciar sesión.
               </p>
             )}
@@ -100,6 +123,7 @@ function LoginContent() {
 
               {modo === 'registro' && (
                 <FormInput
+                  dark
                   label="Nombre completo"
                   name="nombre"
                   type="text"
@@ -111,6 +135,7 @@ function LoginContent() {
               )}
 
               <FormInput
+                dark
                 label="Email"
                 name="email"
                 type="email"
@@ -121,6 +146,7 @@ function LoginContent() {
               />
 
               <FormInput
+                dark
                 label="Contraseña"
                 name="password"
                 type="password"
@@ -132,30 +158,57 @@ function LoginContent() {
               />
 
               {error && (
-                <p className="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl border border-red-200">
+                <p
+                  className="text-sm px-4 py-3 rounded-xl"
+                  style={{
+                    color: '#f87171',
+                    background: 'rgba(248,113,113,0.08)',
+                    border: '1px solid rgba(248,113,113,0.22)',
+                  }}
+                >
                   {error}
                 </p>
               )}
 
-              <Button type="submit" loading={loading} className="w-full py-4 mt-1 text-base rounded-2xl">
-                {modo === 'login' ? 'Ingresar' : 'Crear cuenta y empezar'}
-              </Button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-4 mt-1 text-base rounded-2xl font-semibold transition-all active:scale-[0.98] disabled:opacity-50"
+                style={{ background: GOLD, color: '#0a0a08' }}
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Procesando...
+                  </span>
+                ) : (
+                  modo === 'login' ? 'Ingresar' : 'Crear cuenta y empezar'
+                )}
+              </button>
 
             </form>
 
             {modo === 'login' && (
               <p className="text-center text-sm mt-4">
-                <Link href="/recuperar" className="text-ink-muted hover:text-primary transition-colors">
+                <Link
+                  href="/recuperar"
+                  className="transition-colors"
+                  style={{ color: IVORY35 }}
+                >
                   ¿Olvidaste tu contraseña?
                 </Link>
               </p>
             )}
 
-            <p className="text-center text-sm text-ink-secondary mt-4">
+            <p className="text-center text-sm mt-4" style={{ color: IVORY60 }}>
               {modo === 'login' ? '¿No tenés cuenta?' : '¿Ya tenés cuenta?'}{' '}
               <button
                 onClick={() => { setModo(modo === 'login' ? 'registro' : 'login'); setError('') }}
-                className="text-primary font-semibold hover:underline cursor-pointer"
+                className="font-semibold hover:underline cursor-pointer"
+                style={{ color: GOLD }}
               >
                 {modo === 'login' ? 'Registrate gratis' : 'Iniciá sesión'}
               </button>
@@ -164,7 +217,7 @@ function LoginContent() {
           </div>
 
           {modo === 'registro' && (
-            <p className="text-center text-xs text-ink-muted mt-4 px-4">
+            <p className="text-center text-xs mt-4 px-4" style={{ color: IVORY35 }}>
               Tu cuenta queda lista al instante. El plan se activa una vez confirmado el pago.
             </p>
           )}
