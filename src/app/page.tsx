@@ -3,6 +3,7 @@
 
 import LandingHeader  from '@/components/landing/LandingHeader'
 import LandingFooter  from '@/components/landing/LandingFooter'
+import CursorGlow     from '@/components/CursorGlow'
 import Hero           from '@/components/landing/Hero'
 import Problemas      from '@/components/landing/Problemas'
 import QueIncluye     from '@/components/landing/QueIncluye'
@@ -17,6 +18,7 @@ import Terminos       from '@/components/landing/Terminos'
 export default function LandingPage() {
   return (
     <>
+      <CursorGlow />
       <LandingHeader />
       <main>
         {/* 1. Identidad: quién podés ser */}
