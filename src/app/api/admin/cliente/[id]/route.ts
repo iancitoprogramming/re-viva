@@ -12,9 +12,16 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
   const { id } = await params
 
-  const cliente = await prisma.user.findUnique({
-    where: { id },
-    include: { perfil: true, plan: true },
+  const cliente = await prisma.user.findFirst({
+    where: { id, deletedAt: null },
+    include: {
+      perfil: true,
+      plan: true,
+      archivos: {
+        orderBy: { subidoEn: 'desc' },
+        select: { id: true, nombre: true, tipo: true, nombreOriginal: true, tamano: true, subidoEn: true, subidoPor: true },
+      },
+    },
   })
 
   if (!cliente) return NextResponse.json({ error: 'Cliente no encontrado.' }, { status: 404 })
@@ -26,5 +33,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     creadoEn: cliente.creadoEn,
     perfil:   cliente.perfil,
     plan:     cliente.plan,
+    archivos: cliente.archivos,
   })
 }

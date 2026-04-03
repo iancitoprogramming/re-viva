@@ -18,12 +18,13 @@ export async function GET(request: Request) {
 
   const where = busqueda
     ? {
+        deletedAt: null,
         OR: [
           { nombre: { contains: busqueda, mode: 'insensitive' as const } },
           { email:  { contains: busqueda, mode: 'insensitive' as const } },
         ],
       }
-    : {}
+    : { deletedAt: null }
 
   const [clientes, total] = await Promise.all([
     prisma.user.findMany({

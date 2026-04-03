@@ -10,16 +10,19 @@ datasource db {
 
 // ─── USUARIO ────────────────────────────────────────────────────────────────
 model User {
-  id       String   @id @default(cuid())
-  nombre   String
-  email    String   @unique
-  password String   // Contraseña encriptada con bcrypt
-  creadoEn DateTime @default(now())
+  id        String    @id @default(cuid())
+  nombre    String
+  email     String    @unique
+  password  String
+  creadoEn  DateTime  @default(now())
+  deletedAt DateTime? // Soft delete — no se elimina de la DB
 
-  perfil       NutritionalProfile?
-  plan         NutritionalPlan?
-  resetTokens  ResetToken[]
-  payments     Payment[]
+  perfil      NutritionalProfile?
+  plan        NutritionalPlan?
+  resetTokens ResetToken[]
+  payments    Payment[]
+  checkIns    CheckIn[]
+  archivos    Archivo[]
 }
 
 // ─── CÓDIGO DE RECUPERACIÓN DE CONTRASEÑA ────────────────────────────────────
@@ -49,8 +52,18 @@ model NutritionalProfile {
   adherencia        Adherencia
   preferenciasAlimentarias String?
   lesiones          String?
-  fechaNacimiento   DateTime?   // Para cumpleaños automáticos
-  creadoEn          DateTime    @default(now())
+  fechaNacimiento   DateTime?
+
+  // ── Campos extendidos de onboarding ─────────────────────────────────────
+  experiencia          String?   // "ninguna"|"principiante"|"intermedio"|"avanzado"
+  equipamiento         String[]  @default([]) // ["gym","casa","calistenia","aire_libre"]
+  actividadLaboral     String?   // "sedentario"|"activo"|"alto"
+  practicaDeportes     Boolean   @default(false)
+  deportes             String[]  @default([]) // ["fútbol","running","crossfit",...]
+  quiereMejorarDeporte String?
+  metasFisicas         String[]  @default([]) // ["perder_grasa","ganar_masa","mejorar_resistencia",...]
+
+  creadoEn DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
 }
@@ -60,9 +73,9 @@ model NutritionalPlan {
   id            String         @id @default(cuid())
   userId        String         @unique
   estado        EstadoPlan     @default(PENDIENTE)
-  tipoPlan      String?        // Ej: "online-mensual", "on-demand", etc.
+  tipoPlan      String?
   activadoEn    DateTime?
-  fechaVencimiento DateTime?   // Se calcula en base al tipoPlan al activar
+  fechaVencimiento DateTime?
 
   // Valores que el trainer define
   clasificacion Clasificacion?
@@ -89,6 +102,42 @@ model NutritionalPlan {
   creadoEn DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
+}
+
+// ─── CHECK-IN DIARIO ─────────────────────────────────────────────────────────
+// Registro de actividad del cliente — base del sistema de gamificación.
+// Anti-trampa: max 1 check-in por tipo por día, timestamp generado en servidor.
+model CheckIn {
+  id         String   @id @default(cuid())
+  userId     String
+  tipo       String   // "rutina"|"suplemento"|"peso"|"foto"|"medidas"|"hidratacion"
+  fecha      DateTime @default(now())
+  nota       String?
+  confirmado Boolean  @default(true) // false si es check-in de WA pendiente de confirmar por admin
+  creadoEn   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, fecha])
+  @@index([userId, tipo])
+}
+
+// ─── ARCHIVOS (DOCX, PDF, etc.) ──────────────────────────────────────────────
+// El trainer sube archivos — el cliente los puede ver y descargar.
+model Archivo {
+  id             String   @id @default(cuid())
+  userId         String
+  nombre         String   // Nombre de display, ej: "Rutina Semana 1"
+  tipo           String   // "rutina"|"alimentacion"|"suplementacion"|"meal_prep"|"otro"
+  url            String   // URL de Vercel Blob
+  nombreOriginal String   // Nombre original del archivo
+  tamano         Int      // Tamaño en bytes
+  subidoEn       DateTime @default(now())
+  subidoPor      String   // Email del admin que subió el archivo
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 // ─── ENUMS ───────────────────────────────────────────────────────────────────

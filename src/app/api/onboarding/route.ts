@@ -45,6 +45,14 @@ export async function POST(request: Request) {
         preferenciasAlimentarias: body.preferenciasAlimentarias,
         lesiones:          body.lesiones,
         fechaNacimiento:   body.fechaNacimiento ? new Date(body.fechaNacimiento) : null,
+        // Campos extendidos
+        experiencia:          body.experiencia || null,
+        equipamiento:         body.equipamiento ?? [],
+        actividadLaboral:     body.actividadLaboral || null,
+        practicaDeportes:     body.practicaDeportes ?? false,
+        deportes:             body.deportes ?? [],
+        quiereMejorarDeporte: body.quiereMejorarDeporte || null,
+        metasFisicas:         body.metasFisicas ?? [],
       },
     })
 
