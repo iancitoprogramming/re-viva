@@ -9,11 +9,15 @@ export async function GET(request: Request) {
   const payload = verificarToken(token)
   if (!payload) return NextResponse.json({ error: 'Sesión inválida.' }, { status: 401 })
 
-  const usuario = await prisma.user.findUnique({
-    where: { id: payload.userId },
+  const usuario = await prisma.user.findFirst({
+    where: { id: payload.userId, deletedAt: null },
     include: {
       perfil: true,
       plan: true,
+      archivos: {
+        orderBy: { subidoEn: 'desc' },
+        select: { id: true, nombre: true, tipo: true, nombreOriginal: true, tamano: true, subidoEn: true },
+      },
     },
   })
 
@@ -26,5 +30,6 @@ export async function GET(request: Request) {
     esAdmin:     esAdmin(usuario.email),
     tienePerfil: !!usuario.perfil,
     plan:        usuario.plan ?? null,
+    archivos:    usuario.archivos ?? [],
   })
 }

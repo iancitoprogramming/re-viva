@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
@@ -11,6 +11,16 @@ import { PLAN_LABELS, PLAN_DURACIONES_DIAS, WHATSAPP_NUMBER } from '@/lib/consta
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
 
 type EstadoEntrega = 'PENDIENTE' | 'EN_PROGRESO' | 'ENTREGADO'
+
+interface ArchivoAdmin {
+  id: string
+  nombre: string
+  tipo: string
+  nombreOriginal: string
+  tamano: number
+  subidoEn: string
+  subidoPor: string
+}
 
 interface Entrega {
   estadoAlimentacion:   EstadoEntrega
@@ -38,7 +48,15 @@ interface ClienteDetalle {
     preferenciasAlimentarias?: string | null
     lesiones?: string | null
     fechaNacimiento?: string | null
+    experiencia?: string | null
+    actividadLaboral?: string | null
+    practicaDeportes?: boolean
+    deportes?: string[]
+    quiereMejorarDeporte?: string | null
+    metasFisicas?: string[]
+    equipamiento?: string[]
   } | null
+  archivos: ArchivoAdmin[]
   plan: ({
     id: string
     estado: string
@@ -101,7 +119,18 @@ export default function ClienteDetallePage() {
     tipoPlan: '',
   })
 
-  async function cargarCliente() {
+  // File upload state
+  const [archivoFile, setArchivoFile]       = useState<File | null>(null)
+  const [archivoNombre, setArchivoNombre]   = useState('')
+  const [archivoTipo, setArchivoTipo]       = useState('rutina')
+  const [uploadLoading, setUploadLoading]   = useState(false)
+  const [uploadMsg, setUploadMsg]           = useState('')
+  const [deletingArchivo, setDeletingArchivo] = useState<string | null>(null)
+
+  // Delete client state
+  const [deletingClient, setDeletingClient] = useState(false)
+
+  const cargarCliente = useCallback(async () => {
     const data = await fetch(`/api/admin/cliente/${id}`).then(r => r.json())
     if (!data) return
     setCliente(data)
@@ -117,7 +146,7 @@ export default function ClienteDetallePage() {
       })
     }
     setLoading(false)
-  }
+  }, [id])
 
   useEffect(() => {
     fetch('/api/auth/me').then(r => r.json()).then(d => {
@@ -125,8 +154,58 @@ export default function ClienteDetallePage() {
       setNombreAdmin(d.nombre)
     })
     cargarCliente()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, router])
+  }, [id, router, cargarCliente])
+
+  async function eliminarCliente() {
+    if (!confirm(`¿Eliminar a ${cliente?.nombre}? Esta acción es reversible desde la DB pero no desde el panel.`)) return
+    setDeletingClient(true)
+    const res = await fetch(`/api/admin/delete-cliente/${id}`, { method: 'DELETE' })
+    if (res.ok) {
+      router.push('/admin')
+    } else {
+      alert('Error al eliminar el cliente.')
+      setDeletingClient(false)
+    }
+  }
+
+  async function subirArchivo(e: React.FormEvent) {
+    e.preventDefault()
+    if (!archivoFile || !archivoNombre.trim()) {
+      setUploadMsg('❌ Completá nombre y seleccioná un archivo.')
+      return
+    }
+    setUploadLoading(true)
+    setUploadMsg('')
+    const fd = new FormData()
+    fd.append('archivo', archivoFile)
+    fd.append('nombre', archivoNombre.trim())
+    fd.append('tipo', archivoTipo)
+    const res = await fetch(`/api/admin/archivos/${id}`, { method: 'POST', body: fd })
+    if (res.ok) {
+      setUploadMsg('✅ Archivo subido correctamente.')
+      setArchivoFile(null)
+      setArchivoNombre('')
+      await cargarCliente()
+    } else {
+      const data = await res.json()
+      setUploadMsg(`❌ ${data.error ?? 'Error al subir el archivo.'}`)
+    }
+    setUploadLoading(false)
+  }
+
+  async function eliminarArchivo(archivoId: string) {
+    if (!confirm('¿Eliminar este archivo?')) return
+    setDeletingArchivo(archivoId)
+    await fetch(`/api/admin/archivos/${id}?archivoId=${archivoId}`, { method: 'DELETE' })
+    await cargarCliente()
+    setDeletingArchivo(null)
+  }
+
+  function formatBytes(b: number) {
+    if (b < 1024) return `${b} B`
+    if (b < 1024 * 1024) return `${(b / 1024).toFixed(0)} KB`
+    return `${(b / (1024 * 1024)).toFixed(1)} MB`
+  }
 
   async function activarPlan() {
     setSaving(true)
@@ -247,6 +326,13 @@ export default function ClienteDetallePage() {
               >
                 WhatsApp →
               </a>
+              <button
+                onClick={eliminarCliente}
+                disabled={deletingClient}
+                className="text-xs text-red-600 border border-red-200 rounded-lg px-2.5 py-1 hover:bg-red-50 transition-all disabled:opacity-40"
+              >
+                {deletingClient ? '...' : 'Eliminar'}
+              </button>
             </div>
           </div>
         </div>
@@ -304,6 +390,81 @@ export default function ClienteDetallePage() {
           </div>
         )}
 
+        {/* ── Archivos del cliente ── */}
+        <div className="bg-surface rounded-2xl border border-edge shadow-sm p-6 mb-4">
+          <h2 className="font-serif text-lg text-ink mb-1">Archivos del cliente</h2>
+          <p className="text-ink-muted text-xs mb-4">Los archivos subidos aquí aparecen en el dashboard del cliente para descargar.</p>
+
+          {/* Lista de archivos existentes */}
+          {cliente.archivos.length > 0 && (
+            <div className="flex flex-col gap-2 mb-5">
+              {cliente.archivos.map(a => (
+                <div key={a.id} className="flex items-center justify-between gap-3 p-3 bg-surface-warm rounded-xl border border-edge">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-ink truncate">{a.nombre}</p>
+                      <p className="text-xs text-ink-muted">{a.nombreOriginal} · {formatBytes(a.tamano)}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => eliminarArchivo(a.id)}
+                    disabled={deletingArchivo === a.id}
+                    className="text-xs text-red-500 hover:text-red-700 transition-colors flex-shrink-0 disabled:opacity-40"
+                  >
+                    {deletingArchivo === a.id ? '...' : 'Quitar'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Form subida */}
+          <form onSubmit={subirArchivo} className="flex flex-col gap-3 border-t border-edge pt-4">
+            <p className="text-xs font-bold text-ink-secondary uppercase tracking-widest">Subir nuevo archivo</p>
+            <div className="grid grid-cols-2 gap-3">
+              <FormInput
+                label="Nombre de display"
+                type="text"
+                placeholder="Rutina Semana 1"
+                value={archivoNombre}
+                onChange={e => setArchivoNombre(e.target.value)}
+              />
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium text-ink-secondary">Tipo</label>
+                <select
+                  value={archivoTipo}
+                  onChange={e => setArchivoTipo(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-edge text-sm text-ink bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                >
+                  <option value="rutina">Rutina de entrenamiento</option>
+                  <option value="alimentacion">Plan alimentario</option>
+                  <option value="suplementacion">Suplementación</option>
+                  <option value="meal_prep">Meal prep</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-ink-secondary">Archivo (DOCX, PDF, XLSX — máx 20 MB)</label>
+              <input
+                type="file"
+                accept=".docx,.doc,.pdf,.xlsx"
+                onChange={e => setArchivoFile(e.target.files?.[0] ?? null)}
+                className="text-sm text-ink-secondary file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border file:border-edge file:bg-surface-warm file:text-ink file:font-medium hover:file:bg-primary/5 cursor-pointer"
+              />
+            </div>
+            {uploadMsg && <p className="text-sm font-medium">{uploadMsg}</p>}
+            <Button type="submit" loading={uploadLoading} variant="secondary">
+              Subir archivo
+            </Button>
+          </form>
+        </div>
+
         {/* ── Perfil del cliente ── */}
         {cliente.perfil && (
           <div className="bg-surface rounded-2xl border border-edge shadow-sm p-6 mb-4">
@@ -322,6 +483,12 @@ export default function ClienteDetallePage() {
                 ...(cliente.perfil.fechaNacimiento
                   ? [['Cumpleaños', new Date(cliente.perfil.fechaNacimiento).toLocaleDateString('es-AR', { day: 'numeric', month: 'long' })]]
                   : []),
+                ...(cliente.perfil.experiencia ? [['Experiencia', cliente.perfil.experiencia]] : []),
+                ...(cliente.perfil.actividadLaboral ? [['Actividad laboral', cliente.perfil.actividadLaboral]] : []),
+                ...(cliente.perfil.practicaDeportes !== undefined ? [['Practica deportes', cliente.perfil.practicaDeportes ? 'Sí' : 'No']] : []),
+                ...(cliente.perfil.deportes?.length ? [['Deportes', cliente.perfil.deportes.join(', ')]] : []),
+                ...(cliente.perfil.equipamiento?.length ? [['Equipamiento', cliente.perfil.equipamiento.join(', ')]] : []),
+                ...(cliente.perfil.metasFisicas?.length ? [['Metas físicas', cliente.perfil.metasFisicas.join(', ')]] : []),
               ].map(([k, v]) => (
                 <div key={k} className="flex justify-between py-1.5 border-b border-edge last:border-0">
                   <span className="text-ink-secondary">{k}</span>
