@@ -50,7 +50,10 @@ export async function POST(request: Request, ctx: RouteContext) {
 
   // Subir a Vercel Blob
   const nombreBlob = `reviva/${userId}/${Date.now()}-${archivo.name.replace(/\s+/g, '_')}`
-  const blob = await put(nombreBlob, archivo, { access: 'public' })
+  const blob = await put(nombreBlob, archivo, {
+    access: 'public',
+    token: process.env.REVIVA_READ_WRITE_TOKEN,
+  })
 
   const registro = await prisma.archivo.create({
     data: {
@@ -101,7 +104,7 @@ export async function DELETE(request: Request, ctx: RouteContext) {
   if (!archivo) return NextResponse.json({ error: 'Archivo no encontrado.' }, { status: 404 })
 
   // Eliminar de Vercel Blob
-  try { await del(archivo.url) } catch { /* si falla, igual borramos de DB */ }
+  try { await del(archivo.url, { token: process.env.REVIVA_READ_WRITE_TOKEN }) } catch { /* si falla, igual borramos de DB */ }
 
   await prisma.archivo.delete({ where: { id: archivoId } })
 
