@@ -23,6 +23,7 @@ declare global {
 }
 
 const PLANES_VISIBLES: { key: PlanMPKey; label: string; precio: string }[] = [
+  { key: 'on-demand',                    label: 'On Demand',                          precio: '$30.000 pago único' },
   { key: 'online-mensual',               label: 'Online 100% — Mensual',              precio: '$80.000/mes'      },
   { key: 'online-presencial-mensual',    label: 'Online + Presencial — Mensual',      precio: '$100.000/mes'     },
   { key: 'online-trimestral',            label: 'Online 100% — Trimestral',           precio: '$215.000/3 meses' },
