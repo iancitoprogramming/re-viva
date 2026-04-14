@@ -37,7 +37,7 @@ const planesOnline = [
     duracion: 'Mensual',
     precio: '$80.000',
     unidad: '/ mes',
-    desc: 'Seguimiento nutricional completo desde donde estés.',
+    desc: 'Seguimiento alimentario, guía de entrenamiento y hábitos saludables.',
     detalle: null,
   },
   {
