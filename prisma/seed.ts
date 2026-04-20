@@ -5,8 +5,16 @@
 // Requiere en package.json:  "prisma": { "seed": "tsx prisma/seed.ts" }
 
 import { PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { Pool } from 'pg'
+import 'dotenv/config'
 
-const prisma = new PrismaClient()
+const pool = new Pool({
+  connectionString: process.env.DIRECT_URL ?? process.env.DATABASE_URL!,
+  ssl: { rejectUnauthorized: false },
+})
+const adapter = new PrismaPg(pool as any)
+const prisma = new PrismaClient({ adapter })
 
 type FoodSeed = {
   nombre: string
