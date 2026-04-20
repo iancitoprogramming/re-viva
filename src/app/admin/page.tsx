@@ -56,7 +56,7 @@ export default function AdminPage() {
       <Navbar nombreUsuario={nombreAdmin} esAdmin />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <h1 className="text-xl font-bold text-gray-900">Panel de Admin</h1>
           <div className="flex gap-3 text-sm">
             <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-medium">
@@ -66,6 +66,26 @@ export default function AdminPage() {
               {activos.length} activos
             </span>
           </div>
+        </div>
+
+        {/* Accesos rápidos */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <Link href="/admin/templates"
+            className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-3">
+            <span className="text-2xl">📋</span>
+            <div>
+              <p className="font-semibold text-gray-900 text-sm">Templates</p>
+              <p className="text-xs text-gray-400">Planes base + IA</p>
+            </div>
+          </Link>
+          <Link href="/admin/foods"
+            className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-3">
+            <span className="text-2xl">🥦</span>
+            <div>
+              <p className="font-semibold text-gray-900 text-sm">Alimentos</p>
+              <p className="text-xs text-gray-400">Catálogo de macros</p>
+            </div>
+          </Link>
         </div>
 
         {/* Lista de clientes — cards mobile, tabla desktop */}
