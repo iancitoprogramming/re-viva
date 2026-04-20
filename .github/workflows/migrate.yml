@@ -26,10 +26,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Create .env
+      - name: Debug secrets
         run: |
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env
-          echo "DIRECT_URL=${{ secrets.DIRECT_URL }}" >> .env
+          [ -z "$DATABASE_URL" ] && echo "::error::DATABASE_URL is EMPTY" || echo "DATABASE_URL is SET"
+          [ -z "$DIRECT_URL" ] && echo "::error::DIRECT_URL is EMPTY" || echo "DIRECT_URL is SET"
+
+      - name: Create .env
+        run: printf 'DATABASE_URL=%s\nDIRECT_URL=%s\n' "$DATABASE_URL" "$DIRECT_URL" > .env
 
       - name: Run migrations
         run: npx prisma migrate deploy
