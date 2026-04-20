@@ -52,6 +52,112 @@ interface ClienteData {
   } | null
 }
 
+// ─── Motor de escenarios personalizados ──────────────────────────────────────
+
+interface Perfil {
+  genero: string; edad: number; altura: number; peso: number
+  diasEntrenamiento: number
+}
+
+interface Escenario {
+  id: 'perdida' | 'ganancia' | 'recomposicion' | 'mantenimiento'
+  label: string
+  descripcion: string
+  emoji: string
+  color: string
+  kcal: number
+  proteina: number
+  hidratos: number
+  grasas: number
+}
+
+function calcularTDEE(perfil: Perfil): number {
+  const base = 10 * perfil.peso + 6.25 * perfil.altura - 5 * perfil.edad
+  const bmr = perfil.genero === 'MASCULINO' ? base + 5 : base - 161
+  const dias = perfil.diasEntrenamiento
+  const factor = dias <= 1 ? 1.2 : dias <= 3 ? 1.375 : dias <= 5 ? 1.55 : 1.725
+  return Math.round(bmr * factor)
+}
+
+function distribuirMacros(kcal: number, pPct: number, hPct: number, gPct: number) {
+  return {
+    proteina: Math.round((kcal * pPct) / 4),
+    hidratos: Math.round((kcal * hPct) / 4),
+    grasas:   Math.round((kcal * gPct) / 9),
+  }
+}
+
+function generarEscenarios(perfil: Perfil): Escenario[] {
+  const tdee = calcularTDEE(perfil)
+
+  const kcalPerdida       = Math.round(tdee * 0.83)  // déficit 17%
+  const kcalGanancia      = Math.round(tdee * 1.10)  // superávit 10%
+  const kcalRecomposicion = tdee                      // mantenimiento
+  const kcalMantenimiento = tdee
+
+  return [
+    {
+      id: 'perdida',
+      label: 'Pérdida de grasa',
+      descripcion: `Déficit ~17% · TDEE ${tdee} kcal`,
+      emoji: '🔥',
+      color: 'border-orange-200 bg-orange-50',
+      kcal: kcalPerdida,
+      ...distribuirMacros(kcalPerdida, 0.40, 0.30, 0.30),
+    },
+    {
+      id: 'ganancia',
+      label: 'Ganancia muscular',
+      descripcion: `Superávit ~10% · TDEE ${tdee} kcal`,
+      emoji: '💪',
+      color: 'border-blue-200 bg-blue-50',
+      kcal: kcalGanancia,
+      ...distribuirMacros(kcalGanancia, 0.30, 0.50, 0.20),
+    },
+    {
+      id: 'recomposicion',
+      label: 'Recomposición',
+      descripcion: `Mantenimiento ±5% · TDEE ${tdee} kcal`,
+      emoji: '⚖️',
+      color: 'border-purple-200 bg-purple-50',
+      kcal: kcalRecomposicion,
+      ...distribuirMacros(kcalRecomposicion, 0.35, 0.40, 0.25),
+    },
+    {
+      id: 'mantenimiento',
+      label: 'Salud general',
+      descripcion: `Igualar TDEE · ${tdee} kcal`,
+      emoji: '🌿',
+      color: 'border-emerald-200 bg-emerald-50',
+      kcal: kcalMantenimiento,
+      ...distribuirMacros(kcalMantenimiento, 0.30, 0.45, 0.25),
+    },
+  ]
+}
+
+// Escala los gramajes de un template para alcanzar un target calórico
+function escalarTemplate(
+  template: Template,
+  kcalTarget: number,
+  foodMap: Map<string, Food>,
+): PlanMeal[] {
+  // Calcular kcal actuales del template
+  let kcalActual = 0
+  for (const c of template.comidas)
+    for (const it of c.items) {
+      const f = foodMap.get(it.foodId) ?? it.food
+      if (f) kcalActual += (f.kcal * it.gramos) / 100
+    }
+  const factor = kcalActual > 0 ? kcalTarget / kcalActual : 1
+  return template.comidas.map(c => ({
+    nombre: c.nombre, orden: c.orden, horaSugerida: c.horaSugerida,
+    items: c.items.map(it => ({
+      foodId: it.foodId,
+      gramos: Math.round(it.gramos * factor / 5) * 5, // redondea a múltiplos de 5
+    })),
+  }))
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function calcMacros(comidas: PlanMeal[], foodMap: Map<string, Food>) {
@@ -170,6 +276,98 @@ function FoodCombobox({
   )
 }
 
+// ─── EscenarioCard ───────────────────────────────────────────────────────────
+
+function EscenarioCard({
+  escenario, templates, foodMap, clientePerfil,
+  onCargarTemplate, onGenerarIA,
+}: {
+  escenario: Escenario
+  templates: Template[]
+  foodMap: Map<string, Food>
+  clientePerfil: ClienteData['perfil']
+  onCargarTemplate: (comidas: PlanMeal[], label: string) => void
+  onGenerarIA: (escenario: Escenario) => void
+}) {
+  const [expandido, setExpandido] = useState(false)
+
+  // Template más cercano en kcal
+  const templateCercano = templates.length > 0
+    ? templates.reduce((mejor, t) =>
+        Math.abs(t.kcalTarget - escenario.kcal) < Math.abs(mejor.kcalTarget - escenario.kcal) ? t : mejor
+      )
+    : null
+
+  return (
+    <div className={`border rounded-xl overflow-hidden ${escenario.color}`}>
+      <button
+        type="button"
+        className="w-full text-left p-3"
+        onClick={() => setExpandido(e => !e)}
+      >
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <span>{escenario.emoji}</span>
+              <span className="text-sm font-semibold text-gray-900">{escenario.label}</span>
+            </div>
+            <p className="text-xs text-gray-500">{escenario.descripcion}</p>
+          </div>
+          <span className="text-gray-400 text-xs mt-1 flex-shrink-0">{expandido ? '▲' : '▼'}</span>
+        </div>
+
+        {/* Macros */}
+        <div className="grid grid-cols-4 gap-1 mt-2">
+          {[
+            { l: 'kcal', v: escenario.kcal,      u: ''  },
+            { l: 'prot', v: escenario.proteina,   u: 'g' },
+            { l: 'HC',   v: escenario.hidratos,   u: 'g' },
+            { l: 'gras', v: escenario.grasas,     u: 'g' },
+          ].map(m => (
+            <div key={m.l} className="bg-white/60 rounded-lg p-1.5 text-center">
+              <p className="text-xs text-gray-400">{m.l}</p>
+              <p className="text-xs font-bold text-gray-800 tabular-nums">{m.v}{m.u}</p>
+            </div>
+          ))}
+        </div>
+      </button>
+
+      {expandido && (
+        <div className="border-t border-white/50 p-3 space-y-2">
+          {/* Opción 1: template escalado */}
+          {templateCercano && (
+            <button
+              type="button"
+              onClick={() => {
+                const escalado = escalarTemplate(templateCercano, escenario.kcal, foodMap)
+                onCargarTemplate(escalado, `${escenario.label} (${templateCercano.nombre})`)
+              }}
+              className="w-full text-left bg-white/80 hover:bg-white rounded-lg px-3 py-2 text-xs transition-colors border border-white/60"
+            >
+              <p className="font-semibold text-gray-800">
+                📋 Usar &quot;{templateCercano.nombre}&quot;
+              </p>
+              <p className="text-gray-500 mt-0.5">
+                Escala los gramajes de {templateCercano.kcalTarget} → {escenario.kcal} kcal
+              </p>
+            </button>
+          )}
+
+          {/* Opción 2: generar con IA */}
+          <button
+            type="button"
+            onClick={() => onGenerarIA(escenario)}
+            className="w-full text-left bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-3 py-2 text-xs transition-colors"
+          >
+            <p className="font-semibold">✨ Generar con IA</p>
+            <p className="opacity-80 mt-0.5">Crea un plan nuevo con exactamente {escenario.kcal} kcal</p>
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── TemplateCard: muestra template con preview de ingredientes ───────────────
 
 function TemplateCard({ t, onCargar, foodMap }: { t: Template; onCargar: () => void; foodMap: Map<string, Food> }) {
@@ -261,6 +459,11 @@ export default function PlanBuilderPage() {
   const [diasLista, setDiasLista] = useState(7)
   const [copiadoWA, setCopiadoWA] = useState(false)
 
+  // Modal IA por escenario
+  const [modalIA, setModalIA] = useState<Escenario | null>(null)
+  const [generandoIA, setGenerandoIA] = useState(false)
+  const [restriccionesIA, setRestriccionesIA] = useState('')
+
   const foodMap = new Map(foods.map(f => [f.id, f]))
   const macros = calcMacros(comidas, foodMap)
 
@@ -330,6 +533,71 @@ export default function PlanBuilderPage() {
     setMensaje({ texto: `Template "${t.nombre}" cargado. Ajustá los gramajes y guardá.`, tipo: 'ok' })
     // Scroll al editor
     setTimeout(() => document.getElementById('editor-comidas')?.scrollIntoView({ behavior: 'smooth' }), 100)
+  }
+
+  // ── Escenario: cargar template escalado ──
+  function cargarDesdeEscenario(comidasEscaladas: PlanMeal[], label: string) {
+    if (comidas.length > 0 && !confirm(`¿Reemplazar el plan actual con "${label}"?`)) return
+    setComidas(comidasEscaladas)
+    setPlanEditandoId(null)
+    setShoppingList(null)
+    setMensaje({ texto: `"${label}" cargado. Ajustá los gramajes si querés y guardá.`, tipo: 'ok' })
+    setTimeout(() => document.getElementById('editor-comidas')?.scrollIntoView({ behavior: 'smooth' }), 100)
+  }
+
+  // ── Escenario: generar con Gemini ──
+  async function generarConIA(escenario: Escenario, restricciones: string) {
+    if (!cliente?.perfil) return
+    setGenerandoIA(true)
+    setMensaje(null)
+    const res = await fetch('/api/admin/templates/generar-ia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        genero: cliente.perfil.genero,
+        objetivo: escenario.id.toUpperCase(),
+        edad: cliente.perfil.edad,
+        kcalTarget: escenario.kcal,
+        proteinaTarget: escenario.proteina,
+        hidratosTarget: escenario.hidratos,
+        grasasTarget: escenario.grasas,
+        adherencia: cliente.perfil.adherencia,
+        restricciones: restricciones || null,
+        guardar: false,
+      }),
+    })
+    const data = await res.json()
+    if (!res.ok) {
+      setMensaje({ texto: data.error ?? 'Error al generar con IA.', tipo: 'error' })
+      setGenerandoIA(false)
+      return
+    }
+    // Mapear nombres a IDs
+    const tpl = data.template
+    const foodByName = new Map(foods.map(f => [f.nombre, f]))
+    const comidasGeneradas: PlanMeal[] = tpl.comidas.map((c: {
+      nombre: string; orden: number; horaSugerida?: string
+      items: { food: string; gramos: number }[]
+    }) => ({
+      nombre: c.nombre, orden: c.orden, horaSugerida: c.horaSugerida,
+      items: c.items
+        .filter((it: { food: string }) => foodByName.has(it.food))
+        .map((it: { food: string; gramos: number }) => ({
+          foodId: foodByName.get(it.food)!.id,
+          gramos: it.gramos,
+        })),
+    }))
+    if (comidas.length > 0 && !confirm('¿Reemplazar el plan actual con el generado por IA?')) {
+      setGenerandoIA(false)
+      return
+    }
+    setComidas(comidasGeneradas)
+    setPlanEditandoId(null)
+    setShoppingList(null)
+    setModalIA(null)
+    setMensaje({ texto: `✨ Plan IA generado para ${escenario.label} (${escenario.kcal} kcal). Revisá y guardá.`, tipo: 'ok' })
+    setTimeout(() => document.getElementById('editor-comidas')?.scrollIntoView({ behavior: 'smooth' }), 100)
+    setGenerandoIA(false)
   }
 
   // ── Manejo de comidas ──
@@ -564,27 +832,38 @@ export default function PlanBuilderPage() {
               </div>
             )}
 
-            {/* Templates sugeridos */}
-            {templatesSugeridos.length > 0 && (
+            {/* Escenarios personalizados */}
+            {cliente.perfil && (
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-                <h2 className="font-semibold text-gray-900 text-sm mb-3 flex items-center gap-2">
+                <div className="flex items-center gap-2 mb-1">
                   <span className="w-2 h-2 bg-emerald-500 rounded-full" />
-                  Sugeridos para este cliente
-                </h2>
+                  <h2 className="font-semibold text-gray-900 text-sm">Escenarios para {cliente.nombre.split(' ')[0]}</h2>
+                </div>
+                <p className="text-xs text-gray-400 mb-3">
+                  TDEE calculado: <strong>{calcularTDEE(cliente.perfil)} kcal/día</strong>
+                </p>
                 <div className="space-y-2">
-                  {templatesSugeridos.map(t => (
-                    <TemplateCard key={t.id} t={t} foodMap={foodMap} onCargar={() => cargarTemplate(t)} />
+                  {generarEscenarios(cliente.perfil).map(esc => (
+                    <EscenarioCard
+                      key={esc.id}
+                      escenario={esc}
+                      templates={templates}
+                      foodMap={foodMap}
+                      clientePerfil={cliente.perfil}
+                      onCargarTemplate={cargarDesdeEscenario}
+                      onGenerarIA={esc => setModalIA(esc)}
+                    />
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Otros templates */}
-            {templatesOtros.length > 0 && (
+            {/* Todos los templates (catálogo completo) */}
+            {templates.length > 0 && (
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-                <h2 className="text-sm font-semibold text-gray-500 mb-3">Otros templates</h2>
+                <h2 className="text-sm font-semibold text-gray-500 mb-3">Catálogo de templates</h2>
                 <div className="space-y-2">
-                  {templatesOtros.map(t => (
+                  {templates.map(t => (
                     <TemplateCard key={t.id} t={t} foodMap={foodMap} onCargar={() => cargarTemplate(t)} />
                   ))}
                 </div>
@@ -863,6 +1142,62 @@ export default function PlanBuilderPage() {
           </div>
         </div>
       </main>
+
+      {/* Modal IA por escenario */}
+      {modalIA && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xl">{modalIA.emoji}</span>
+              <h3 className="font-bold text-gray-900">Generar plan con IA</h3>
+            </div>
+            <p className="text-sm text-gray-500 mb-1">{modalIA.label}</p>
+            <div className="bg-gray-50 rounded-xl p-3 mb-4 grid grid-cols-4 gap-2 text-center">
+              {[
+                { l: 'kcal', v: modalIA.kcal,      u: ''  },
+                { l: 'prot', v: modalIA.proteina,   u: 'g' },
+                { l: 'HC',   v: modalIA.hidratos,   u: 'g' },
+                { l: 'gras', v: modalIA.grasas,     u: 'g' },
+              ].map(m => (
+                <div key={m.l}>
+                  <p className="text-xs text-gray-400">{m.l}</p>
+                  <p className="text-sm font-bold text-gray-800 tabular-nums">{m.v}{m.u}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mb-4">
+              <label className="text-xs font-semibold text-gray-600 block mb-1">
+                Restricciones alimentarias (opcional)
+              </label>
+              <input
+                value={restriccionesIA}
+                onChange={e => setRestriccionesIA(e.target.value)}
+                placeholder="sin lactosa, vegetariano…"
+                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+            </div>
+            <p className="text-xs text-gray-400 mb-4">
+              Gemini va a crear comidas usando solo alimentos del catálogo cargado.
+              Podés ajustar los gramajes después.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => { setModalIA(null); setRestriccionesIA('') }}
+                className="text-sm text-gray-500 hover:text-gray-700 px-4 py-2"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => generarConIA(modalIA, restriccionesIA)}
+                disabled={generandoIA}
+                className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 rounded-xl transition-colors"
+              >
+                {generandoIA ? '✨ Generando…' : '✨ Generar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
