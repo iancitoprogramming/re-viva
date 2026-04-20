@@ -20,6 +20,176 @@ model User {
   plan         NutritionalPlan?
   resetTokens  ResetToken[]
   payments     Payment[]
+  mealPlans    MealPlan[]
+}
+
+// ─── CATÁLOGO DE ALIMENTOS ───────────────────────────────────────────────────
+// Macros expresados por 100 g (o 100 ml para líquidos). El trainer puede ajustar.
+model Food {
+  id          String       @id @default(cuid())
+  nombre      String       @unique
+  categoria   FoodCategoria
+  unidad      String       @default("g") // "g" | "ml" | "unidad"
+  // Macros por 100 g/ml
+  kcal        Float
+  proteina    Float
+  hidratos    Float
+  grasas      Float
+  // Para lista de compras (cómo se compra en la góndola)
+  unidadCompra String?     // ej. "kg", "docena", "atado"
+  notas       String?
+  activo      Boolean      @default(true)
+  creadoEn    DateTime     @default(now())
+  actualizadoEn DateTime   @updatedAt
+
+  templateItems TemplateMealItem[]
+  planItems     PlanMealItem[]
+}
+
+enum FoodCategoria {
+  PROTEINA_ANIMAL
+  PROTEINA_VEGETAL
+  LACTEO
+  CARBOHIDRATO
+  VEGETAL
+  FRUTA
+  GRASA
+  BEBIDA
+  CONDIMENTO
+  SUPLEMENTO
+}
+
+// ─── TEMPLATES DE PLAN ALIMENTARIO ───────────────────────────────────────────
+// Plantillas reutilizables que el trainer usa como punto de partida.
+model MealPlanTemplate {
+  id            String        @id @default(cuid())
+  nombre        String
+  descripcion   String?
+  // Perfil objetivo (para sugerencia automática al trainer)
+  genero        Genero?
+  objetivo      Objetivo?
+  edadMin       Int?
+  edadMax       Int?
+  adherencia    Adherencia?
+  // Macros target del template (como referencia, recalculados al instanciar)
+  kcalTarget    Float
+  proteinaTarget Float
+  hidratosTarget Float
+  grasasTarget  Float
+  notas         String?
+  generadoConIA Boolean       @default(false)
+  activo        Boolean       @default(true)
+  creadoEn      DateTime      @default(now())
+  actualizadoEn DateTime      @updatedAt
+
+  comidas TemplateMeal[]
+}
+
+model TemplateMeal {
+  id         String  @id @default(cuid())
+  templateId String
+  nombre     String  // "Desayuno", "Almuerzo", etc.
+  orden      Int
+  horaSugerida String?
+
+  template MealPlanTemplate    @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  items    TemplateMealItem[]
+}
+
+model TemplateMealItem {
+  id      String @id @default(cuid())
+  mealId  String
+  foodId  String
+  gramos  Float
+  notas   String?
+
+  meal TemplateMeal @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  food Food         @relation(fields: [foodId], references: [id])
+}
+
+// ─── PLAN ALIMENTARIO ASIGNADO A UN CLIENTE ──────────────────────────────────
+// Instancia concreta para un cliente. Se versiona: cada edición crea una nueva
+// versión y la anterior queda como ARCHIVADO en el historial.
+model MealPlan {
+  id            String        @id @default(cuid())
+  userId        String
+  version       Int           @default(1)
+  estado        EstadoMealPlan @default(BORRADOR)
+  // Origen
+  templateOrigenId String?    // de qué template se partió (si aplica)
+  // Macros calculados desde los items
+  kcalTotal     Float
+  proteinaTotal Float
+  hidratosTotal Float
+  grasasTotal   Float
+  // Macros target que el trainer quiso lograr (referencia)
+  kcalTarget    Float?
+  proteinaTarget Float?
+  hidratosTarget Float?
+  grasasTarget  Float?
+  notas         String?
+  creadoEn      DateTime      @default(now())
+  actualizadoEn DateTime      @updatedAt
+
+  user        User           @relation(fields: [userId], references: [id])
+  comidas     PlanMeal[]
+  shoppingList ShoppingList?
+
+  @@index([userId, version])
+}
+
+enum EstadoMealPlan {
+  BORRADOR
+  ACTIVO
+  ARCHIVADO
+}
+
+model PlanMeal {
+  id         String @id @default(cuid())
+  mealPlanId String
+  nombre     String
+  orden      Int
+  horaSugerida String?
+
+  mealPlan MealPlan        @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  items    PlanMealItem[]
+}
+
+model PlanMealItem {
+  id     String @id @default(cuid())
+  mealId String
+  foodId String
+  gramos Float
+  notas  String?
+
+  meal PlanMeal @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  food Food     @relation(fields: [foodId], references: [id])
+}
+
+// ─── LISTA DE COMPRAS ────────────────────────────────────────────────────────
+// Autogenerada agrupando items del MealPlan. Editable por el trainer.
+model ShoppingList {
+  id         String   @id @default(cuid())
+  mealPlanId String   @unique
+  diasCubiertos Int   @default(7)
+  notas      String?
+  creadoEn   DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  mealPlan MealPlan          @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  items    ShoppingListItem[]
+}
+
+model ShoppingListItem {
+  id             String @id @default(cuid())
+  shoppingListId String
+  nombre         String        // copiado del Food.nombre (puede editarse)
+  categoria      FoodCategoria
+  cantidad       Float         // total semanal
+  unidad         String        // "g", "kg", "ml", "unidad"
+  comprado       Boolean       @default(false)
+
+  shoppingList ShoppingList @relation(fields: [shoppingListId], references: [id], onDelete: Cascade)
 }
 
 // ─── CÓDIGO DE RECUPERACIÓN DE CONTRASEÑA ────────────────────────────────────
