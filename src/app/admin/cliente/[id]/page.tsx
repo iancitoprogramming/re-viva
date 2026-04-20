@@ -180,9 +180,15 @@ export default function ClienteDetallePage() {
       <Navbar nombreUsuario={nombreAdmin} esAdmin />
 
       <main className="max-w-3xl mx-auto px-4 py-8">
-        <Link href="/admin" className="text-sm text-primary hover:underline mb-6 inline-block">
-          ← Volver al panel
-        </Link>
+        <div className="flex items-center justify-between mb-6">
+          <Link href="/admin" className="text-sm text-primary hover:underline">
+            ← Volver al panel
+          </Link>
+          <Link href={`/admin/cliente/${id}/plan-builder`}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors">
+            🍽️ Plan Builder
+          </Link>
+        </div>
 
         {/* ── Info del cliente ── */}
         <div className="bg-surface rounded-2xl border border-edge shadow-sm p-6 mb-4">
