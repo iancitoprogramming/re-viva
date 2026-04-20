@@ -312,6 +312,26 @@ export default function AdminPage() {
           <MetricaCard valor={total}             label="Total"      color="ink" />
         </div>
 
+        {/* Accesos rápidos — motor de planes */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <Link href="/admin/templates"
+            className="bg-surface border border-edge rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-3">
+            <span className="text-2xl">📋</span>
+            <div>
+              <p className="font-semibold text-ink text-sm">Templates</p>
+              <p className="text-xs text-ink-muted">Planes base + IA</p>
+            </div>
+          </Link>
+          <Link href="/admin/foods"
+            className="bg-surface border border-edge rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-3">
+            <span className="text-2xl">🥦</span>
+            <div>
+              <p className="font-semibold text-ink text-sm">Alimentos</p>
+              <p className="text-xs text-ink-muted">Catálogo de macros</p>
+            </div>
+          </Link>
+        </div>
+
         {/* Alertas */}
         {proximos.length > 0 && (
           <div className="bg-amber-50 border border-amber-300 rounded-2xl px-4 py-3 mb-5 flex items-center gap-2 text-sm text-amber-800">
