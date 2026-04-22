@@ -215,6 +215,7 @@ export interface GeneratedPlan {
 export type PipelineStatus =
   | 'queued_alta_prioridad'
   | 'queued_revision'
+  | 'queued_regeneracion'
   | 'error_intake'
   | 'error_engine'
   | 'blocked_consents';
@@ -225,6 +226,8 @@ export interface PipelineResult {
   reviewId?: string;
   error?: string;
   requiereRevisionManual?: boolean;
+  proofreaderStatus?: 'aprobado' | 'aprobado_con_observaciones' | 'rechazado';
+  observacionesCount?: number;
 }
 
 // ─── ERRORES DE INTAKE ────────────────────────────────────────────────────────

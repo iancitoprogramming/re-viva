@@ -9,6 +9,7 @@ import {
   type PipelineResult,
   type ProcessedContext,
 } from './types';
+import { ejecutarProofreader, type ProofreaderReport } from './proofreader';
 
 // ─── Modelos ──────────────────────────────────────────────────────────────────
 const MODELS = {
@@ -447,7 +448,11 @@ async function guardarYEnrrutar(
   tokensInput: number,
   tokensOutput: number,
   promptHash: string,
-): Promise<{ reviewId: string }> {
+  proofreaderReport: ProofreaderReport | null,
+): Promise<
+  | { reviewId: string; regenerada?: false }
+  | { reviewId?: undefined; regenerada: true }
+> {
   const costUSD = estimarCosto(modelId, tokensInput, tokensOutput);
 
   // Actualizar metaInfo con costo real
@@ -466,13 +471,50 @@ async function guardarYEnrrutar(
     },
   });
 
-  const prioridad = ctx.requiereRevisionManualObligatoria ? 'alta' : 'baja';
+  // Si el proofreader rechazó el plan, NO lo enviamos a cola de revisión:
+  // directo a regeneración automática (salvo que ya alcanzó el límite).
+  if (proofreaderReport && proofreaderReport.status === 'rechazado') {
+    const intentosPrevios = await prisma.planToRegenerate.count({
+      where: { clientId: perfil.id, estado: { not: 'COMPLETADO' } },
+    });
+
+    if (intentosPrevios < 2) {
+      await prisma.planToRegenerate.create({
+        data: {
+          clientId: perfil.id,
+          originalPlanId: generation.id,
+          motivoRechazo: `Proofreader: ${proofreaderReport.resumenParaTrainer}`,
+        },
+      });
+      return { regenerada: true };
+    }
+    // Si ya alcanzó el límite, cae a la cola manual con prioridad alta.
+  }
+
+  // Prioridad:
+  // - alta si hay flags de alto riesgo O proofreader rechazó (pero ya se agotó regeneración)
+  // - media si proofreader aprobó con observaciones
+  // - baja si proofreader aprobó sin observaciones
+  let prioridad: 'alta' | 'media' | 'baja';
+  if (ctx.requiereRevisionManualObligatoria) {
+    prioridad = 'alta';
+  } else if (proofreaderReport?.status === 'rechazado') {
+    prioridad = 'alta';
+  } else if (proofreaderReport?.status === 'aprobado_con_observaciones') {
+    prioridad = 'media';
+  } else {
+    prioridad = 'baja';
+  }
 
   const review = await prisma.pendingTrainerReview.create({
     data: {
       clientId: perfil.id,
       planGenerationId: generation.id,
       planJson: plan as object,
+      proofreaderReportJson: proofreaderReport
+        ? (proofreaderReport as unknown as object)
+        : undefined,
+      proofreaderStatus: proofreaderReport?.status ?? null,
       prioridad,
       requiereRevisionManual: ctx.requiereRevisionManualObligatoria,
       flagsDetectados: [
@@ -553,18 +595,46 @@ export async function correrPipeline(perfil: ClientProfile): Promise<PipelineRes
     return { status: 'error_engine', error: 'El motor falló. El plan fue encolado para regeneración automática.' };
   }
 
+  // Etapa 4.5: Proofreader automático
+  // Se ejecuta siempre, excepto cuando el plan debe ir obligatoriamente a
+  // revisión manual (flags de alto riesgo) — en ese caso el trainer revisa
+  // sin pre-validación automática para evitar ruido.
+  let proofreaderReport: ProofreaderReport | null = null;
+  if (!ctx.requiereRevisionManualObligatoria) {
+    try {
+      proofreaderReport = ejecutarProofreader(plan, perfil, ctx);
+    } catch (err) {
+      // Un fallo del proofreader no debe romper el pipeline: queda sin reporte
+      // y el plan va a revisión manual normal.
+      console.error('[pipeline] proofreader falló:', err);
+      proofreaderReport = null;
+    }
+  }
+
   // Etapa 5: Routing
-  const { reviewId } = await guardarYEnrrutar(
-    perfil, ctx, plan, modelId, tokensInput, tokensOutput, promptHash,
+  const resultado = await guardarYEnrrutar(
+    perfil, ctx, plan, modelId, tokensInput, tokensOutput, promptHash, proofreaderReport,
   );
+
+  // Si el proofreader rechazó y se encoló para regeneración automática
+  if (resultado.regenerada) {
+    return {
+      status: 'queued_regeneracion',
+      planId: plan.planId,
+      proofreaderStatus: 'rechazado',
+      observacionesCount: proofreaderReport?.observaciones.length ?? 0,
+    };
+  }
 
   return {
     status: ctx.requiereRevisionManualObligatoria
       ? 'queued_alta_prioridad'
       : 'queued_revision',
     planId: plan.planId,
-    reviewId,
+    reviewId: resultado.reviewId,
     requiereRevisionManual: ctx.requiereRevisionManualObligatoria,
+    proofreaderStatus: proofreaderReport?.status,
+    observacionesCount: proofreaderReport?.observaciones.length,
   };
 }
 
