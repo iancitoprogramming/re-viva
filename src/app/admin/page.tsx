@@ -314,6 +314,14 @@ export default function AdminPage() {
 
         {/* Accesos rápidos — motor de planes */}
         <div className="grid grid-cols-2 gap-3 mb-6">
+          <Link href="/admin/revisiones"
+            className="bg-surface border border-edge rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-3 col-span-2">
+            <span className="text-2xl">🔍</span>
+            <div>
+              <p className="font-semibold text-ink text-sm">Cola de revisiones</p>
+              <p className="text-xs text-ink-muted">Planes generados por IA pendientes de aprobación</p>
+            </div>
+          </Link>
           <Link href="/admin/templates"
             className="bg-surface border border-edge rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-3">
             <span className="text-2xl">📋</span>
