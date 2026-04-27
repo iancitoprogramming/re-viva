@@ -107,7 +107,7 @@ function CheckIcon() {
 
 // ─── COMPONENTE ──────────────────────────────────────────────────────────────
 
-type TabMain = 'on-demand' | 'online' | 'presencial'
+type TabMain = 'on-demand' | 'online' | 'presencial' | 'ebook'
 type TabPres = 'mensual' | 'trimestral' | 'semestral'
 
 export default function PlanesTabs() {
@@ -126,6 +126,7 @@ export default function PlanesTabs() {
           ['on-demand', 'On Demand'],
           ['online',    'Online'],
           ['presencial','Presencial'],
+          ['ebook',     'Ebooks'],
         ] as [TabMain, string][]).map(([tab, label]) => (
           <button
             key={tab}
@@ -248,6 +249,67 @@ export default function PlanesTabs() {
               </Link>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* ── EBOOKS ── */}
+      {tabMain === 'ebook' && (
+        <div className="max-w-md mx-auto">
+          <div
+            className="rounded-2xl p-6 flex flex-col gap-5"
+            style={{ background: GLASS_HI, border: `1px solid ${BORDER}`, backdropFilter: 'blur(14px)' }}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="font-serif text-xl leading-tight" style={{ color: IVORY }}>
+                Ryan Humiston
+              </h3>
+              <span
+                className="text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap flex-shrink-0"
+                style={{ background: 'rgba(201,168,76,0.12)', color: GOLD, border: `1px solid rgba(201,168,76,0.25)` }}
+              >
+                PDF Digital
+              </span>
+            </div>
+
+            <p className="text-sm leading-relaxed" style={{ color: IVORY55 }}>
+              El programa de entrenamiento de Ryan Humiston. Planificación estructurada, progresión semana a semana y técnica detallada para hipertrofia real.
+            </p>
+
+            <ul className="flex flex-col gap-2">
+              {[
+                'Programa completo de hipertrofia',
+                'Progresión semanal estructurada',
+                'Técnica por ejercicio',
+                'Planificación por objetivo',
+                'Entrega inmediata por WhatsApp',
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-2.5 text-sm" style={{ color: IVORY70 }}>
+                  <CheckIcon />
+                  {item}
+                </li>
+              ))}
+            </ul>
+
+            <p className="text-xs pt-3" style={{ color: IVORY40, borderTop: `1px solid ${DIVIDER}` }}>
+              Formato PDF. Se envía por WhatsApp una vez confirmado el pago.
+            </p>
+
+            <div>
+              <div className="flex items-baseline gap-1 mb-4">
+                <span className="font-serif text-3xl font-bold" style={{ color: GOLD }}>
+                  $19.900
+                </span>
+                <span className="text-sm" style={{ color: IVORY40 }}>pago único</span>
+              </div>
+              <a
+                href="/checkout?plan=ebook-ryan-humiston"
+                className="block text-center font-semibold py-3.5 rounded-xl text-sm transition-all active:scale-[0.98]"
+                style={{ background: GOLD, color: '#0a0a08' }}
+              >
+                Comprar ebook
+              </a>
+            </div>
+          </div>
         </div>
       )}
 
