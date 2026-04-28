@@ -71,7 +71,7 @@ function CheckoutContent() {
     })
       .then(r => r.json())
       .then(data => {
-        if (data.error) throw new Error(data.error)
+        if (data.error) throw new Error(data.detail ? `${data.error}: ${data.detail}` : data.error)
         setPreferenceId(data.preferenceId)
       })
       .catch(err => setError(err.message ?? 'No se pudo iniciar el pago.'))

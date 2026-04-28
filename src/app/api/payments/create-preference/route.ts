@@ -75,7 +75,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ preferenceId: result.id })
   } catch (error: unknown) {
     const e = error as { message?: string; cause?: unknown; status?: number }
-    console.error('[create-preference] Error:', e?.message, JSON.stringify(e?.cause ?? error))
-    return NextResponse.json({ error: 'Error al crear la preferencia de pago' }, { status: 500 })
+    const cause = e?.cause ?? error
+    console.error('[create-preference] Error:', e?.message, JSON.stringify(cause))
+    const detail = e?.message ?? JSON.stringify(cause)
+    return NextResponse.json(
+      { error: 'Error al crear la preferencia de pago', detail },
+      { status: 500 },
+    )
   }
 }
