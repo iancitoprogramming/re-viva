@@ -14,6 +14,32 @@ const GLASS_HI = 'rgba(255,255,255,0.055)'
 const BORDER  = 'rgba(201,168,76,0.13)'
 const DIVIDER = 'rgba(201,168,76,0.09)'
 
+// ─── EBOOKS ───────────────────────────────────────────────────────────────────
+// Para agregar caratula: setear `cover` con la URL de la imagen (ej. '/covers/ryan.jpg')
+
+const EBOOKS = [
+  {
+    key:        'ebook-ryan-humiston',
+    titulo:     'Ryan Humiston',
+    subtitulo:  'Método de Entrenamiento',
+    descripcion:'El programa de entrenamiento de Ryan Humiston. Planificación estructurada, progresión semana a semana y técnica detallada para hipertrofia real.',
+    disclaimer: '⚠ Contenido meramente informativo. No es un producto oficial ni está afiliado a la marca.',
+    items:      ['Programa completo de hipertrofia', 'Progresión semanal estructurada', 'Técnica por ejercicio', 'Planificación por objetivo', 'Entrega inmediata por WhatsApp'],
+    href:       '/checkout?plan=ebook-ryan-humiston',
+    cover:      null as string | null,
+  },
+  {
+    key:        'ebook-gluteos',
+    titulo:     'Glúteos',
+    subtitulo:  'Guía Completa',
+    descripcion:'Guía completa de entrenamiento de glúteos. Ejercicios, series, progresión y técnica para resultados reales y sostenibles.',
+    disclaimer: null,
+    items:      ['Programa enfocado en glúteos', 'Ejercicios con y sin máquinas', 'Progresión semana a semana', 'Técnica detallada por ejercicio', 'Entrega inmediata por WhatsApp'],
+    href:       '/checkout?plan=ebook-gluteos',
+    cover:      null as string | null,
+  },
+]
+
 // ─── DATOS ────────────────────────────────────────────────────────────────────
 
 const planOnDemand = {
@@ -111,8 +137,9 @@ type TabMain = 'on-demand' | 'online' | 'presencial' | 'ebook'
 type TabPres = 'mensual' | 'trimestral' | 'semestral'
 
 export default function PlanesTabs() {
-  const [tabMain, setTabMain] = useState<TabMain>('on-demand')
-  const [tabPres, setTabPres] = useState<TabPres>('mensual')
+  const [tabMain, setTabMain]   = useState<TabMain>('on-demand')
+  const [tabPres, setTabPres]   = useState<TabPres>('mensual')
+  const [ebookIdx, setEbookIdx] = useState(0)
 
   return (
     <div>
@@ -252,125 +279,150 @@ export default function PlanesTabs() {
         </div>
       )}
 
-      {/* ── EBOOKS ── */}
+      {/* ── EBOOKS (carrusel) ── */}
       {tabMain === 'ebook' && (
-        <div className="max-w-md mx-auto flex flex-col gap-4">
-          <div
-            className="rounded-2xl p-6 flex flex-col gap-5"
-            style={{ background: GLASS_HI, border: `1px solid ${BORDER}`, backdropFilter: 'blur(14px)' }}
-          >
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="font-serif text-xl leading-tight" style={{ color: IVORY }}>
-                Ryan Humiston
-              </h3>
-              <span
-                className="text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap flex-shrink-0"
-                style={{ background: 'rgba(201,168,76,0.12)', color: GOLD, border: `1px solid rgba(201,168,76,0.25)` }}
-              >
-                PDF Digital
-              </span>
-            </div>
+        <div className="max-w-sm mx-auto">
 
-            <p className="text-sm leading-relaxed" style={{ color: IVORY55 }}>
-              El programa de entrenamiento de Ryan Humiston. Planificación estructurada, progresión semana a semana y técnica detallada para hipertrofia real.
-            </p>
+          {/* Track */}
+          <div className="overflow-hidden rounded-2xl">
+            <div
+              className="flex transition-transform duration-300 ease-in-out"
+              style={{ transform: `translateX(-${ebookIdx * 100}%)` }}
+            >
+              {EBOOKS.map((eb) => (
+                <div key={eb.key} className="w-full flex-shrink-0">
+                  <div style={{ background: GLASS_HI, border: `1px solid ${BORDER}`, backdropFilter: 'blur(14px)' }}>
 
-            <p className="text-xs px-3 py-2 rounded-lg" style={{ color: IVORY40, background: 'rgba(245,242,231,0.04)', border: `1px solid rgba(245,242,231,0.08)` }}>
-              ⚠ Contenido meramente informativo sobre el método de Ryan Humiston. No es un producto oficial ni está afiliado a su marca.
-            </p>
+                    {/* ── Caratula ── */}
+                    <div
+                      className="relative flex flex-col items-center justify-end overflow-hidden"
+                      style={{ aspectRatio: '2/3', maxHeight: 340 }}
+                    >
+                      {eb.cover ? (
+                        <img
+                          src={eb.cover}
+                          alt={eb.titulo}
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      ) : (
+                        <>
+                          {/* Placeholder de caratula */}
+                          <div
+                            className="absolute inset-0"
+                            style={{
+                              background: 'radial-gradient(ellipse at 50% 30%, rgba(201,168,76,0.18) 0%, transparent 65%), #0f0f0c',
+                            }}
+                          />
+                          <div className="relative z-10 flex flex-col items-center justify-center h-full gap-3 px-6 text-center">
+                            <span className="text-xs tracking-[0.25em] uppercase" style={{ color: 'rgba(201,168,76,0.6)' }}>
+                              REVIVA · IGZ Trainer
+                            </span>
+                            <h3 className="font-serif text-3xl leading-tight" style={{ color: IVORY }}>
+                              {eb.titulo}
+                            </h3>
+                            <span className="text-xs tracking-widest uppercase" style={{ color: 'rgba(201,168,76,0.5)' }}>
+                              {eb.subtitulo}
+                            </span>
+                          </div>
+                          <div className="relative z-10 w-full h-px mb-6" style={{ background: 'rgba(201,168,76,0.15)' }} />
+                        </>
+                      )}
+                    </div>
 
-            <ul className="flex flex-col gap-2">
-              {[
-                'Programa completo de hipertrofia',
-                'Progresión semanal estructurada',
-                'Técnica por ejercicio',
-                'Planificación por objetivo',
-                'Entrega inmediata por WhatsApp',
-              ].map((item) => (
-                <li key={item} className="flex items-center gap-2.5 text-sm" style={{ color: IVORY70 }}>
-                  <CheckIcon />
-                  {item}
-                </li>
+                    {/* ── Contenido ── */}
+                    <div className="p-6 flex flex-col gap-4">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="font-serif text-lg" style={{ color: IVORY }}>{eb.titulo}</h4>
+                        <span
+                          className="text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap"
+                          style={{ background: 'rgba(201,168,76,0.12)', color: GOLD, border: `1px solid rgba(201,168,76,0.25)` }}
+                        >
+                          PDF Digital
+                        </span>
+                      </div>
+
+                      <p className="text-sm leading-relaxed" style={{ color: IVORY55 }}>
+                        {eb.descripcion}
+                      </p>
+
+                      {eb.disclaimer && (
+                        <p className="text-xs px-3 py-2 rounded-lg" style={{ color: IVORY40, background: 'rgba(245,242,231,0.04)', border: `1px solid rgba(245,242,231,0.08)` }}>
+                          {eb.disclaimer}
+                        </p>
+                      )}
+
+                      <ul className="flex flex-col gap-2">
+                        {eb.items.map((item) => (
+                          <li key={item} className="flex items-center gap-2.5 text-sm" style={{ color: IVORY70 }}>
+                            <CheckIcon />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+
+                      <p className="text-xs pt-3" style={{ color: IVORY40, borderTop: `1px solid ${DIVIDER}` }}>
+                        Formato PDF. Se envía por WhatsApp una vez confirmado el pago.
+                      </p>
+
+                      <div className="flex items-baseline gap-1">
+                        <span className="font-serif text-3xl font-bold" style={{ color: GOLD }}>$19.900</span>
+                        <span className="text-sm" style={{ color: IVORY40 }}>pago único</span>
+                      </div>
+
+                      <a
+                        href={eb.href}
+                        className="block text-center font-semibold py-3.5 rounded-xl text-sm transition-all active:scale-[0.98]"
+                        style={{ background: GOLD, color: '#0a0a08' }}
+                      >
+                        Comprar ebook
+                      </a>
+                    </div>
+                  </div>
+                </div>
               ))}
-            </ul>
-
-            <p className="text-xs pt-3" style={{ color: IVORY40, borderTop: `1px solid ${DIVIDER}` }}>
-              Formato PDF. Se envía por WhatsApp una vez confirmado el pago.
-            </p>
-
-            <div>
-              <div className="flex items-baseline gap-1 mb-4">
-                <span className="font-serif text-3xl font-bold" style={{ color: GOLD }}>
-                  $19.900
-                </span>
-                <span className="text-sm" style={{ color: IVORY40 }}>pago único</span>
-              </div>
-              <a
-                href="/checkout?plan=ebook-ryan-humiston"
-                className="block text-center font-semibold py-3.5 rounded-xl text-sm transition-all active:scale-[0.98]"
-                style={{ background: GOLD, color: '#0a0a08' }}
-              >
-                Comprar ebook
-              </a>
             </div>
           </div>
 
-          {/* ── Ebook Glúteos ── */}
-          <div
-            className="rounded-2xl p-6 flex flex-col gap-5"
-            style={{ background: GLASS_HI, border: `1px solid ${BORDER}`, backdropFilter: 'blur(14px)' }}
-          >
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="font-serif text-xl leading-tight" style={{ color: IVORY }}>
-                Glúteos
-              </h3>
-              <span
-                className="text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap flex-shrink-0"
-                style={{ background: 'rgba(201,168,76,0.12)', color: GOLD, border: `1px solid rgba(201,168,76,0.25)` }}
-              >
-                PDF Digital
-              </span>
-            </div>
+          {/* Navegación — dots + flechas */}
+          <div className="flex items-center justify-center gap-4 mt-5">
+            <button
+              onClick={() => setEbookIdx(i => Math.max(0, i - 1))}
+              disabled={ebookIdx === 0}
+              className="w-8 h-8 rounded-full flex items-center justify-center transition-all disabled:opacity-20"
+              style={{ background: 'rgba(201,168,76,0.10)', border: `1px solid rgba(201,168,76,0.20)` }}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke={GOLD}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
 
-            <p className="text-sm leading-relaxed" style={{ color: IVORY55 }}>
-              Guía completa de entrenamiento de glúteos. Ejercicios, series, progresión y técnica para resultados reales y sostenibles.
-            </p>
-
-            <ul className="flex flex-col gap-2">
-              {[
-                'Programa de entrenamiento enfocado en glúteos',
-                'Ejercicios con y sin máquinas',
-                'Progresión semana a semana',
-                'Técnica detallada por ejercicio',
-                'Entrega inmediata por WhatsApp',
-              ].map((item) => (
-                <li key={item} className="flex items-center gap-2.5 text-sm" style={{ color: IVORY70 }}>
-                  <CheckIcon />
-                  {item}
-                </li>
+            <div className="flex gap-2">
+              {EBOOKS.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setEbookIdx(i)}
+                  className="rounded-full transition-all duration-200"
+                  style={{
+                    width:   i === ebookIdx ? 20 : 8,
+                    height:  8,
+                    background: i === ebookIdx ? GOLD : 'rgba(201,168,76,0.25)',
+                  }}
+                />
               ))}
-            </ul>
-
-            <p className="text-xs pt-3" style={{ color: IVORY40, borderTop: `1px solid ${DIVIDER}` }}>
-              Formato PDF. Se envía por WhatsApp una vez confirmado el pago.
-            </p>
-
-            <div>
-              <div className="flex items-baseline gap-1 mb-4">
-                <span className="font-serif text-3xl font-bold" style={{ color: GOLD }}>
-                  $19.900
-                </span>
-                <span className="text-sm" style={{ color: IVORY40 }}>pago único</span>
-              </div>
-              <a
-                href="/checkout?plan=ebook-gluteos"
-                className="block text-center font-semibold py-3.5 rounded-xl text-sm transition-all active:scale-[0.98]"
-                style={{ background: GOLD, color: '#0a0a08' }}
-              >
-                Comprar ebook
-              </a>
             </div>
+
+            <button
+              onClick={() => setEbookIdx(i => Math.min(EBOOKS.length - 1, i + 1))}
+              disabled={ebookIdx === EBOOKS.length - 1}
+              className="w-8 h-8 rounded-full flex items-center justify-center transition-all disabled:opacity-20"
+              style={{ background: 'rgba(201,168,76,0.10)', border: `1px solid rgba(201,168,76,0.20)` }}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke={GOLD}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
+
         </div>
       )}
 
