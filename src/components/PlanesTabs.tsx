@@ -279,148 +279,142 @@ export default function PlanesTabs() {
         </div>
       )}
 
-      {/* ── EBOOKS (carrusel) ── */}
+      {/* ── EBOOKS (carrusel Instagram) ── */}
       {tabMain === 'ebook' && (
         <div className="max-w-sm mx-auto">
 
-          {/* Track */}
-          <div className="overflow-hidden rounded-2xl">
-            <div
-              className="flex transition-transform duration-300 ease-in-out"
-              style={{ transform: `translateX(-${ebookIdx * 100}%)` }}
-            >
-              {EBOOKS.map((eb) => (
-                <div key={eb.key} className="w-full flex-shrink-0">
-                  <div style={{ background: GLASS_HI, border: `1px solid ${BORDER}`, backdropFilter: 'blur(14px)' }}>
+          {/* Card con track deslizante */}
+          <div
+            className="rounded-2xl overflow-hidden"
+            style={{ background: GLASS_HI, border: `1px solid ${BORDER}`, backdropFilter: 'blur(14px)' }}
+          >
+            {/* ── Caratula 1:1 con flechas y dots encima ── */}
+            <div className="relative aspect-square overflow-hidden">
 
-                    {/* ── Caratula ── */}
-                    <div
-                      className="relative flex flex-col items-center justify-end overflow-hidden"
-                      style={{ aspectRatio: '2/3', maxHeight: 340 }}
-                    >
-                      {eb.cover ? (
-                        <img
-                          src={eb.cover}
-                          alt={eb.titulo}
-                          className="absolute inset-0 w-full h-full object-cover"
+              {/* Track */}
+              <div
+                className="flex h-full transition-transform duration-300 ease-in-out"
+                style={{ transform: `translateX(-${ebookIdx * 100}%)` }}
+              >
+                {EBOOKS.map((eb) => (
+                  <div key={eb.key} className="relative w-full h-full flex-shrink-0">
+                    {eb.cover ? (
+                      <img src={eb.cover} alt={eb.titulo} className="w-full h-full object-cover" />
+                    ) : (
+                      <>
+                        <div
+                          className="absolute inset-0"
+                          style={{ background: 'radial-gradient(ellipse at 50% 35%, rgba(201,168,76,0.22) 0%, transparent 60%), #0f0f0c' }}
                         />
-                      ) : (
-                        <>
-                          {/* Placeholder de caratula */}
-                          <div
-                            className="absolute inset-0"
-                            style={{
-                              background: 'radial-gradient(ellipse at 50% 30%, rgba(201,168,76,0.18) 0%, transparent 65%), #0f0f0c',
-                            }}
-                          />
-                          <div className="relative z-10 flex flex-col items-center justify-center h-full gap-3 px-6 text-center">
-                            <span className="text-xs tracking-[0.25em] uppercase" style={{ color: 'rgba(201,168,76,0.6)' }}>
-                              REVIVA · IGZ Trainer
-                            </span>
-                            <h3 className="font-serif text-3xl leading-tight" style={{ color: IVORY }}>
-                              {eb.titulo}
-                            </h3>
-                            <span className="text-xs tracking-widest uppercase" style={{ color: 'rgba(201,168,76,0.5)' }}>
-                              {eb.subtitulo}
-                            </span>
-                          </div>
-                          <div className="relative z-10 w-full h-px mb-6" style={{ background: 'rgba(201,168,76,0.15)' }} />
-                        </>
-                      )}
-                    </div>
-
-                    {/* ── Contenido ── */}
-                    <div className="p-6 flex flex-col gap-4">
-                      <div className="flex items-center justify-between gap-2">
-                        <h4 className="font-serif text-lg" style={{ color: IVORY }}>{eb.titulo}</h4>
-                        <span
-                          className="text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap"
-                          style={{ background: 'rgba(201,168,76,0.12)', color: GOLD, border: `1px solid rgba(201,168,76,0.25)` }}
-                        >
-                          PDF Digital
-                        </span>
-                      </div>
-
-                      <p className="text-sm leading-relaxed" style={{ color: IVORY55 }}>
-                        {eb.descripcion}
-                      </p>
-
-                      {eb.disclaimer && (
-                        <p className="text-xs px-3 py-2 rounded-lg" style={{ color: IVORY40, background: 'rgba(245,242,231,0.04)', border: `1px solid rgba(245,242,231,0.08)` }}>
-                          {eb.disclaimer}
-                        </p>
-                      )}
-
-                      <ul className="flex flex-col gap-2">
-                        {eb.items.map((item) => (
-                          <li key={item} className="flex items-center gap-2.5 text-sm" style={{ color: IVORY70 }}>
-                            <CheckIcon />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-
-                      <p className="text-xs pt-3" style={{ color: IVORY40, borderTop: `1px solid ${DIVIDER}` }}>
-                        Formato PDF. Se envía por WhatsApp una vez confirmado el pago.
-                      </p>
-
-                      <div className="flex items-baseline gap-1">
-                        <span className="font-serif text-3xl font-bold" style={{ color: GOLD }}>$19.900</span>
-                        <span className="text-sm" style={{ color: IVORY40 }}>pago único</span>
-                      </div>
-
-                      <a
-                        href={eb.href}
-                        className="block text-center font-semibold py-3.5 rounded-xl text-sm transition-all active:scale-[0.98]"
-                        style={{ background: GOLD, color: '#0a0a08' }}
-                      >
-                        Comprar ebook
-                      </a>
-                    </div>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center">
+                          <span className="text-xs tracking-[0.22em] uppercase" style={{ color: 'rgba(201,168,76,0.55)' }}>
+                            REVIVA · IGZ Trainer
+                          </span>
+                          <h3 className="font-serif text-3xl leading-tight" style={{ color: IVORY }}>
+                            {eb.titulo}
+                          </h3>
+                          <span className="text-xs tracking-widest uppercase" style={{ color: 'rgba(201,168,76,0.45)' }}>
+                            {eb.subtitulo}
+                          </span>
+                          <div className="w-12 h-px mt-1" style={{ background: 'rgba(201,168,76,0.25)' }} />
+                        </div>
+                      </>
+                    )}
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                ))}
+              </div>
 
-          {/* Navegación — dots + flechas */}
-          <div className="flex items-center justify-center gap-4 mt-5">
-            <button
-              onClick={() => setEbookIdx(i => Math.max(0, i - 1))}
-              disabled={ebookIdx === 0}
-              className="w-8 h-8 rounded-full flex items-center justify-center transition-all disabled:opacity-20"
-              style={{ background: 'rgba(201,168,76,0.10)', border: `1px solid rgba(201,168,76,0.20)` }}
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke={GOLD}>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-
-            <div className="flex gap-2">
-              {EBOOKS.map((_, i) => (
+              {/* ── Flecha izquierda ── */}
+              {ebookIdx > 0 && (
                 <button
-                  key={i}
-                  onClick={() => setEbookIdx(i)}
-                  className="rounded-full transition-all duration-200"
-                  style={{
-                    width:   i === ebookIdx ? 20 : 8,
-                    height:  8,
-                    background: i === ebookIdx ? GOLD : 'rgba(201,168,76,0.25)',
-                  }}
-                />
-              ))}
+                  onClick={() => setEbookIdx(i => i - 1)}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
+                  style={{ background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(6px)', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }}
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="#0a0a08" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+              )}
+
+              {/* ── Flecha derecha ── */}
+              {ebookIdx < EBOOKS.length - 1 && (
+                <button
+                  onClick={() => setEbookIdx(i => i + 1)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
+                  style={{ background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(6px)', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }}
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="#0a0a08" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              )}
+
+              {/* ── Dots sobre la imagen ── */}
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                {EBOOKS.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setEbookIdx(i)}
+                    className="rounded-full transition-all duration-200"
+                    style={{
+                      width:      i === ebookIdx ? 18 : 6,
+                      height:     6,
+                      background: i === ebookIdx ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.45)',
+                    }}
+                  />
+                ))}
+              </div>
             </div>
 
-            <button
-              onClick={() => setEbookIdx(i => Math.min(EBOOKS.length - 1, i + 1))}
-              disabled={ebookIdx === EBOOKS.length - 1}
-              className="w-8 h-8 rounded-full flex items-center justify-center transition-all disabled:opacity-20"
-              style={{ background: 'rgba(201,168,76,0.10)', border: `1px solid rgba(201,168,76,0.20)` }}
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke={GOLD}>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+            {/* ── Contenido del ebook activo ── */}
+            {EBOOKS.map((eb, i) => i === ebookIdx && (
+              <div key={eb.key} className="p-6 flex flex-col gap-4">
+                <div className="flex items-center justify-between gap-2">
+                  <h4 className="font-serif text-lg" style={{ color: IVORY }}>{eb.titulo}</h4>
+                  <span
+                    className="text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap"
+                    style={{ background: 'rgba(201,168,76,0.12)', color: GOLD, border: `1px solid rgba(201,168,76,0.25)` }}
+                  >
+                    PDF Digital
+                  </span>
+                </div>
+
+                <p className="text-sm leading-relaxed" style={{ color: IVORY55 }}>{eb.descripcion}</p>
+
+                {eb.disclaimer && (
+                  <p className="text-xs px-3 py-2 rounded-lg" style={{ color: IVORY40, background: 'rgba(245,242,231,0.04)', border: `1px solid rgba(245,242,231,0.08)` }}>
+                    {eb.disclaimer}
+                  </p>
+                )}
+
+                <ul className="flex flex-col gap-2">
+                  {eb.items.map((item) => (
+                    <li key={item} className="flex items-center gap-2.5 text-sm" style={{ color: IVORY70 }}>
+                      <CheckIcon />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+
+                <p className="text-xs pt-3" style={{ color: IVORY40, borderTop: `1px solid ${DIVIDER}` }}>
+                  Formato PDF. Se envía por WhatsApp una vez confirmado el pago.
+                </p>
+
+                <div className="flex items-baseline gap-1">
+                  <span className="font-serif text-3xl font-bold" style={{ color: GOLD }}>$19.900</span>
+                  <span className="text-sm" style={{ color: IVORY40 }}>pago único</span>
+                </div>
+
+                <a
+                  href={eb.href}
+                  className="block text-center font-semibold py-3.5 rounded-xl text-sm transition-all active:scale-[0.98]"
+                  style={{ background: GOLD, color: '#0a0a08' }}
+                >
+                  Comprar ebook
+                </a>
+              </div>
+            ))}
           </div>
 
         </div>
