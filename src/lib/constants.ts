@@ -59,6 +59,12 @@ export const PLANES_MP = {
     monto: 260000,
     badge: 'Presencial',
   },
+  'ebook-ryan-humiston': {
+    titulo: 'Ebook — Ryan Humiston',
+    descripcion: 'Programa completo de entrenamiento e hipertrofia de Ryan Humiston. Planificación, progresión y técnica.',
+    monto: 19900,
+    badge: 'PDF Digital',
+  },
 } as const
 
 export type PlanMPKey = keyof typeof PLANES_MP
@@ -80,6 +86,7 @@ export const PLAN_DURACIONES_DIAS: Record<string, number> = {
   'presencial-3x-semestral':      180,
   'presencial-4x-semestral':      180,
   'presencial-5x-semestral':      180,
+  'ebook-ryan-humiston':            0,
 }
 
 // ─── Etiquetas legibles de tipos de plan ──────────────────────────────────────
@@ -98,5 +105,6 @@ export const PLAN_LABELS: Record<string, string> = {
   'presencial-3x-semestral':      'Presencial 3x/sem — Semestral',
   'presencial-4x-semestral':      'Presencial 4x/sem — Semestral',
   'presencial-5x-semestral':      'Presencial 5x/sem — Semestral',
+  'ebook-ryan-humiston':          'Ebook Ryan Humiston',
 }
 
