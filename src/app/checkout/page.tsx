@@ -32,6 +32,7 @@ const PLANES_VISIBLES: { key: PlanMPKey; label: string; precio: string }[] = [
   { key: 'presencial-4x-mensual',        label: 'Presencial 4×/semana — Mensual',     precio: '$224.000/mes'     },
   { key: 'presencial-5x-mensual',        label: 'Presencial 5×/semana — Mensual',     precio: '$260.000/mes'     },
   { key: 'ebook-ryan-humiston',          label: 'Ebook Ryan Humiston',                precio: '$19.900 pago único' },
+  { key: 'ebook-gluteos',                label: 'Ebook Glúteos',                      precio: '$19.900 pago único' },
 ]
 
 function CheckoutContent() {
