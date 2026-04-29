@@ -227,6 +227,9 @@ export default function AdminPage() {
   const [total, setTotal]         = useState(0)
   const [totalPages, setTotalPages] = useState(1)
 
+  // Alertas: consentimientos legales pendientes de revisión personal
+  const [consentimientosPendientes, setConsentimientosPendientes] = useState(0)
+
   const cargarClientes = useCallback(async (q: string, p: number, l: number) => {
     setLoading(true)
     const params = new URLSearchParams({
@@ -249,6 +252,10 @@ export default function AdminPage() {
       setNombreAdmin(d.nombre)
     })
     cargarClientes('', 1, 20)
+    fetch('/api/admin/consentimientos-pendientes')
+      .then(r => r.json())
+      .then(d => setConsentimientosPendientes(d.total ?? 0))
+      .catch(() => {})
   }, [router, cargarClientes])
 
   // Buscar con delay
@@ -341,6 +348,16 @@ export default function AdminPage() {
         </div>
 
         {/* Alertas */}
+        {consentimientosPendientes > 0 && (
+          <Link href="/admin/consentimientos-pendientes"
+            className="bg-blue-50 border border-blue-300 rounded-2xl px-4 py-3 mb-5 flex items-center gap-2 text-sm text-blue-800 hover:bg-blue-100 transition-colors">
+            <span>📞</span>
+            <span className="flex-1">
+              <strong>{consentimientosPendientes}</strong> cliente{consentimientosPendientes !== 1 ? 's' : ''} pendiente{consentimientosPendientes !== 1 ? 's' : ''} de charla legal
+              <span className="text-blue-600 ml-2">→</span>
+            </span>
+          </Link>
+        )}
         {proximos.length > 0 && (
           <div className="bg-amber-50 border border-amber-300 rounded-2xl px-4 py-3 mb-5 flex items-center gap-2 text-sm text-amber-800">
             <span>⚠️</span>

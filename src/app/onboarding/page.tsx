@@ -140,10 +140,6 @@ export default function OnboardingPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!todosConsentimientos) {
-      setError('Necesitás aceptar los 4 consentimientos para continuar.')
-      return
-    }
     setLoading(true)
     setError('')
 
@@ -478,9 +474,10 @@ export default function OnboardingPage() {
               <>
                 <div className="bg-surface-warm border border-edge rounded-xl p-4">
                   <p className="text-sm text-ink-secondary leading-relaxed">
-                    Antes de generar tu plan, necesitamos que revises y aceptes
-                    estas declaraciones. Son obligatorias y protegen tanto a vos
-                    como al equipo de Re-Viva.
+                    Tres declaraciones legales y una de veracidad. Si no querés
+                    aceptarlas todas online, podés saltearlas — Ian se va a
+                    contactar para charlarlas en persona o por videollamada
+                    antes de armarte el plan.
                   </p>
                 </div>
 
@@ -512,13 +509,23 @@ export default function OnboardingPage() {
                   onChange={() => toggleConsent('confirmaVeracidadDatos')}
                 />
 
+                {!todosConsentimientos && (
+                  <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3 text-sm leading-relaxed">
+                    <p className="font-semibold mb-1">Quedás marcado para charla previa</p>
+                    <p className="text-amber-800">
+                      Igual podés enviar el perfil. Te vamos a contactar para
+                      revisar lo que falte antes de generar tu plan.
+                    </p>
+                  </div>
+                )}
+
                 {error && <p className="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">{error}</p>}
 
                 <div className="flex gap-3 mt-2">
                   <Button type="button" variant="secondary" className="flex-1" onClick={() => setPaso(3)}>
                     ← Atrás
                   </Button>
-                  <Button type="submit" loading={loading} className="flex-1" disabled={!todosConsentimientos}>
+                  <Button type="submit" loading={loading} className="flex-1">
                     Enviar mi perfil
                   </Button>
                 </div>

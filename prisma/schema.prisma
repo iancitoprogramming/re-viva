@@ -257,6 +257,13 @@ model NutritionalProfile {
   fechaAceptacionConsentimientos        DateTime?
   ipAceptacionConsentimientos           String?
 
+  // Si el cliente no aceptó todos los consentimientos en el form, queda
+  // en estado "pendiente de hablar en persona / videollamada". El trainer
+  // marca como revisado desde el back-office después de la charla.
+  consentimientosRevisionPersonal       Boolean   @default(false)
+  consentimientosRevisadoPorTrainerEn   DateTime?
+  notasRevisionConsentimientos          String?
+
   creadoEn DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])

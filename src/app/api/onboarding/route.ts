@@ -64,22 +64,20 @@ export async function POST(request: Request) {
       }
     }
 
-    // Validar consentimientos legales (obligatorios para clientes nuevos)
+    // Consentimientos legales: si el cliente no acepta los 4, no bloqueamos.
+    // Queda marcado en el back-office como pendiente de charla en persona /
+    // videollamada. El trainer marca como revisado después.
     const consentimientos = {
       aceptaTerminosYCondiciones:           body.aceptaTerminosYCondiciones === true,
       aceptaPoliticaPrivacidad:             body.aceptaPoliticaPrivacidad === true,
       aceptaDescargoMedicoYResponsabilidad: body.aceptaDescargoMedicoYResponsabilidad === true,
       confirmaVeracidadDatos:               body.confirmaVeracidadDatos === true,
     }
-    if (!consentimientos.aceptaTerminosYCondiciones ||
-        !consentimientos.aceptaPoliticaPrivacidad ||
-        !consentimientos.aceptaDescargoMedicoYResponsabilidad ||
-        !consentimientos.confirmaVeracidadDatos) {
-      return NextResponse.json(
-        { error: 'Debés aceptar todos los consentimientos para completar el onboarding.' },
-        { status: 400 },
-      )
-    }
+    const todosAceptados =
+      consentimientos.aceptaTerminosYCondiciones &&
+      consentimientos.aceptaPoliticaPrivacidad &&
+      consentimientos.aceptaDescargoMedicoYResponsabilidad &&
+      consentimientos.confirmaVeracidadDatos
 
     // Verificar que no tenga perfil ya
     const perfilExistente = await prisma.nutritionalProfile.findUnique({ where: { userId: payload.userId } })
@@ -144,8 +142,10 @@ export async function POST(request: Request) {
         aceptaPoliticaPrivacidad:             consentimientos.aceptaPoliticaPrivacidad,
         aceptaDescargoMedicoYResponsabilidad: consentimientos.aceptaDescargoMedicoYResponsabilidad,
         confirmaVeracidadDatos:               consentimientos.confirmaVeracidadDatos,
-        fechaAceptacionConsentimientos:       new Date(),
-        ipAceptacionConsentimientos:          ip,
+        fechaAceptacionConsentimientos:       todosAceptados ? new Date() : null,
+        ipAceptacionConsentimientos:          todosAceptados ? ip : null,
+        // Si faltó alguno, queda pendiente de revisión personal por el trainer
+        consentimientosRevisionPersonal:      todosAceptados, // si todos OK, no requiere revisión
       },
     })
 
