@@ -59,13 +59,20 @@ const OBJ_COLORES: Record<string, string> = {
   RECOMPOSICION: 'bg-purple-100 text-purple-700',
 }
 
+// Devuelve el factor a multiplicar por los macros del Food.
+// - 'unidad' (huevo, fruta entera, etc): macros guardados POR UNIDAD → usar cantidad directa
+// - 'g' (gramos): macros guardados POR 100g → dividir por 100
+function ratioPorUnidad(food: Food, cantidad: number): number {
+  return food.unidad === 'unidad' ? cantidad : cantidad / 100
+}
+
 function calcularMacrosComidas(comidas: TemplateMeal[], foodMap: Map<string, Food>) {
   let kcal = 0, prot = 0, hc = 0, gras = 0
   for (const c of comidas) {
     for (const it of c.items) {
       const f = foodMap.get(it.foodId)
       if (!f) continue
-      const factor = it.gramos / 100
+      const factor = ratioPorUnidad(f, it.gramos)
       kcal += f.kcal * factor
       prot += f.proteina * factor
       hc   += f.hidratos * factor

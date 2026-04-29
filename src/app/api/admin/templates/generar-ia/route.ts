@@ -45,9 +45,16 @@ export async function POST(request: Request) {
 
   // Cargar catálogo de alimentos para que Gemini elija solo de los disponibles
   const foods = await prisma.food.findMany({ where: { activo: true }, orderBy: { categoria: 'asc' } })
-  const catalogoTexto = foods.map(f =>
-    `- ${f.nombre} (${f.categoria}): ${f.kcal} kcal, ${f.proteina}g prot, ${f.hidratos}g HC, ${f.grasas}g grasa por 100${f.unidad}`
-  ).join('\n')
+  const catalogoTexto = foods.map(f => {
+    // Diferenciamos explícitamente alimentos por gramos vs por unidad para
+    // que Gemini no produzca aberraciones tipo "huevo entero: 100g" (que
+    // serían 100 huevos = 7000 kcal con la fórmula correcta).
+    const refMacros = `${f.kcal} kcal, ${f.proteina}g prot, ${f.hidratos}g HC, ${f.grasas}g grasa`
+    if (f.unidad === 'unidad') {
+      return `- ${f.nombre} (${f.categoria}): ${refMacros} POR UNIDAD ENTERA. Cargar "gramos" como CANTIDAD DE UNIDADES (ej: 2 = 2 huevos enteros). NO usar valores en gramos.`
+    }
+    return `- ${f.nombre} (${f.categoria}): ${refMacros} por 100g. Cargar "gramos" como peso en gramos (ej: 150 = 150g).`
+  }).join('\n')
 
   const prompt = `Sos un nutricionista deportivo experto. Creá un plan alimentario diario completo para:
 - Género: ${genero || 'no especificado'}
@@ -66,7 +73,9 @@ ${catalogoTexto}
 
 2. El plan debe tener entre 4 y 6 comidas (desayuno, almuerzo, merienda, cena y opcionales colación/media mañana).
 3. Los macros totales del plan deben estar dentro del ±5% del target.
-4. Los gramos de cada alimento deben ser números enteros razonables (no menos de 20g, no más de 400g por item).
+4. CRÍTICO — el campo "gramos" significa cosas distintas según la unidad del alimento:
+   - Si el alimento dice "POR UNIDAD ENTERA": "gramos" es la CANTIDAD DE UNIDADES (1, 2, 3, 4...). Para huevos típicamente 1-4. Para frutas enteras típicamente 1-2. NUNCA pongas 100 ni 50 ni números altos en estos alimentos — eso significaría 100 huevos.
+   - Si el alimento dice "por 100g": "gramos" es el peso real en gramos. Rango razonable 20–400.
 5. Respondé ÚNICAMENTE con un JSON válido, sin texto adicional, sin markdown, sin explicaciones.
 
 Formato exacto del JSON:
@@ -132,6 +141,17 @@ Formato exacto del JSON:
   // Guardar en DB
   const foodMap = new Map(foods.map(f => [f.nombre, f]))
 
+  // Normalización defensiva: si Gemini puso un número claramente en "gramos"
+  // para un alimento que es por unidad (ej: 100 huevos), lo dividimos por 100
+  // y redondeamos al entero más cercano (mínimo 1).
+  function normalizarCantidad(food: { unidad: string }, raw: number): number {
+    const n = Number(raw)
+    if (food.unidad === 'unidad' && n > 20) {
+      return Math.max(1, Math.round(n / 100))
+    }
+    return n
+  }
+
   const template = await prisma.mealPlanTemplate.create({
     data: {
       nombre: nombre || templateData.nombre,
@@ -154,7 +174,7 @@ Formato exacto del JSON:
               .filter((it: { food: string; gramos: number }) => foodMap.has(it.food))
               .map((it: { food: string; gramos: number }) => ({
                 foodId: foodMap.get(it.food)!.id,
-                gramos: Number(it.gramos),
+                gramos: normalizarCantidad(foodMap.get(it.food)!, it.gramos),
               })),
           },
         })),
