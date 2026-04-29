@@ -664,6 +664,14 @@ export function perfilDbAClientProfile(
     }
   }
 
+  // Compatibilidad legacy: si los nuevos arrays están vacíos pero hay valores
+  // en los campos viejos (lesiones string, preferenciasAlimentarias string),
+  // los usamos como fallback para no perder información de los 19 clientes
+  // que se cargaron antes del onboarding extendido.
+  const lesionesActuales = perfil.lesionesActuales.length > 0
+    ? perfil.lesionesActuales
+    : perfil.lesiones ? [perfil.lesiones] : [];
+
   return {
     id: user.id,
     nombre: user.nombre,
@@ -681,7 +689,7 @@ export function perfilDbAClientProfile(
         ? 'perdida_grasa'
         : 'recomposicion',
     diasPorSemana: dias,
-    minutosPorSesion: 60,
+    minutosPorSesion: perfil.minutosPorSesion ?? 60,
     nivelExperiencia: expMap[perfil.experiencia ?? 'principiante'] ?? 'principiante',
     lugarEntrenamiento:
       perfil.equipamiento.includes('gym') ? 'gimnasio'
@@ -695,25 +703,27 @@ export function perfilDbAClientProfile(
           ? 'vegetariana'
           : 'omnivora')
       : 'omnivora',
-    alergias: [],
-    intolerancias: [],
-    alimentosQueNoConsume: [],
-    comidasPorDia: 4,
-    condicionesMedicasDeclaradas: [],
-    lesionesActuales: perfil.lesiones ? [perfil.lesiones] : [],
-    lesionesPasadas: [],
-    medicacionActual: [],
+    alergias: perfil.alergias,
+    intolerancias: perfil.intolerancias,
+    alimentosQueNoConsume: perfil.alimentosQueNoConsume,
+    comidasPorDia: perfil.comidasPorDia ?? 4,
+    condicionesMedicasDeclaradas: perfil.condicionesMedicasDeclaradas,
+    lesionesActuales,
+    lesionesPasadas: perfil.lesionesPasadas,
+    medicacionActual: perfil.medicacionActual,
     nivelEstres:
       perfil.nivelEstres === 'BAJO' ? 2 : perfil.nivelEstres === 'MEDIO' ? 3 : 4,
     horasSuenoPromedio: perfil.horasSueno,
     flagsEspeciales: flags.length > 0 ? flags : undefined,
     consentimientos: {
-      aceptaTerminosYCondiciones: true,
-      aceptaPoliticaPrivacidad: true,
-      aceptaDescargoMedicoYResponsabilidad: true,
-      confirmaVeracidadDatos: true,
-      fechaAceptacion: new Date().toISOString(),
-      ipAceptacion: ip,
+      aceptaTerminosYCondiciones: perfil.aceptaTerminosYCondiciones,
+      aceptaPoliticaPrivacidad: perfil.aceptaPoliticaPrivacidad,
+      aceptaDescargoMedicoYResponsabilidad: perfil.aceptaDescargoMedicoYResponsabilidad,
+      confirmaVeracidadDatos: perfil.confirmaVeracidadDatos,
+      fechaAceptacion: perfil.fechaAceptacionConsentimientos
+        ? perfil.fechaAceptacionConsentimientos.toISOString()
+        : new Date().toISOString(),
+      ipAceptacion: perfil.ipAceptacionConsentimientos ?? ip,
     },
     ...extras,
   };

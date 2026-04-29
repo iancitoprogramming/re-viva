@@ -5,6 +5,21 @@ import { correrMotorIGZ } from '@/lib/igzEngine'
 import { enviarNotificacionNuevoCliente } from '@/lib/email'
 import type { OnboardingData } from '@/types'
 
+function getClientIp(request: Request): string {
+  return (
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    request.headers.get('x-real-ip') ??
+    '0.0.0.0'
+  )
+}
+
+// Sanitiza un input que el form puede mandar como string CSV o como string[]
+function toStringArray(v: unknown): string[] {
+  if (Array.isArray(v)) return v.map(s => String(s).trim()).filter(Boolean)
+  if (typeof v === 'string') return v.split(',').map(s => s.trim()).filter(Boolean)
+  return []
+}
+
 export async function POST(request: Request) {
   try {
     // Verificar autenticación
@@ -49,11 +64,45 @@ export async function POST(request: Request) {
       }
     }
 
+    // Validar consentimientos legales (obligatorios para clientes nuevos)
+    const consentimientos = {
+      aceptaTerminosYCondiciones:           body.aceptaTerminosYCondiciones === true,
+      aceptaPoliticaPrivacidad:             body.aceptaPoliticaPrivacidad === true,
+      aceptaDescargoMedicoYResponsabilidad: body.aceptaDescargoMedicoYResponsabilidad === true,
+      confirmaVeracidadDatos:               body.confirmaVeracidadDatos === true,
+    }
+    if (!consentimientos.aceptaTerminosYCondiciones ||
+        !consentimientos.aceptaPoliticaPrivacidad ||
+        !consentimientos.aceptaDescargoMedicoYResponsabilidad ||
+        !consentimientos.confirmaVeracidadDatos) {
+      return NextResponse.json(
+        { error: 'Debés aceptar todos los consentimientos para completar el onboarding.' },
+        { status: 400 },
+      )
+    }
+
     // Verificar que no tenga perfil ya
     const perfilExistente = await prisma.nutritionalProfile.findUnique({ where: { userId: payload.userId } })
     if (perfilExistente) {
       return NextResponse.json({ error: 'Ya completaste el formulario anteriormente.' }, { status: 400 })
     }
+
+    // Normalizar arrays de salud (admite CSV o array)
+    const alergias                     = toStringArray(body.alergias)
+    const intolerancias                = toStringArray(body.intolerancias)
+    const alimentosQueNoConsume        = toStringArray(body.alimentosQueNoConsume)
+    const condicionesMedicasDeclaradas = toStringArray(body.condicionesMedicasDeclaradas)
+    const lesionesActuales             = toStringArray(body.lesionesActuales)
+    const lesionesPasadas              = toStringArray(body.lesionesPasadas)
+    const medicacionActual             = toStringArray(body.medicacionActual)
+    const flagsEspeciales              = toStringArray(body.flagsEspeciales)
+
+    // Auto-flag por edad
+    if (typeof body.edad === 'number' && body.edad >= 65 && !flagsEspeciales.includes('adulto_mayor_65plus')) {
+      flagsEspeciales.push('adulto_mayor_65plus')
+    }
+
+    const ip = getClientIp(request)
 
     // Guardar perfil en la base de datos
     await prisma.nutritionalProfile.create({
@@ -79,6 +128,24 @@ export async function POST(request: Request) {
         deportes:             body.deportes ?? [],
         quiereMejorarDeporte: body.quiereMejorarDeporte || null,
         metasFisicas:         body.metasFisicas ?? [],
+        flagsEspeciales,
+        // Pipeline de generación automática
+        comidasPorDia:        body.comidasPorDia ?? 4,
+        minutosPorSesion:     body.minutosPorSesion ?? 60,
+        alergias,
+        intolerancias,
+        alimentosQueNoConsume,
+        condicionesMedicasDeclaradas,
+        lesionesActuales,
+        lesionesPasadas,
+        medicacionActual,
+        // Consentimientos
+        aceptaTerminosYCondiciones:           consentimientos.aceptaTerminosYCondiciones,
+        aceptaPoliticaPrivacidad:             consentimientos.aceptaPoliticaPrivacidad,
+        aceptaDescargoMedicoYResponsabilidad: consentimientos.aceptaDescargoMedicoYResponsabilidad,
+        confirmaVeracidadDatos:               consentimientos.confirmaVeracidadDatos,
+        fechaAceptacionConsentimientos:       new Date(),
+        ipAceptacionConsentimientos:          ip,
       },
     })
 

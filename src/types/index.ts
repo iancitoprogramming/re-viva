@@ -32,6 +32,24 @@ export interface OnboardingData {
   deportes?: string[]
   quiereMejorarDeporte?: string
   metasFisicas?: string[]
+
+  // Pipeline de generación automática (paso 3 del onboarding)
+  comidasPorDia?: number
+  minutosPorSesion?: number
+  alergias?: string[]
+  intolerancias?: string[]
+  alimentosQueNoConsume?: string[]
+  condicionesMedicasDeclaradas?: string[]
+  lesionesActuales?: string[]
+  lesionesPasadas?: string[]
+  medicacionActual?: string[]
+  flagsEspeciales?: string[]
+
+  // Consentimientos legales (paso 4)
+  aceptaTerminosYCondiciones?: boolean
+  aceptaPoliticaPrivacidad?: boolean
+  aceptaDescargoMedicoYResponsabilidad?: boolean
+  confirmaVeracidadDatos?: boolean
 }
 
 // Resultado del motor IGZ
