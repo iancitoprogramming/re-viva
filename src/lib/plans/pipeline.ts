@@ -715,14 +715,20 @@ export function perfilDbAClientProfile(
       perfil.nivelEstres === 'BAJO' ? 2 : perfil.nivelEstres === 'MEDIO' ? 3 : 4,
     horasSuenoPromedio: perfil.horasSueno,
     flagsEspeciales: flags.length > 0 ? flags : undefined,
+    // Si el trainer ya revisó los consentimientos en persona/videollamada,
+    // los tratamos como aceptados a efectos del pipeline (el cliente firmó
+    // off-platform).
     consentimientos: {
-      aceptaTerminosYCondiciones: perfil.aceptaTerminosYCondiciones,
-      aceptaPoliticaPrivacidad: perfil.aceptaPoliticaPrivacidad,
-      aceptaDescargoMedicoYResponsabilidad: perfil.aceptaDescargoMedicoYResponsabilidad,
-      confirmaVeracidadDatos: perfil.confirmaVeracidadDatos,
-      fechaAceptacion: perfil.fechaAceptacionConsentimientos
-        ? perfil.fechaAceptacionConsentimientos.toISOString()
-        : new Date().toISOString(),
+      aceptaTerminosYCondiciones:
+        perfil.aceptaTerminosYCondiciones || perfil.consentimientosRevisionPersonal,
+      aceptaPoliticaPrivacidad:
+        perfil.aceptaPoliticaPrivacidad || perfil.consentimientosRevisionPersonal,
+      aceptaDescargoMedicoYResponsabilidad:
+        perfil.aceptaDescargoMedicoYResponsabilidad || perfil.consentimientosRevisionPersonal,
+      confirmaVeracidadDatos:
+        perfil.confirmaVeracidadDatos || perfil.consentimientosRevisionPersonal,
+      fechaAceptacion: (perfil.consentimientosRevisadoPorTrainerEn ?? perfil.fechaAceptacionConsentimientos)?.toISOString()
+        ?? new Date().toISOString(),
       ipAceptacion: perfil.ipAceptacionConsentimientos ?? ip,
     },
     ...extras,
