@@ -186,8 +186,8 @@ export default function OnboardingPage() {
                     min="30" max="250" step="0.1" value={form.peso} onChange={handleChange} required />
                 </div>
 
-                <FormInput label="Altura (cm)" name="altura" type="number" placeholder="170"
-                  min="130" max="230" value={form.altura} onChange={handleChange} required />
+                <FormInput label="Altura en centímetros (ej: 170, no 1.70)" name="altura" type="number" placeholder="170"
+                  min="130" max="230" step="1" value={form.altura} onChange={handleChange} required />
 
                 <FormSelect label="¿Cuál es tu objetivo principal?" name="objetivo"
                   options={opcionesObjetivo} value={form.objetivo} onChange={handleChange} required />

@@ -7,12 +7,16 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "test": "node --import tsx --test tests/**/*.test.ts",
+    "test:pipeline": "tsx scripts/test-pipeline.ts",
+    "test:pipeline:dry": "tsx scripts/test-pipeline.ts --dry-run"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.90.0",
     "@mercadopago/sdk-js": "^0.0.3",
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
@@ -23,6 +27,7 @@
     "@vercel/speed-insights": "^2.0.0",
     "bcryptjs": "^3.0.3",
     "cookie": "^1.1.1",
+    "docx": "^9.6.1",
     "dotenv": "^17.3.1",
     "jsonwebtoken": "^9.0.3",
     "mercadopago": "^2.12.0",

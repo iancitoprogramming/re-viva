@@ -24,6 +24,10 @@ model User {
   checkIns    CheckIn[]
   archivos    Archivo[]
   mealPlans   MealPlan[]
+
+  planGenerations   PlanGeneration[]
+  pendingReviews    PendingTrainerReview[]
+  plansToRegenerate PlanToRegenerate[]
 }
 
 // ─── CATÁLOGO DE ALIMENTOS ───────────────────────────────────────────────────
@@ -232,6 +236,7 @@ model NutritionalProfile {
   deportes             String[]  @default([]) // ["fútbol","running","crossfit",...]
   quiereMejorarDeporte String?
   metasFisicas         String[]  @default([]) // ["perder_grasa","ganar_masa","mejorar_resistencia",...]
+  flagsEspeciales      String[]  @default([]) // perimenopausia|embarazo|postparto|lumbar_cronico|adulto_mayor_65plus|deportista_competitivo
 
   creadoEn DateTime @default(now())
 
@@ -350,6 +355,71 @@ enum EstadoEntrega {
   PENDIENTE
   EN_PROGRESO
   ENTREGADO
+}
+
+// ─── PIPELINE DE GENERACIÓN DE PLANES ───────────────────────────────────────
+// Registro de cada llamada al motor IA (auditoría y costos).
+model PlanGeneration {
+  id           String   @id @default(cuid())
+  clientId     String
+  promptHash   String
+  modelUsed    String
+  tokensInput  Int      @default(0)
+  tokensOutput Int      @default(0)
+  costUSD      Float    @default(0)
+  status       String   // 'success' | 'error' | 'timeout'
+  errorMsg     String?
+  creadoEn     DateTime @default(now())
+
+  client User                 @relation(fields: [clientId], references: [id])
+  review PendingTrainerReview?
+
+  @@index([clientId])
+  @@index([creadoEn])
+}
+
+// Cola de revisión del trainer antes de entregar el plan al cliente.
+model PendingTrainerReview {
+  id                     String    @id @default(cuid())
+  clientId               String
+  planGenerationId       String    @unique
+  planJson               Json      // GeneratedPlan completo
+  proofreaderReportJson  Json?     // ProofreaderReport (rellena en Paso 4)
+  proofreaderStatus      String?   // 'aprobado'|'aprobado_con_observaciones'|'rechazado'
+  prioridad              String    // 'alta'|'media'|'baja'
+  estado                 String    @default("PENDIENTE") // 'PENDIENTE'|'APROBADO'|'RECHAZADO'
+  requiereRevisionManual Boolean   @default(false)
+  flagsDetectados        String[]  @default([])
+  aprobadoPorTrainerId   String?
+  aprobadoAt             DateTime?
+  entregadoAt            DateTime?
+  observacionesResueltas String[]  @default([])
+  modificacionesJson     Json?
+  creadoEn               DateTime  @default(now())
+  actualizadoEn          DateTime  @updatedAt
+
+  client         User           @relation(fields: [clientId], references: [id])
+  planGeneration PlanGeneration @relation(fields: [planGenerationId], references: [id])
+
+  @@index([clientId, estado])
+  @@index([prioridad, estado])
+}
+
+// Planes rechazados en espera de regeneración automática.
+model PlanToRegenerate {
+  id            String   @id @default(cuid())
+  clientId      String
+  originalPlanId String?
+  motivoRechazo String
+  intentosCount Int      @default(0)
+  maxIntentos   Int      @default(2)
+  estado        String   @default("PENDIENTE") // 'PENDIENTE'|'EN_PROCESO'|'COMPLETADO'|'FALLIDO'
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  client User @relation(fields: [clientId], references: [id])
+
+  @@index([clientId, estado])
 }
 
 // ─── PAGO (Mercado Pago) ─────────────────────────────────────────────────────
