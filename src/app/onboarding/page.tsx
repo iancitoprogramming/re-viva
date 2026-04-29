@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import FormInput, { FormSelect } from '@/components/FormInput'
 import Button from '@/components/Button'
+import ChipInput from '@/components/ChipInput'
 
 const opcionesGenero     = [{ value: 'MASCULINO', label: 'Masculino' }, { value: 'FEMENINO', label: 'Femenino' }]
 const opcionesObjetivo   = [{ value: 'VOLUMEN', label: 'Ganar músculo (Volumen)' }, { value: 'DEFINICION', label: 'Perder grasa (Definición)' }, { value: 'RECOMPOSICION', label: 'Mejorar composición (Recomposición)' }]
@@ -75,13 +76,15 @@ export default function OnboardingPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [paso, setPaso] = useState<1 | 2>(1)
+  const [paso, setPaso] = useState<1 | 2 | 3 | 4>(1)
 
   const [form, setForm] = useState({
     // Paso 1 — básicos
     genero: '', edad: '', altura: '', peso: '', objetivo: '',
     diasEntrenamiento: '', nivelEstres: '', horasSueno: '', adherencia: '',
     preferenciasAlimentarias: '', lesiones: '', fechaNacimiento: '',
+    // Paso 1bis — pipeline (entrenamiento + comidas)
+    minutosPorSesion: '60', comidasPorDia: '4',
     // Paso 2 — estilo de vida
     experiencia: '', actividadLaboral: '', practicaDeportes: false,
     quiereMejorarDeporte: '', deportes: '' as string,
@@ -89,6 +92,35 @@ export default function OnboardingPage() {
 
   const [equipamiento, setEquipamiento] = useState<string[]>([])
   const [metasFisicas, setMetasFisicas]  = useState<string[]>([])
+
+  // Paso 3 — Salud y restricciones (multi-string)
+  const [alergias, setAlergias]                                   = useState<string[]>([])
+  const [intolerancias, setIntolerancias]                         = useState<string[]>([])
+  const [alimentosQueNoConsume, setAlimentosQueNoConsume]         = useState<string[]>([])
+  const [condicionesMedicasDeclaradas, setCondicionesMedicas]     = useState<string[]>([])
+  const [lesionesActuales, setLesionesActuales]                   = useState<string[]>([])
+  const [lesionesPasadas, setLesionesPasadas]                     = useState<string[]>([])
+  const [medicacionActual, setMedicacionActual]                   = useState<string[]>([])
+  const [flagsEspeciales, setFlagsEspeciales]                     = useState<string[]>([])
+
+  // Paso 4 — Consentimientos
+  const [consents, setConsents] = useState({
+    aceptaTerminosYCondiciones:           false,
+    aceptaPoliticaPrivacidad:             false,
+    aceptaDescargoMedicoYResponsabilidad: false,
+    confirmaVeracidadDatos:               false,
+  })
+
+  function toggleFlag(flag: string) {
+    setFlagsEspeciales(curr =>
+      curr.includes(flag) ? curr.filter(f => f !== flag) : [...curr, flag],
+    )
+  }
+  function toggleConsent(key: keyof typeof consents) {
+    setConsents(c => ({ ...c, [key]: !c[key] }))
+  }
+
+  const todosConsentimientos = Object.values(consents).every(Boolean)
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value, type } = e.target
@@ -108,6 +140,10 @@ export default function OnboardingPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!todosConsentimientos) {
+      setError('Necesitás aceptar los 4 consentimientos para continuar.')
+      return
+    }
     setLoading(true)
     setError('')
 
@@ -125,9 +161,17 @@ export default function OnboardingPage() {
         peso: Number(form.peso),
         diasEntrenamiento: Number(form.diasEntrenamiento),
         horasSueno: Number(form.horasSueno),
+        comidasPorDia: Number(form.comidasPorDia) || 4,
+        minutosPorSesion: Number(form.minutosPorSesion) || 60,
         equipamiento,
         metasFisicas,
         deportes: deportesList,
+        // Salud
+        alergias, intolerancias, alimentosQueNoConsume,
+        condicionesMedicasDeclaradas, lesionesActuales, lesionesPasadas,
+        medicacionActual, flagsEspeciales,
+        // Consentimientos
+        ...consents,
       }),
     })
 
@@ -155,13 +199,14 @@ export default function OnboardingPage() {
           <span className="font-serif font-bold text-xl text-primary">REVIVA</span>
           <h1 className="text-2xl font-bold text-ink mt-4 mb-2">Tu perfil</h1>
           <p className="text-ink-muted text-sm">
-            {paso === 1
-              ? 'Primero lo básico. Rápido y preciso.'
-              : 'Contanos sobre tu estilo de vida para personalizar tu plan.'}
+            {paso === 1 && 'Primero lo básico. Rápido y preciso.'}
+            {paso === 2 && 'Contanos sobre tu estilo de vida.'}
+            {paso === 3 && 'Salud y restricciones — clave para que tu plan sea seguro.'}
+            {paso === 4 && 'Último paso: declaraciones legales.'}
           </p>
           {/* Progreso */}
           <div className="flex gap-2 justify-center mt-4">
-            {[1, 2].map(n => (
+            {[1, 2, 3, 4].map(n => (
               <div
                 key={n}
                 className={`h-1.5 rounded-full transition-all duration-300 ${n <= paso ? 'bg-primary w-8' : 'bg-edge w-4'}`}
@@ -192,9 +237,18 @@ export default function OnboardingPage() {
                 <FormSelect label="¿Cuál es tu objetivo principal?" name="objetivo"
                   options={opcionesObjetivo} value={form.objetivo} onChange={handleChange} required />
 
-                <FormInput label="¿Cuántos días por semana entrenás?" name="diasEntrenamiento"
-                  type="number" placeholder="3" min="0" max="7"
-                  value={form.diasEntrenamiento} onChange={handleChange} required />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormInput label="Días/semana de entrenamiento" name="diasEntrenamiento"
+                    type="number" placeholder="3" min="0" max="7"
+                    value={form.diasEntrenamiento} onChange={handleChange} required />
+                  <FormInput label="Min. por sesión" name="minutosPorSesion"
+                    type="number" placeholder="60" min="20" max="180" step="5"
+                    value={form.minutosPorSesion} onChange={handleChange} />
+                </div>
+
+                <FormInput label="¿Cuántas comidas por día hacés?" name="comidasPorDia"
+                  type="number" placeholder="4" min="2" max="6" step="1"
+                  value={form.comidasPorDia} onChange={handleChange} />
 
                 <FormSelect label="¿Cómo es tu nivel de estrés habitual?" name="nivelEstres"
                   options={opcionesEstres} value={form.nivelEstres} onChange={handleChange} required />
@@ -302,7 +356,169 @@ export default function OnboardingPage() {
                     onClick={() => setPaso(1)}>
                     ← Atrás
                   </Button>
-                  <Button type="submit" loading={loading} className="flex-1">
+                  <Button type="button" className="flex-1" onClick={() => setPaso(3)}>
+                    Continuar →
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {/* ── PASO 3: SALUD Y RESTRICCIONES ────────────────── */}
+            {paso === 3 && (
+              <>
+                <ChipInput
+                  label="Alergias alimentarias"
+                  hint="Ej: maní, frutos secos, mariscos. Escribí y presioná Enter."
+                  placeholder="Sin alergias declaradas"
+                  values={alergias} onChange={setAlergias}
+                  sugerencias={['maní','frutos secos','mariscos','pescado','huevo','soja']}
+                />
+
+                <ChipInput
+                  label="Intolerancias"
+                  hint="Ej: lactosa, gluten, fructosa."
+                  placeholder="Sin intolerancias"
+                  values={intolerancias} onChange={setIntolerancias}
+                  sugerencias={['lactosa','gluten','fructosa']}
+                />
+
+                <ChipInput
+                  label="Alimentos que NO consumís"
+                  hint="Por preferencia, religión o asco. Distinto a alergia/intolerancia."
+                  placeholder="Ninguno"
+                  values={alimentosQueNoConsume} onChange={setAlimentosQueNoConsume}
+                  sugerencias={['cerdo','vísceras','pescado','hongos']}
+                />
+
+                <ChipInput
+                  label="Condiciones médicas declaradas"
+                  hint="Ej: hipertensión, diabetes tipo 2, hipotiroidismo. NO reemplaza la consulta médica."
+                  placeholder="Ninguna"
+                  values={condicionesMedicasDeclaradas} onChange={setCondicionesMedicas}
+                  sugerencias={['hipertensión','diabetes','hipotiroidismo','colesterol alto']}
+                />
+
+                <ChipInput
+                  label="Lesiones actuales"
+                  hint="Algo que te duele HOY o que tu kine te indicó cuidar."
+                  placeholder="Sin lesiones activas"
+                  values={lesionesActuales} onChange={setLesionesActuales}
+                  sugerencias={['rodilla','lumbar','hombro','codo','muñeca']}
+                />
+
+                <ChipInput
+                  label="Lesiones pasadas"
+                  hint="Operaciones, fracturas o lesiones que ya superaste pero conviene tener presentes."
+                  placeholder="Sin antecedentes"
+                  values={lesionesPasadas} onChange={setLesionesPasadas}
+                  sugerencias={['hernia discal','rotura LCA','luxación hombro']}
+                />
+
+                <ChipInput
+                  label="Medicación actual"
+                  hint="Lo que tomás de forma regular (con o sin receta). Ayuda a evitar interacciones."
+                  placeholder="Sin medicación"
+                  values={medicacionActual} onChange={setMedicacionActual}
+                />
+
+                {/* Flags especiales */}
+                <div className="border-t border-edge pt-4">
+                  <p className={sectionLabel}>Situaciones especiales (opcional)</p>
+                  <p className="text-xs text-ink-muted mb-3 -mt-2">
+                    Marcalas si aplican. El plan se ajusta automáticamente.
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {form.genero === 'FEMENINO' && (
+                      <>
+                        <ConsentCheckbox
+                          label="Estoy embarazada"
+                          checked={flagsEspeciales.includes('embarazo')}
+                          onChange={() => toggleFlag('embarazo')}
+                        />
+                        <ConsentCheckbox
+                          label="Tuve un bebé en los últimos 12 meses (postparto)"
+                          checked={flagsEspeciales.includes('postparto')}
+                          onChange={() => toggleFlag('postparto')}
+                        />
+                        <ConsentCheckbox
+                          label="Estoy en perimenopausia o menopausia"
+                          checked={flagsEspeciales.includes('perimenopausia')}
+                          onChange={() => toggleFlag('perimenopausia')}
+                        />
+                      </>
+                    )}
+                    <ConsentCheckbox
+                      label="Tengo problemas crónicos en la zona lumbar"
+                      checked={flagsEspeciales.includes('lumbar_cronico')}
+                      onChange={() => toggleFlag('lumbar_cronico')}
+                    />
+                    <ConsentCheckbox
+                      label="Soy deportista competitivo (compito en federaciones / torneos)"
+                      checked={flagsEspeciales.includes('deportista_competitivo')}
+                      onChange={() => toggleFlag('deportista_competitivo')}
+                    />
+                  </div>
+                </div>
+
+                {error && <p className="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">{error}</p>}
+
+                <div className="flex gap-3 mt-2">
+                  <Button type="button" variant="secondary" className="flex-1" onClick={() => setPaso(2)}>
+                    ← Atrás
+                  </Button>
+                  <Button type="button" className="flex-1" onClick={() => setPaso(4)}>
+                    Continuar →
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {/* ── PASO 4: CONSENTIMIENTOS LEGALES ──────────────── */}
+            {paso === 4 && (
+              <>
+                <div className="bg-surface-warm border border-edge rounded-xl p-4">
+                  <p className="text-sm text-ink-secondary leading-relaxed">
+                    Antes de generar tu plan, necesitamos que revises y aceptes
+                    estas declaraciones. Son obligatorias y protegen tanto a vos
+                    como al equipo de Re-Viva.
+                  </p>
+                </div>
+
+                <ConsentCheckbox
+                  label="Acepto los Términos y Condiciones de Re-Viva"
+                  hint="Reglas de uso de la plataforma, política de cancelación y pago."
+                  checked={consents.aceptaTerminosYCondiciones}
+                  onChange={() => toggleConsent('aceptaTerminosYCondiciones')}
+                />
+
+                <ConsentCheckbox
+                  label="Acepto la Política de Privacidad y el tratamiento de mis datos personales"
+                  hint="Ley 25.326 Argentina. Tus datos no se comparten con terceros."
+                  checked={consents.aceptaPoliticaPrivacidad}
+                  onChange={() => toggleConsent('aceptaPoliticaPrivacidad')}
+                />
+
+                <ConsentCheckbox
+                  label="Entiendo que este plan no reemplaza la consulta médica profesional"
+                  hint="Re-Viva es coaching de entrenamiento y nutrición, no atención médica. Si tenés condiciones de salud, consultá con un profesional antes de empezar."
+                  checked={consents.aceptaDescargoMedicoYResponsabilidad}
+                  onChange={() => toggleConsent('aceptaDescargoMedicoYResponsabilidad')}
+                />
+
+                <ConsentCheckbox
+                  label="Confirmo que los datos que cargué son verdaderos y completos"
+                  hint="Si hay algo que no declaraste, el plan puede no ser seguro para vos."
+                  checked={consents.confirmaVeracidadDatos}
+                  onChange={() => toggleConsent('confirmaVeracidadDatos')}
+                />
+
+                {error && <p className="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">{error}</p>}
+
+                <div className="flex gap-3 mt-2">
+                  <Button type="button" variant="secondary" className="flex-1" onClick={() => setPaso(3)}>
+                    ← Atrás
+                  </Button>
+                  <Button type="submit" loading={loading} className="flex-1" disabled={!todosConsentimientos}>
                     Enviar mi perfil
                   </Button>
                 </div>
@@ -314,5 +530,36 @@ export default function OnboardingPage() {
 
       </div>
     </main>
+  )
+}
+
+// Checkbox grande para flags y consentimientos
+function ConsentCheckbox({
+  label, hint, checked, onChange,
+}: { label: string; hint?: string; checked: boolean; onChange: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onChange}
+      className={`text-left flex items-start gap-3 p-3 rounded-xl border transition-all w-full ${
+        checked ? 'border-primary bg-primary/5' : 'border-edge bg-surface-warm hover:border-primary/40'
+      }`}
+    >
+      <span
+        className={`flex-shrink-0 mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+          checked ? 'border-primary bg-primary' : 'border-edge bg-surface'
+        }`}
+      >
+        {checked && (
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M2 6.5L5 9.5L10 3.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+      </span>
+      <span className="flex-1">
+        <span className="block text-sm font-medium text-ink">{label}</span>
+        {hint && <span className="block text-xs text-ink-muted mt-0.5 leading-snug">{hint}</span>}
+      </span>
+    </button>
   )
 }
