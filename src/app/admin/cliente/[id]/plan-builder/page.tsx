@@ -137,6 +137,19 @@ function generarEscenarios(perfil: Perfil): Escenario[] {
 }
 
 // Escala los gramajes de un template para alcanzar un target calórico
+// Factor de cálculo de macros según la unidad del alimento.
+// - 'g' (gramos): los macros están por 100g, la cantidad ingresada es en gramos → dividir por 100
+// - 'unidad' (huevo, fruta, rebanada, etc): los macros están por unidad → multiplicar directo
+function ratioPorUnidad(food: Food | undefined, cantidad: number): number {
+  if (!food) return 0
+  return food.unidad === 'unidad' ? cantidad : cantidad / 100
+}
+
+function kcalDeItem(food: Food | undefined, cantidad: number): number {
+  if (!food) return 0
+  return Math.round(food.kcal * ratioPorUnidad(food, cantidad))
+}
+
 function escalarTemplate(
   template: Template,
   kcalTarget: number,
@@ -147,15 +160,20 @@ function escalarTemplate(
   for (const c of template.comidas)
     for (const it of c.items) {
       const f = foodMap.get(it.foodId) ?? it.food
-      if (f) kcalActual += (f.kcal * it.gramos) / 100
+      if (f) kcalActual += f.kcal * ratioPorUnidad(f, it.gramos)
     }
   const factor = kcalActual > 0 ? kcalTarget / kcalActual : 1
   return template.comidas.map(c => ({
     nombre: c.nombre, orden: c.orden, horaSugerida: c.horaSugerida,
-    items: c.items.map(it => ({
-      foodId: it.foodId,
-      gramos: Math.round(it.gramos * factor / 5) * 5, // redondea a múltiplos de 5
-    })),
+    items: c.items.map(it => {
+      const f = foodMap.get(it.foodId) ?? it.food
+      // Para alimentos en unidades enteras escalamos al entero más cercano (sin redondear a 5)
+      const escalado = it.gramos * factor
+      const ajustado = f?.unidad === 'unidad'
+        ? Math.max(1, Math.round(escalado))
+        : Math.round(escalado / 5) * 5
+      return { foodId: it.foodId, gramos: ajustado }
+    }),
   }))
 }
 
@@ -165,7 +183,7 @@ function calcMacros(comidas: PlanMeal[], foodMap: Map<string, Food>) {
   let kcal = 0, prot = 0, hc = 0, gras = 0
   for (const c of comidas) for (const it of c.items) {
     const f = foodMap.get(it.foodId); if (!f) continue
-    const r = it.gramos / 100
+    const r = ratioPorUnidad(f, it.gramos)
     kcal += f.kcal * r; prot += f.proteina * r; hc += f.hidratos * r; gras += f.grasas * r
   }
   return { kcal: Math.round(kcal), prot: Math.round(prot*10)/10, hc: Math.round(hc*10)/10, gras: Math.round(gras*10)/10 }
@@ -1063,7 +1081,8 @@ export default function PlanBuilderPage() {
                         )}
                         {comida.items.map((item, iIdx) => {
                           const food = foodMap.get(item.foodId)
-                          const kcalItem = food ? Math.round(food.kcal * item.gramos / 100) : 0
+                          const kcalItem = kcalDeItem(food, item.gramos)
+                          const stepUnidad = food?.unidad === 'unidad' ? 1 : 5
                           return (
                             <div key={iIdx} className="flex items-center gap-2">
                               <FoodCombobox
@@ -1073,10 +1092,10 @@ export default function PlanBuilderPage() {
                               />
                               <div className="flex items-center gap-1 flex-shrink-0">
                                 <input
-                                  type="number" min="0" step="5"
+                                  type="number" min="0" step={stepUnidad}
                                   value={item.gramos === 0 ? '' : item.gramos}
                                   onChange={e => cambiarGramos(mIdx, iIdx, e.target.value)}
-                                  className="w-16 border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-1 focus:ring-emerald-400 tabular-nums"
+                                  className="w-16 border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-center text-gray-900 focus:outline-none focus:ring-1 focus:ring-emerald-400 tabular-nums"
                                 />
                                 <span className="text-xs text-gray-400">{food?.unidad ?? 'g'}</span>
                               </div>
