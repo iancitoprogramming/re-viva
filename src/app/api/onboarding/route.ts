@@ -23,6 +23,32 @@ export async function POST(request: Request) {
       }
     }
 
+    // Normalización defensiva: la altura debe estar en cm.
+    // Si el usuario cargó en metros (1.6 / 1.75 / etc), lo convertimos.
+    // Cualquier valor por debajo de 3 se asume en metros.
+    if (typeof body.altura === 'number') {
+      if (body.altura > 0 && body.altura < 3) {
+        body.altura = Math.round(body.altura * 100)
+      }
+      if (body.altura < 130 || body.altura > 230) {
+        return NextResponse.json(
+          { error: `Altura fuera de rango (recibido: ${body.altura}cm). Cargala en centímetros, ej: 175.` },
+          { status: 400 },
+        )
+      }
+    }
+
+    // Idem para peso: si vino en gramos por error, normalizamos.
+    if (typeof body.peso === 'number') {
+      if (body.peso > 500) body.peso = body.peso / 1000 // gramos → kg
+      if (body.peso < 30 || body.peso > 300) {
+        return NextResponse.json(
+          { error: `Peso fuera de rango (recibido: ${body.peso}kg). Cargalo en kilos, ej: 70.` },
+          { status: 400 },
+        )
+      }
+    }
+
     // Verificar que no tenga perfil ya
     const perfilExistente = await prisma.nutritionalProfile.findUnique({ where: { userId: payload.userId } })
     if (perfilExistente) {
