@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
@@ -192,12 +193,48 @@ function FoodCombobox({
   const selected = foods.find(f => f.id === value)
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
-  const ref = useRef<HTMLDivElement>(null)
+  const [coords, setCoords] = useState<{ top: number; left: number; width: number } | null>(null)
+  const [mounted, setMounted] = useState(false)
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const popoverRef = useRef<HTMLDivElement>(null)
 
-  // Cerrar al hacer click afuera
+  // Activar portales solo después de montar (evita SSR mismatch)
+  useEffect(() => { setMounted(true) }, [])
+
+  // Recalcular posición del popover cuando se abre, y al hacer scroll/resize
+  useEffect(() => {
+    if (!open) { setCoords(null); return }
+
+    const update = () => {
+      const rect = wrapperRef.current?.getBoundingClientRect()
+      if (!rect) return
+      // 288px = w-72; clamp para que no se salga del viewport
+      const width = 288
+      const left = Math.min(rect.left, window.innerWidth - width - 8)
+      setCoords({
+        top: rect.bottom + 4,
+        left: Math.max(8, left),
+        width,
+      })
+    }
+    update()
+
+    const opts = { passive: true } as AddEventListenerOptions
+    window.addEventListener('scroll', update, true)
+    window.addEventListener('resize', update, opts)
+    return () => {
+      window.removeEventListener('scroll', update, true)
+      window.removeEventListener('resize', update)
+    }
+  }, [open])
+
+  // Cerrar al hacer click afuera (considera el wrapper Y el popover portaleado)
   useEffect(() => {
     function handler(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+      const t = e.target as Node
+      if (wrapperRef.current?.contains(t)) return
+      if (popoverRef.current?.contains(t)) return
+      setOpen(false)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
@@ -221,8 +258,52 @@ function FoodCombobox({
     setOpen(false)
   }
 
+  const popover = open && coords && mounted ? createPortal(
+    <div
+      ref={popoverRef}
+      className="fixed z-[1000] bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden"
+      style={{ top: coords.top, left: coords.left, width: coords.width }}
+    >
+      {/* Buscador */}
+      <div className="p-2 border-b border-gray-100">
+        <input
+          autoFocus
+          type="text"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder="Buscar alimento…"
+          className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 bg-white focus:outline-none focus:border-emerald-400"
+        />
+      </div>
+
+      {/* Lista */}
+      <div className="overflow-y-auto max-h-64">
+        {grupos.size === 0 && (
+          <p className="text-sm text-gray-400 text-center py-4">Sin resultados</p>
+        )}
+        {Array.from(grupos).map(([cat, items]) => (
+          <div key={cat}>
+            <p className="px-3 py-1 text-xs font-semibold text-gray-500 bg-gray-50 sticky top-0">{cat}</p>
+            {items.map(f => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => select(f)}
+                className={`w-full text-left px-3 py-2 text-sm hover:bg-emerald-50 flex items-center justify-between gap-2 transition-colors ${f.id === value ? 'bg-emerald-50 text-emerald-700' : 'text-gray-800'}`}
+              >
+                <span className="truncate">{f.nombre}</span>
+                <span className="text-xs text-gray-500 flex-shrink-0 tabular-nums">{f.kcal} kcal</span>
+              </button>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>,
+    document.body,
+  ) : null
+
   return (
-    <div ref={ref} className="relative flex-1 min-w-0">
+    <div ref={wrapperRef} className="relative flex-1 min-w-0">
       <button
         type="button"
         onClick={() => { setOpen(o => !o); setQuery('') }}
@@ -233,45 +314,7 @@ function FoodCombobox({
         </span>
         <span className="text-gray-400 flex-shrink-0 text-xs">▾</span>
       </button>
-
-      {open && (
-        <div className="absolute z-50 top-full left-0 mt-1 w-72 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
-          {/* Buscador */}
-          <div className="p-2 border-b border-gray-100">
-            <input
-              autoFocus
-              type="text"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              placeholder="Buscar alimento…"
-              className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-emerald-400"
-            />
-          </div>
-
-          {/* Lista */}
-          <div className="overflow-y-auto max-h-64">
-            {grupos.size === 0 && (
-              <p className="text-sm text-gray-400 text-center py-4">Sin resultados</p>
-            )}
-            {Array.from(grupos).map(([cat, items]) => (
-              <div key={cat}>
-                <p className="px-3 py-1 text-xs font-semibold text-gray-400 bg-gray-50 sticky top-0">{cat}</p>
-                {items.map(f => (
-                  <button
-                    key={f.id}
-                    type="button"
-                    onClick={() => select(f)}
-                    className={`w-full text-left px-3 py-2 text-sm hover:bg-emerald-50 flex items-center justify-between gap-2 transition-colors ${f.id === value ? 'bg-emerald-50 text-emerald-700' : 'text-gray-800'}`}
-                  >
-                    <span className="truncate">{f.nombre}</span>
-                    <span className="text-xs text-gray-400 flex-shrink-0 tabular-nums">{f.kcal} kcal</span>
-                  </button>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {popover}
     </div>
   )
 }
