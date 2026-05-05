@@ -71,6 +71,13 @@ export const PLANES_MP = {
     monto: 19900,
     badge: 'PDF Digital',
   },
+  'ebook-rentable': {
+    titulo: 'Curso — Personal Trainer Rentable',
+    descripcion: 'El sistema completo para que ser entrenador deje de ser un hobby y se transforme en un negocio real. Captación, conversión, retención y modelo de ingresos.',
+    monto: 49900,           // Precio de pre-venta (lanzamiento)
+    montoOriginal: 79900,   // Precio sugerido post-lanzamiento (para mostrar descuento)
+    badge: 'Pre-venta',
+  },
 } as const
 
 export type PlanMPKey = keyof typeof PLANES_MP
@@ -94,6 +101,7 @@ export const PLAN_DURACIONES_DIAS: Record<string, number> = {
   'presencial-5x-semestral':      180,
   'ebook-ryan-humiston':            0,
   'ebook-gluteos':                  0,
+  'ebook-rentable':                 0,
 }
 
 // ─── Etiquetas legibles de tipos de plan ──────────────────────────────────────
@@ -114,5 +122,13 @@ export const PLAN_LABELS: Record<string, string> = {
   'presencial-5x-semestral':      'Presencial 5x/sem — Semestral',
   'ebook-ryan-humiston':          'Ebook Ryan Humiston',
   'ebook-gluteos':                'Ebook Glúteos',
+  'ebook-rentable':               'Curso Personal Trainer Rentable',
 }
+
+// ─── Set de planes que son ebooks/cursos digitales (entrega manual por WhatsApp) ──
+export const ES_EBOOK = new Set<string>([
+  'ebook-ryan-humiston',
+  'ebook-gluteos',
+  'ebook-rentable',
+])
 
