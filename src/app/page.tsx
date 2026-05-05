@@ -12,6 +12,7 @@ import Resultados     from '@/components/landing/Resultados'
 import ComoFunciona   from '@/components/landing/ComoFunciona'
 import Planes         from '@/components/landing/Planes'
 import Pagos          from '@/components/landing/Pagos'
+import CursoEntrenadores from '@/components/landing/CursoEntrenadores'
 import CTAFinal       from '@/components/landing/CTAFinal'
 import Terminos       from '@/components/landing/Terminos'
 
@@ -42,7 +43,10 @@ export default function LandingPage() {
         {/* 8. Conversión: planes y precios */}
         <Planes />
 
-        {/* 9. Cierre emocional */}
+        {/* 9. Sección para entrenadores — curso rentable */}
+        <CursoEntrenadores />
+
+        {/* 10. Cierre emocional */}
         <CTAFinal />
 
         {/* 10. Medios de pago */}
