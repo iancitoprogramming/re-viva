@@ -24,7 +24,7 @@ const EBOOKS = [
     subtitulo:       'Curso para Entrenadores',
     descripcion:     'El sistema completo para que ser entrenador deje de ser un hobby y se transforme en un negocio real. Captación, conversión, retención y modelo de ingresos escalable.',
     disclaimer:      null,
-    items:           ['5 capítulos + bonus aplicables desde el día 1', 'Sistema de captación y cierre de clientes', 'Cómo salir del modelo hora-cobrada', 'Plantillas de mensajes incluidas', 'Entrega por WhatsApp · Garantía 7 días'],
+    items:           ['5 capítulos + bonus aplicables desde el día 1', 'Cómo salir del modelo hora-cobrada-hora-trabajada', 'Retención y modelo de ingresos escalable', 'Plantillas de mensajes incluidas', 'Entrega por WhatsApp · Garantía 7 días'],
     href:            '/checkout?plan=ebook-rentable',
     cover:           null as string | null,
     precio:          '$49.900',

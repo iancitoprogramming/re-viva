@@ -36,19 +36,19 @@ const QUE_INCLUYE = [
     ],
   },
   {
-    titulo: 'Capítulo 2 — Captación de clientes',
+    titulo: 'Capítulo 2 — Precio y valor',
     bullets: [
-      'Embudo simple para Instagram + WhatsApp',
-      'Qué tipo de contenido convierte (con ejemplos)',
-      'Cómo filtrar consultas y no perder horas con curiosos',
+      'Cuánto cobrar por cada servicio y por qué',
+      'Cómo manejar objeciones de precio sin bajar el ticket',
+      'El error más común al fijar precios (y cómo corregirlo)',
     ],
   },
   {
     titulo: 'Capítulo 3 — Conversión',
     bullets: [
-      'El guion que uso para cerrar planes premium',
-      'Cómo manejar objeciones de precio sin bajar el ticket',
-      'Plantilla de propuesta que vende sin que parezca venta',
+      'Cómo presentar tu propuesta sin que parezca venta',
+      'Qué hace que un cliente diga sí (y qué lo frena)',
+      'Plantilla de propuesta lista para usar',
     ],
   },
   {
@@ -70,7 +70,7 @@ const QUE_INCLUYE = [
   {
     titulo: 'Bonus',
     bullets: [
-      'Plantillas de mensajes para captación, cierre y seguimiento',
+      'Plantillas de mensajes para consultas, seguimiento y retención',
       'Calculadora de pricing por hora real (con costos ocultos)',
       'Tabla de benchmarks reales del mercado argentino 2026',
     ],
@@ -103,11 +103,11 @@ const FAQ = [
   },
   {
     q: '¿Cuánto tiempo tarda en mostrar resultados?',
-    a: 'Si aplicás el módulo de captación y el guion de cierre, podés cerrar un cliente nuevo en la primera semana. La parte de retención y modelo de ingresos suele empezar a moverse a los 30-60 días.',
+    a: 'Si aplicás lo del modelo de precios y la parte de retención, los primeros cambios se notan en la primera o segunda semana. El modelo de ingresos escalable suele empezar a moverse a los 30-60 días.',
   },
   {
     q: '¿Sirve para entrenadores de Argentina o también de afuera?',
-    a: 'Los principios sirven en cualquier mercado. Los benchmarks de pricing y los ejemplos están adaptados al mercado argentino 2026, pero la lógica de captación, cierre y retención es universal.',
+    a: 'Los principios sirven en cualquier mercado. Los benchmarks de pricing y los ejemplos están adaptados al mercado argentino 2026, pero la lógica de precios, retención y modelo de ingresos es universal.',
   },
   {
     q: '¿Hay garantía?',
