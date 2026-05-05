@@ -50,12 +50,16 @@ function CheckoutContent() {
   const [procesando, setProcesando]     = useState(false)
   const [error, setError]               = useState<string | null>(null)
 
-  // Verificar sesión activa
+  // Verificar sesión activa — preservar el plan en la URL de redirect
   useEffect(() => {
+    const planParam = searchParams.get('plan')
+    const redirectPath = planParam ? `/checkout?plan=${planParam}` : '/checkout'
     fetch('/api/auth/me')
-      .then(r => { if (!r.ok) router.replace('/login') })
-      .catch(() => router.replace('/login'))
-  }, [router])
+      .then(r => {
+        if (!r.ok) router.replace(`/login?redirect=${encodeURIComponent(redirectPath)}&modo=registro`)
+      })
+      .catch(() => router.replace(`/login?redirect=${encodeURIComponent(redirectPath)}&modo=registro`))
+  }, [router, searchParams])
 
   // Crear preferencia cuando se selecciona el plan
   useEffect(() => {

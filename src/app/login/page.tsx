@@ -48,7 +48,7 @@ function LoginContent() {
         return
       }
 
-      if (redirectTo && data.tienePerfil && (data.planEstado === 'ACTIVO' || data.esAdmin)) {
+      if (redirectTo) {
         router.push(redirectTo)
       } else if (data.esAdmin) {
         router.push('/admin')
