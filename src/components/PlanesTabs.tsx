@@ -19,24 +19,46 @@ const DIVIDER = 'rgba(201,168,76,0.09)'
 
 const EBOOKS = [
   {
-    key:        'ebook-ryan-humiston',
-    titulo:     'Ryan Humiston',
-    subtitulo:  'Método de Entrenamiento',
-    descripcion:'El programa de entrenamiento de Ryan Humiston. Planificación estructurada, progresión semana a semana y técnica detallada para hipertrofia real.',
-    disclaimer: '⚠ Contenido meramente informativo. No es un producto oficial ni está afiliado a la marca.',
-    items:      ['Programa completo de hipertrofia', 'Progresión semanal estructurada', 'Técnica por ejercicio', 'Planificación por objetivo', 'Entrega inmediata por WhatsApp'],
-    href:       '/checkout?plan=ebook-ryan-humiston',
-    cover:      null as string | null,
+    key:             'ebook-rentable',
+    titulo:          'Personal Trainer Rentable',
+    subtitulo:       'Curso para Entrenadores',
+    descripcion:     'El sistema completo para que ser entrenador deje de ser un hobby y se transforme en un negocio real. Captación, conversión, retención y modelo de ingresos escalable.',
+    disclaimer:      null,
+    items:           ['5 capítulos + bonus aplicables desde el día 1', 'Sistema de captación y cierre de clientes', 'Cómo salir del modelo hora-cobrada', 'Plantillas de mensajes incluidas', 'Entrega por WhatsApp · Garantía 7 días'],
+    href:            '/checkout?plan=ebook-rentable',
+    cover:           null as string | null,
+    precio:          '$49.900',
+    precioOriginal:  '$79.900' as string | null,
+    badge:           'Pre-venta' as string,
+    badgeExtra:      'Para entrenadores' as string | null,
   },
   {
-    key:        'ebook-gluteos',
-    titulo:     'Glúteos',
-    subtitulo:  'Guía Completa',
-    descripcion:'Guía completa de entrenamiento de glúteos. Ejercicios, series, progresión y técnica para resultados reales y sostenibles.',
-    disclaimer: null,
-    items:      ['Programa enfocado en glúteos', 'Ejercicios con y sin máquinas', 'Progresión semana a semana', 'Técnica detallada por ejercicio', 'Entrega inmediata por WhatsApp'],
-    href:       '/checkout?plan=ebook-gluteos',
-    cover:      null as string | null,
+    key:             'ebook-ryan-humiston',
+    titulo:          'Ryan Humiston',
+    subtitulo:       'Método de Entrenamiento',
+    descripcion:     'El programa de entrenamiento de Ryan Humiston. Planificación estructurada, progresión semana a semana y técnica detallada para hipertrofia real.',
+    disclaimer:      '⚠ Contenido meramente informativo. No es un producto oficial ni está afiliado a la marca.',
+    items:           ['Programa completo de hipertrofia', 'Progresión semanal estructurada', 'Técnica por ejercicio', 'Planificación por objetivo', 'Entrega inmediata por WhatsApp'],
+    href:            '/checkout?plan=ebook-ryan-humiston',
+    cover:           null as string | null,
+    precio:          '$19.900',
+    precioOriginal:  null,
+    badge:           'PDF Digital' as string,
+    badgeExtra:      null as string | null,
+  },
+  {
+    key:             'ebook-gluteos',
+    titulo:          'Glúteos',
+    subtitulo:       'Guía Completa',
+    descripcion:     'Guía completa de entrenamiento de glúteos. Ejercicios, series, progresión y técnica para resultados reales y sostenibles.',
+    disclaimer:      null,
+    items:           ['Programa enfocado en glúteos', 'Ejercicios con y sin máquinas', 'Progresión semana a semana', 'Técnica detallada por ejercicio', 'Entrega inmediata por WhatsApp'],
+    href:            '/checkout?plan=ebook-gluteos',
+    cover:           null as string | null,
+    precio:          '$19.900',
+    precioOriginal:  null,
+    badge:           'PDF Digital' as string,
+    badgeExtra:      null as string | null,
   },
 ]
 
@@ -310,7 +332,7 @@ export default function PlanesTabs() {
                           <span className="text-xs tracking-[0.22em] uppercase" style={{ color: 'rgba(201,168,76,0.55)' }}>
                             REVIVA · IGZ Trainer
                           </span>
-                          <h3 className="font-serif text-3xl leading-tight" style={{ color: IVORY }}>
+                          <h3 className="font-serif leading-tight" style={{ color: IVORY, fontSize: eb.titulo.length > 15 ? '1.5rem' : '1.875rem' }}>
                             {eb.titulo}
                           </h3>
                           <span className="text-xs tracking-widest uppercase" style={{ color: 'rgba(201,168,76,0.45)' }}>
@@ -370,13 +392,20 @@ export default function PlanesTabs() {
             {/* ── Contenido del ebook activo ── */}
             {EBOOKS.map((eb, i) => i === ebookIdx && (
               <div key={eb.key} className="p-6 flex flex-col gap-4">
-                <div className="flex items-center justify-between gap-2">
-                  <h4 className="font-serif text-lg" style={{ color: IVORY }}>{eb.titulo}</h4>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h4 className="font-serif text-lg" style={{ color: IVORY }}>{eb.titulo}</h4>
+                    {eb.badgeExtra && (
+                      <span className="inline-block text-[10px] font-semibold tracking-wider uppercase mt-1" style={{ color: 'rgba(201,168,76,0.65)' }}>
+                        {eb.badgeExtra}
+                      </span>
+                    )}
+                  </div>
                   <span
-                    className="text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap"
+                    className="text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap flex-shrink-0"
                     style={{ background: 'rgba(201,168,76,0.12)', color: GOLD, border: `1px solid rgba(201,168,76,0.25)` }}
                   >
-                    PDF Digital
+                    {eb.badge}
                   </span>
                 </div>
 
@@ -401,8 +430,11 @@ export default function PlanesTabs() {
                   Formato PDF. Se envía por WhatsApp una vez confirmado el pago.
                 </p>
 
-                <div className="flex items-baseline gap-1">
-                  <span className="font-serif text-3xl font-bold" style={{ color: GOLD }}>$19.900</span>
+                <div className="flex items-baseline gap-2">
+                  {eb.precioOriginal && (
+                    <span className="text-base line-through" style={{ color: IVORY40 }}>{eb.precioOriginal}</span>
+                  )}
+                  <span className="font-serif text-3xl font-bold" style={{ color: GOLD }}>{eb.precio}</span>
                   <span className="text-sm" style={{ color: IVORY40 }}>pago único</span>
                 </div>
 
@@ -411,7 +443,7 @@ export default function PlanesTabs() {
                   className="block text-center font-semibold py-3.5 rounded-xl text-sm transition-all active:scale-[0.98]"
                   style={{ background: GOLD, color: '#0a0a08' }}
                 >
-                  Comprar ebook
+                  {eb.key === 'ebook-rentable' ? 'Acceder al curso' : 'Comprar ebook'}
                 </a>
               </div>
             ))}
