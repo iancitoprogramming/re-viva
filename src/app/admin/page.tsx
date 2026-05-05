@@ -229,6 +229,8 @@ export default function AdminPage() {
 
   // Alertas: consentimientos legales pendientes de revisión personal
   const [consentimientosPendientes, setConsentimientosPendientes] = useState(0)
+  // Alerta: ebooks/cursos comprados pendientes de envío manual por WhatsApp
+  const [ebooksPendientes, setEbooksPendientes] = useState(0)
 
   const cargarClientes = useCallback(async (q: string, p: number, l: number) => {
     setLoading(true)
@@ -255,6 +257,10 @@ export default function AdminPage() {
     fetch('/api/admin/consentimientos-pendientes')
       .then(r => r.json())
       .then(d => setConsentimientosPendientes(d.total ?? 0))
+      .catch(() => {})
+    fetch('/api/admin/ebooks-pendientes')
+      .then(r => r.json())
+      .then(d => setEbooksPendientes(d.totalPendientes ?? 0))
       .catch(() => {})
   }, [router, cargarClientes])
 
@@ -348,6 +354,16 @@ export default function AdminPage() {
         </div>
 
         {/* Alertas */}
+        {ebooksPendientes > 0 && (
+          <Link href="/admin/ebooks-pendientes"
+            className="bg-emerald-50 border border-emerald-300 rounded-2xl px-4 py-3 mb-5 flex items-center gap-2 text-sm text-emerald-800 hover:bg-emerald-100 transition-colors">
+            <span>📚</span>
+            <span className="flex-1">
+              <strong>{ebooksPendientes}</strong> ebook{ebooksPendientes !== 1 ? 's' : ''}/curso{ebooksPendientes !== 1 ? 's' : ''} pago{ebooksPendientes !== 1 ? 's' : ''} pendiente{ebooksPendientes !== 1 ? 's' : ''} de envío
+              <span className="text-emerald-700 ml-2">→</span>
+            </span>
+          </Link>
+        )}
         {consentimientosPendientes > 0 && (
           <Link href="/admin/consentimientos-pendientes"
             className="bg-blue-50 border border-blue-300 rounded-2xl px-4 py-3 mb-5 flex items-center gap-2 text-sm text-blue-800 hover:bg-blue-100 transition-colors">

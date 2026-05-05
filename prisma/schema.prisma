@@ -21,6 +21,7 @@ model User {
   plan        NutritionalPlan?
   resetTokens ResetToken[]
   payments    Payment[]
+  ebookEntregas EbookEntrega[]
   checkIns    CheckIn[]
   archivos    Archivo[]
   mealPlans   MealPlan[]
@@ -461,5 +462,27 @@ model Payment {
   creadoEn     DateTime @default(now())
   actualizadoEn DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
+  user           User            @relation(fields: [userId], references: [id])
+  ebookEntrega   EbookEntrega?
+}
+
+// ─── EBOOK / CURSO — entregas pendientes ────────────────────────────────────
+// Cuando un cliente paga un ebook (planTipo en ES_EBOOK), se crea un registro
+// acá. El trainer ve la lista en /admin/ebooks-pendientes con un botón
+// WhatsApp pre-cargado para enviar el PDF y marcar como entregado.
+model EbookEntrega {
+  id          String    @id @default(cuid())
+  userId      String
+  paymentId   String    @unique
+  planTipo    String    // ebook-rentable | ebook-gluteos | ebook-ryan-humiston
+  estado      String    @default("PENDIENTE") // PENDIENTE | ENTREGADO
+  entregadoEn DateTime?
+  notas       String?
+  creadoEn    DateTime  @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id])
+  payment Payment @relation(fields: [paymentId], references: [id])
+
+  @@index([estado, creadoEn])
 }

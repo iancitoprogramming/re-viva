@@ -7,6 +7,7 @@ import { NextResponse } from 'next/server'
 import { MercadoPagoConfig, Payment } from 'mercadopago'
 import { prisma } from '@/lib/prisma'
 import { createHmac } from 'crypto'
+import { ES_EBOOK } from '@/lib/constants'
 
 const mp = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN!,
@@ -69,6 +70,19 @@ export async function POST(request: Request) {
             status: status ?? 'unknown',
           },
         })
+
+        // Si el pago fue aprobado y el plan es un ebook, crear entrega pendiente
+        if (status === 'approved' && ES_EBOOK.has(dbPayment.planTipo)) {
+          await prisma.ebookEntrega.upsert({
+            where: { paymentId: dbPayment.id },
+            create: {
+              userId: dbPayment.userId,
+              paymentId: dbPayment.id,
+              planTipo: dbPayment.planTipo,
+            },
+            update: {}, // si ya existe, no tocamos nada
+          })
+        }
 
         // Notificar al trainer si el pago fue aprobado
         if (status === 'approved') {
