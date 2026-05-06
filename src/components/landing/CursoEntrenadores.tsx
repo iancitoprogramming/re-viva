@@ -18,10 +18,10 @@ const pctAhorro = tieneDescuento ? Math.round((ahorro / (plan.montoOriginal as n
 
 const BULLETS = [
   'Cómo salir del modelo hora-cobrada-hora-trabajada',
-  'Sistema de captación con Instagram + WhatsApp',
-  'El guion que cierra planes premium sin bajar el precio',
   'Retención: por qué se van los clientes (y cómo evitarlo)',
   'Modelo de ingresos mixto: presencial, online y digitales',
+  'Cuánto cobrar por cada cosa y por qué',
+  'Escalar sin clonarte ni quemarte',
 ]
 
 export default function CursoEntrenadores() {
