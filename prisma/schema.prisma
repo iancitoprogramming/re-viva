@@ -29,6 +29,8 @@ model User {
   planGenerations   PlanGeneration[]
   pendingReviews    PendingTrainerReview[]
   plansToRegenerate PlanToRegenerate[]
+  webAuthnCredentials WebAuthnCredential[]
+  cursosProgreso    CursoProgreso[]
 }
 
 // ─── CATÁLOGO DE ALIMENTOS ───────────────────────────────────────────────────
@@ -464,6 +466,50 @@ model Payment {
 
   user           User            @relation(fields: [userId], references: [id])
   ebookEntrega   EbookEntrega?
+}
+
+// ─── LECTOR DE CURSOS — progreso de lectura ─────────────────────────────────
+model CursoProgreso {
+  id             String   @id @default(cuid())
+  userId         String
+  slug           String
+  ultimoCapitulo String
+  completados    String[] @default([])
+  creadoEn       DateTime @default(now())
+  actualizadoEn  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, slug])
+  @@index([userId])
+}
+
+// ─── WEBAUTHN — credenciales biométricas ─────────────────────────────────────
+model WebAuthnCredential {
+  id           String    @id @default(cuid())
+  userId       String
+  credentialId String    @unique
+  publicKey    String
+  counter      BigInt    @default(0)
+  deviceType   String?
+  backedUp     Boolean   @default(false)
+  transports   String[]  @default([])
+  creadoEn     DateTime  @default(now())
+  ultimoUsoEn  DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model WebAuthnChallenge {
+  id        String   @id @default(cuid())
+  challenge String
+  tipo      String   // "register" | "login"
+  email     String?
+  userId    String?
+  expiresAt DateTime
+  creadoEn  DateTime @default(now())
 }
 
 // ─── EBOOK / CURSO — entregas pendientes ────────────────────────────────────

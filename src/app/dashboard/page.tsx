@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
+import BiometricSetup from '@/components/BiometricSetup'
 import { ALIAS, WHATSAPP_COMPROBANTE, INSTAGRAM_URL } from '@/lib/constants'
 import type { TipoCheckIn, ArchivoData } from '@/types'
 
@@ -417,6 +418,9 @@ export default function DashboardPage() {
             </div>
           )
         })()}
+
+        {/* Acceso biométrico */}
+        <BiometricSetup />
 
       </main>
     </div>

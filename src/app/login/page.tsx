@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useState } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import FormInput from '@/components/FormInput'
@@ -16,13 +16,69 @@ function LoginContent() {
   const [modo, setModo] = useState<'login' | 'registro'>(
     searchParams.get('modo') === 'registro' ? 'registro' : 'login'
   )
-  const [loading, setLoading] = useState(false)
-  const [error, setError]     = useState('')
-  const [form, setForm]       = useState({ nombre: '', email: '', password: '' })
+  const [loading, setLoading]         = useState(false)
+  const [error, setError]             = useState('')
+  const [form, setForm]               = useState({ nombre: '', email: '', password: '' })
+  const [biometricLoading, setBiometricLoading] = useState(false)
+  const [biometricAvailable, setBiometricAvailable] = useState(false)
+
+  useEffect(() => {
+    if (modo === 'login' && typeof window !== 'undefined') {
+      const check = async () => {
+        try {
+          const available = await window.PublicKeyCredential?.isUserVerifyingPlatformAuthenticatorAvailable()
+          setBiometricAvailable(!!available)
+        } catch {
+          setBiometricAvailable(false)
+        }
+      }
+      check()
+    }
+  }, [modo])
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
     setError('')
+  }
+
+  async function handleBiometric() {
+    if (!form.email) { setError('Ingresá tu email primero para usar biometría.'); return }
+    setBiometricLoading(true)
+    setError('')
+    try {
+      const { startAuthentication } = await import('@simplewebauthn/browser')
+      const optRes = await fetch('/api/auth/webauthn/login-options', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: form.email }),
+      })
+      if (!optRes.ok) { setError('No hay biometría registrada para este email.'); return }
+      const options = await optRes.json()
+      const authResponse = await startAuthentication({ optionsJSON: options })
+      const loginRes = await fetch('/api/auth/webauthn/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: form.email, response: authResponse }),
+      })
+      const data = await loginRes.json()
+      if (!loginRes.ok) { setError(data.error ?? 'Error de autenticación biométrica.'); return }
+      if (redirectTo) return router.push(redirectTo)
+      if (data.esAdmin) return router.push('/admin')
+      if (!data.tienePerfil) return router.push('/onboarding')
+      if (data.planEstado === 'PENDIENTE') {
+        const nombre = data.nombre ? `?nombre=${encodeURIComponent(data.nombre.split(' ')[0])}` : ''
+        return router.push(`/pendiente${nombre}`)
+      }
+      router.push('/dashboard')
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'NotAllowedError') {
+        setError('Biometría cancelada.')
+      } else {
+        setError('Error al usar biometría. Iniciá sesión con contraseña.')
+      }
+    } finally {
+      setBiometricLoading(false)
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -190,6 +246,36 @@ function LoginContent() {
               </button>
 
             </form>
+
+            {modo === 'login' && biometricAvailable && (
+              <>
+                <div className="flex items-center gap-3 my-1">
+                  <div className="flex-1 h-px" style={{ background: BORDER }} />
+                  <span className="text-xs" style={{ color: IVORY35 }}>o</span>
+                  <div className="flex-1 h-px" style={{ background: BORDER }} />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleBiometric}
+                  disabled={biometricLoading}
+                  className="w-full py-3.5 rounded-2xl font-semibold text-sm transition-all flex items-center justify-center gap-2.5 border disabled:opacity-50"
+                  style={{ border: `1px solid ${BORDER}`, background: GLASS, color: IVORY }}
+                >
+                  {biometricLoading ? (
+                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                      <path d="M12 2C9.38 2 7 3.68 7 6v1H5a2 2 0 00-2 2v11a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-2V6c0-2.32-2.38-4-5-4z"/>
+                      <circle cx="12" cy="14" r="2"/>
+                    </svg>
+                  )}
+                  {biometricLoading ? 'Verificando...' : 'Ingresar con biometría'}
+                </button>
+              </>
+            )}
 
             {modo === 'login' && (
               <p className="text-center text-sm mt-4">
