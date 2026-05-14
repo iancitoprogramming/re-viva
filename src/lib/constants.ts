@@ -14,68 +14,68 @@ export const PLANES_MP = {
   'on-demand': {
     titulo: 'Plan On Demand',
     descripcion: 'Autoguiado y autodidacta. 8 a 10 semanas de proceso con 100% responsabilidad propia.',
-    monto: 30000,
+    monto: 33000,
     badge: 'Pago único',
   },
   'online-mensual': {
     titulo: 'Plan Online 100% — Mensual',
     descripcion: 'Seguimiento nutricional y de entrenamiento completo desde donde estés.',
-    monto: 80000,
+    monto: 88000,
     badge: 'Mensual',
   },
   'online-presencial-mensual': {
     titulo: 'Plan Online + Presencial — Mensual',
     descripcion: 'Plan online con 1 clase presencial por semana incluida.',
-    monto: 100000,
+    monto: 110000,
     badge: 'Mensual',
   },
   'online-trimestral': {
     titulo: 'Plan Online 100% — Trimestral',
     descripcion: 'El compromiso que construye hábitos reales. 3 meses.',
-    monto: 215000,
+    monto: 236500,
     badge: 'Trimestral',
   },
   'online-presencial-trimestral': {
     titulo: 'Plan Online + Presencial — Trimestral',
     descripcion: 'Plan trimestral con 1 clase presencial semanal.',
-    monto: 245000,
+    monto: 269500,
     badge: 'Trimestral',
   },
   'presencial-3x-mensual': {
     titulo: 'Presencial 3 veces/semana — Mensual',
     descripcion: 'Entrenamiento privado presencial 3 veces por semana.',
-    monto: 180000,
+    monto: 198000,
     badge: 'Presencial',
   },
   'presencial-4x-mensual': {
     titulo: 'Presencial 4 veces/semana — Mensual',
     descripcion: 'Entrenamiento privado presencial 4 veces por semana.',
-    monto: 224000,
+    monto: 246400,
     badge: 'Presencial',
   },
   'presencial-5x-mensual': {
     titulo: 'Presencial 5 veces/semana — Mensual',
     descripcion: 'Entrenamiento privado presencial 5 veces por semana.',
-    monto: 260000,
+    monto: 286000,
     badge: 'Presencial',
   },
   'ebook-ryan-humiston': {
     titulo: 'Ebook — Ryan Humiston',
     descripcion: 'Programa completo de entrenamiento e hipertrofia de Ryan Humiston. Planificación, progresión y técnica.',
-    monto: 19900,
+    monto: 21890,
     badge: 'PDF Digital',
   },
   'ebook-gluteos': {
     titulo: 'Ebook — Glúteos',
     descripcion: 'Guía completa de entrenamiento de glúteos. Ejercicios, progresión y técnica para resultados reales.',
-    monto: 19900,
+    monto: 21890,
     badge: 'PDF Digital',
   },
   'ebook-rentable': {
     titulo: 'Curso — Personal Trainer Rentable',
     descripcion: 'El sistema completo para que ser entrenador deje de ser un hobby y se transforme en un negocio real. Captación, conversión, retención y modelo de ingresos.',
-    monto: 49900,           // Precio de pre-venta (lanzamiento)
-    montoOriginal: 79900,   // Precio sugerido post-lanzamiento (para mostrar descuento)
+    monto: 54890,           // Precio de pre-venta (lanzamiento)
+    montoOriginal: 87890,   // Precio sugerido post-lanzamiento (para mostrar descuento)
     badge: 'Pre-venta',
   },
 } as const

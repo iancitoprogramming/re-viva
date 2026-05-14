@@ -27,8 +27,8 @@ const EBOOKS = [
     items:           ['5 capítulos + bonus aplicables desde el día 1', 'Cómo salir del modelo hora-cobrada-hora-trabajada', 'Retención y modelo de ingresos escalable', 'Plantillas de mensajes incluidas', 'Entrega por WhatsApp · Garantía 7 días'],
     href:            '/checkout?plan=ebook-rentable',
     cover:           null as string | null,
-    precio:          '$49.900',
-    precioOriginal:  '$79.900' as string | null,
+    precio:          '$54.890',
+    precioOriginal:  '$87.890' as string | null,
     badge:           'Pre-venta' as string,
     badgeExtra:      'Para entrenadores' as string | null,
   },
@@ -41,7 +41,7 @@ const EBOOKS = [
     items:           ['Programa completo de hipertrofia', 'Progresión semanal estructurada', 'Técnica por ejercicio', 'Planificación por objetivo', 'Entrega inmediata por WhatsApp'],
     href:            '/checkout?plan=ebook-ryan-humiston',
     cover:           null as string | null,
-    precio:          '$19.900',
+    precio:          '$21.890',
     precioOriginal:  null,
     badge:           'PDF Digital' as string,
     badgeExtra:      null as string | null,
@@ -55,7 +55,7 @@ const EBOOKS = [
     items:           ['Programa enfocado en glúteos', 'Ejercicios con y sin máquinas', 'Progresión semana a semana', 'Técnica detallada por ejercicio', 'Entrega inmediata por WhatsApp'],
     href:            '/checkout?plan=ebook-gluteos',
     cover:           null as string | null,
-    precio:          '$19.900',
+    precio:          '$21.890',
     precioOriginal:  null,
     badge:           'PDF Digital' as string,
     badgeExtra:      null as string | null,
@@ -66,7 +66,7 @@ const EBOOKS = [
 
 const planOnDemand = {
   nombre: 'On Demand',
-  precio: '$30.000',
+  precio: '$33.000',
   unidad: 'pago único',
   duracion: '8 a 10 semanas',
   desc: 'Tu plan personalizado, sin seguimiento directo. Autoguiado y autodidacta. 100% responsabilidad propia.',
@@ -83,7 +83,7 @@ const planesOnline = [
   {
     nombre: 'Online 100%',
     duracion: 'Mensual',
-    precio: '$80.000',
+    precio: '$88.000',
     unidad: '/ mes',
     desc: 'Seguimiento alimentario, guía de entrenamiento y hábitos saludables.',
     detalle: null,
@@ -91,7 +91,7 @@ const planesOnline = [
   {
     nombre: 'Online + Presencial',
     duracion: 'Mensual',
-    precio: '$100.000',
+    precio: '$110.000',
     unidad: '/ mes',
     desc: 'Plan online con 1 clase presencial por semana incluida.',
     detalle: null,
@@ -99,36 +99,36 @@ const planesOnline = [
   {
     nombre: 'Online 100%',
     duracion: 'Trimestral',
-    precio: '$215.000',
+    precio: '$236.500',
     unidad: '3 meses',
     desc: 'El compromiso que construye hábitos reales.',
-    detalle: '≈ $71.666 por mes',
+    detalle: '≈ $78.833 por mes',
   },
   {
     nombre: 'Online + Presencial',
     duracion: 'Trimestral',
-    precio: '$245.000',
+    precio: '$269.500',
     unidad: '3 meses',
     desc: 'Plan trimestral con 1 clase presencial semanal.',
-    detalle: '≈ $81.666 por mes',
+    detalle: '≈ $89.833 por mes',
   },
 ]
 
 const presencial = {
   mensual: [
-    { sesiones: '3 veces por semana', precio: '$180.000', unidad: 'mes', clases: null },
-    { sesiones: '4 veces por semana', precio: '$224.000', unidad: 'mes', clases: null },
-    { sesiones: '5 veces por semana', precio: '$260.000', unidad: 'mes', clases: null },
+    { sesiones: '3 veces por semana', precio: '$198.000', unidad: 'mes', clases: null },
+    { sesiones: '4 veces por semana', precio: '$246.400', unidad: 'mes', clases: null },
+    { sesiones: '5 veces por semana', precio: '$286.000', unidad: 'mes', clases: null },
   ],
   trimestral: [
-    { sesiones: '3 veces por semana', precio: '$468.000', unidad: '3 meses', clases: '36 clases' },
-    { sesiones: '4 veces por semana', precio: '$600.000', unidad: '3 meses', clases: '48 clases' },
-    { sesiones: '5 veces por semana', precio: '$690.000', unidad: '3 meses', clases: '60 clases' },
+    { sesiones: '3 veces por semana', precio: '$514.800', unidad: '3 meses', clases: '36 clases' },
+    { sesiones: '4 veces por semana', precio: '$660.000', unidad: '3 meses', clases: '48 clases' },
+    { sesiones: '5 veces por semana', precio: '$759.000', unidad: '3 meses', clases: '60 clases' },
   ],
   semestral: [
-    { sesiones: '3 veces por semana', precio: '$900.000',    unidad: '6 meses', clases: '72 clases' },
-    { sesiones: '4 veces por semana', precio: '$1.152.000',  unidad: '6 meses', clases: '96 clases' },
-    { sesiones: '5 veces por semana', precio: '$1.200.000',  unidad: '6 meses', clases: '120 clases' },
+    { sesiones: '3 veces por semana', precio: '$990.000',    unidad: '6 meses', clases: '72 clases' },
+    { sesiones: '4 veces por semana', precio: '$1.267.200',  unidad: '6 meses', clases: '96 clases' },
+    { sesiones: '5 veces por semana', precio: '$1.320.000',  unidad: '6 meses', clases: '120 clases' },
   ],
 }
 
