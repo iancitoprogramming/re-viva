@@ -23,16 +23,22 @@ declare global {
 }
 
 const PLANES_VISIBLES: { key: PlanMPKey; label: string; precio: string }[] = [
-  { key: 'on-demand',                    label: 'On Demand',                          precio: '$30.000 pago único' },
-  { key: 'online-mensual',               label: 'Online 100% — Mensual',              precio: '$80.000/mes'      },
-  { key: 'online-presencial-mensual',    label: 'Online + Presencial — Mensual',      precio: '$100.000/mes'     },
-  { key: 'online-trimestral',            label: 'Online 100% — Trimestral',           precio: '$215.000/3 meses' },
-  { key: 'online-presencial-trimestral', label: 'Online + Presencial — Trimestral',   precio: '$245.000/3 meses' },
-  { key: 'presencial-3x-mensual',        label: 'Presencial 3×/semana — Mensual',     precio: '$180.000/mes'     },
-  { key: 'presencial-4x-mensual',        label: 'Presencial 4×/semana — Mensual',     precio: '$224.000/mes'     },
-  { key: 'presencial-5x-mensual',        label: 'Presencial 5×/semana — Mensual',     precio: '$260.000/mes'     },
-  { key: 'ebook-ryan-humiston',          label: 'Ebook Ryan Humiston',                precio: '$19.900 pago único' },
-  { key: 'ebook-gluteos',                label: 'Ebook Glúteos',                      precio: '$19.900 pago único' },
+  { key: 'on-demand',                    label: 'On Demand',                          precio: '$33.000 pago único'   },
+  { key: 'online-mensual',               label: 'Online 100% — Mensual',              precio: '$88.000/mes'          },
+  { key: 'online-presencial-mensual',    label: 'Online + Presencial — Mensual',      precio: '$110.000/mes'         },
+  { key: 'online-trimestral',            label: 'Online 100% — Trimestral',           precio: '$236.500/3 meses'     },
+  { key: 'online-presencial-trimestral', label: 'Online + Presencial — Trimestral',   precio: '$269.500/3 meses'     },
+  { key: 'presencial-3x-mensual',        label: 'Presencial 3×/semana — Mensual',     precio: '$198.000/mes'         },
+  { key: 'presencial-4x-mensual',        label: 'Presencial 4×/semana — Mensual',     precio: '$246.400/mes'         },
+  { key: 'presencial-5x-mensual',        label: 'Presencial 5×/semana — Mensual',     precio: '$286.000/mes'         },
+  { key: 'presencial-3x-trimestral',     label: 'Presencial 3×/semana — Trimestral',  precio: '$514.800/3 meses'     },
+  { key: 'presencial-4x-trimestral',     label: 'Presencial 4×/semana — Trimestral',  precio: '$660.000/3 meses'     },
+  { key: 'presencial-5x-trimestral',     label: 'Presencial 5×/semana — Trimestral',  precio: '$759.000/3 meses'     },
+  { key: 'presencial-3x-semestral',      label: 'Presencial 3×/semana — Semestral',   precio: '$990.000/6 meses'     },
+  { key: 'presencial-4x-semestral',      label: 'Presencial 4×/semana — Semestral',   precio: '$1.267.200/6 meses'   },
+  { key: 'presencial-5x-semestral',      label: 'Presencial 5×/semana — Semestral',   precio: '$1.320.000/6 meses'   },
+  { key: 'ebook-ryan-humiston',          label: 'Ebook Ryan Humiston',                precio: '$21.890 pago único'   },
+  { key: 'ebook-gluteos',                label: 'Ebook Glúteos',                      precio: '$21.890 pago único'   },
 ]
 
 function CheckoutContent() {

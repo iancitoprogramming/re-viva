@@ -116,19 +116,19 @@ const planesOnline = [
 
 const presencial = {
   mensual: [
-    { sesiones: '3 veces por semana', precio: '$198.000', unidad: 'mes', clases: null },
-    { sesiones: '4 veces por semana', precio: '$246.400', unidad: 'mes', clases: null },
-    { sesiones: '5 veces por semana', precio: '$286.000', unidad: 'mes', clases: null },
+    { key: 'presencial-3x-mensual',     sesiones: '3 veces por semana', precio: '$198.000',   unidad: 'mes',     clases: null        },
+    { key: 'presencial-4x-mensual',     sesiones: '4 veces por semana', precio: '$246.400',   unidad: 'mes',     clases: null        },
+    { key: 'presencial-5x-mensual',     sesiones: '5 veces por semana', precio: '$286.000',   unidad: 'mes',     clases: null        },
   ],
   trimestral: [
-    { sesiones: '3 veces por semana', precio: '$514.800', unidad: '3 meses', clases: '36 clases' },
-    { sesiones: '4 veces por semana', precio: '$660.000', unidad: '3 meses', clases: '48 clases' },
-    { sesiones: '5 veces por semana', precio: '$759.000', unidad: '3 meses', clases: '60 clases' },
+    { key: 'presencial-3x-trimestral',  sesiones: '3 veces por semana', precio: '$514.800',   unidad: '3 meses', clases: '36 clases' },
+    { key: 'presencial-4x-trimestral',  sesiones: '4 veces por semana', precio: '$660.000',   unidad: '3 meses', clases: '48 clases' },
+    { key: 'presencial-5x-trimestral',  sesiones: '5 veces por semana', precio: '$759.000',   unidad: '3 meses', clases: '60 clases' },
   ],
   semestral: [
-    { sesiones: '3 veces por semana', precio: '$990.000',    unidad: '6 meses', clases: '72 clases' },
-    { sesiones: '4 veces por semana', precio: '$1.267.200',  unidad: '6 meses', clases: '96 clases' },
-    { sesiones: '5 veces por semana', precio: '$1.320.000',  unidad: '6 meses', clases: '120 clases' },
+    { key: 'presencial-3x-semestral',   sesiones: '3 veces por semana', precio: '$990.000',   unidad: '6 meses', clases: '72 clases' },
+    { key: 'presencial-4x-semestral',   sesiones: '4 veces por semana', precio: '$1.267.200', unidad: '6 meses', clases: '96 clases' },
+    { key: 'presencial-5x-semestral',   sesiones: '5 veces por semana', precio: '$1.320.000', unidad: '6 meses', clases: '120 clases'},
   ],
 }
 
@@ -506,7 +506,7 @@ export default function PlanesTabs() {
                 </div>
 
                 <Link
-                  href={PLAN_CTA_HREF}
+                  href={`/checkout?plan=${plan.key}`}
                   className="text-center font-semibold py-3 rounded-xl text-sm transition-all"
                   style={{
                     background: 'rgba(201,168,76,0.10)',

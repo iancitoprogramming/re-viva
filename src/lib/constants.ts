@@ -59,6 +59,42 @@ export const PLANES_MP = {
     monto: 286000,
     badge: 'Presencial',
   },
+  'presencial-3x-trimestral': {
+    titulo: 'Presencial 3 veces/semana — Trimestral',
+    descripcion: 'Entrenamiento privado presencial 3 veces por semana. 3 meses — 36 clases.',
+    monto: 514800,
+    badge: 'Trimestral',
+  },
+  'presencial-4x-trimestral': {
+    titulo: 'Presencial 4 veces/semana — Trimestral',
+    descripcion: 'Entrenamiento privado presencial 4 veces por semana. 3 meses — 48 clases.',
+    monto: 660000,
+    badge: 'Trimestral',
+  },
+  'presencial-5x-trimestral': {
+    titulo: 'Presencial 5 veces/semana — Trimestral',
+    descripcion: 'Entrenamiento privado presencial 5 veces por semana. 3 meses — 60 clases.',
+    monto: 759000,
+    badge: 'Trimestral',
+  },
+  'presencial-3x-semestral': {
+    titulo: 'Presencial 3 veces/semana — Semestral',
+    descripcion: 'Entrenamiento privado presencial 3 veces por semana. 6 meses — 72 clases.',
+    monto: 990000,
+    badge: 'Semestral',
+  },
+  'presencial-4x-semestral': {
+    titulo: 'Presencial 4 veces/semana — Semestral',
+    descripcion: 'Entrenamiento privado presencial 4 veces por semana. 6 meses — 96 clases.',
+    monto: 1267200,
+    badge: 'Semestral',
+  },
+  'presencial-5x-semestral': {
+    titulo: 'Presencial 5 veces/semana — Semestral',
+    descripcion: 'Entrenamiento privado presencial 5 veces por semana. 6 meses — 120 clases.',
+    monto: 1320000,
+    badge: 'Semestral',
+  },
   'ebook-ryan-humiston': {
     titulo: 'Ebook — Ryan Humiston',
     descripcion: 'Programa completo de entrenamiento e hipertrofia de Ryan Humiston. Planificación, progresión y técnica.',
