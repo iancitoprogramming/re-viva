@@ -18,6 +18,7 @@
 10. [Issues Pendientes](#10-issues-pendientes)
 11. [Reglas para Claude](#11-reglas-para-claude)
 12. [Contexto de Marca y Negocio](#12-contexto-de-marca-y-negocio)
+13. [Metodología de Entrenamiento — Defaults IGZ](#13-metodología-de-entrenamiento--defaults-igz)
 
 ---
 
@@ -713,5 +714,41 @@ Ante cualquier decisión de producto, UX o automatización, priorizar:
 - CRM liviano integrado
 
 ---
+
+## 13. METODOLOGÍA DE ENTRENAMIENTO — DEFAULTS IGZ
+
+> Reglas de negocio que deben aplicarse al generar o revisar planes de entrenamiento.
+> Tienen precedencia sobre cualquier criterio genérico del modelo.
+
+---
+
+### Frecuencia por defecto: FBEOD (Full Body Every Other Day)
+
+**Aplica a:** clientes principiantes e intermedios con 3 sesiones/semana.
+
+- Cada sesión cubre los **4 patrones motores principales**: empuje, tracción, bisagra de cadera, sentadilla.
+- La variación sesión-a-sesión se resuelve con **DUP integrado**:
+  - Día A → Fuerza
+  - Día B → Hipertrofia
+  - Día C → Metabólico
+
+#### Distribución semanal estándar
+- Sin domingo disponible: **Lunes / Miércoles / Viernes**
+- Con gimnasio 24/7 o domingo disponible: rotar para incluir Domingo **solo si el cliente lo confirma en el onboarding**.
+
+---
+
+### Cláusula para recomposición corporal
+
+Si el objetivo es **RECOMPOSICION** (déficit calórico + retención/ganancia muscular simultánea):
+
+- FBEOD es la estructura indicada **siempre que el cliente tolere la carga**.
+- **Criterio de tolerancia:** experiencia ≥ 3 meses de entrenamiento consistente + ausencia de síntomas de sobreentrenamiento (fatiga crónica, insomnio, caída de rendimiento).
+- En recomposición con FBEOD: **volumen por sesión moderado — no superar 16–20 series totales/sesión** para preservar recuperación en déficit.
+- **Clientes con < 3 meses o señales de baja recuperación** → reducir a 3x con mayor volumen por sesión, o evaluar 4x split en lugar de FBEOD.
+
+---
+
+*Última actualización: 2026-05-18.*
 
 *Última actualización: 2026-03-20. Flujo de conversión rediseñado, QR eliminado.*
