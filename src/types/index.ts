@@ -33,6 +33,9 @@ export interface OnboardingData {
   quiereMejorarDeporte?: string
   metasFisicas?: string[]
 
+  // Disponibilidad de domingo (3x/semana FBEOD)
+  disponibilidadDomingo?: 'siempre' | 'aveces' | 'no'
+
   // Pipeline de generación automática (paso 3 del onboarding)
   comidasPorDia?: number
   minutosPorSesion?: number

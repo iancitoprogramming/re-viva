@@ -241,6 +241,9 @@ model NutritionalProfile {
   metasFisicas         String[]  @default([]) // ["perder_grasa","ganar_masa","mejorar_resistencia",...]
   flagsEspeciales      String[]  @default([]) // perimenopausia|embarazo|postparto|lumbar_cronico|adulto_mayor_65plus|deportista_competitivo
 
+  // ── Disponibilidad de domingo (aplica solo para 3x/semana FBEOD) ────────
+  disponibilidadDomingo  String   @default("no") // "siempre" | "aveces" | "no"
+
   // ── Campos para el motor de generación automática (paso 3 onboarding) ──
   comidasPorDia                 Int       @default(4)
   minutosPorSesion              Int       @default(60)

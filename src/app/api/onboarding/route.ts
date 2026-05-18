@@ -127,6 +127,7 @@ export async function POST(request: Request) {
         quiereMejorarDeporte: body.quiereMejorarDeporte || null,
         metasFisicas:         body.metasFisicas ?? [],
         flagsEspeciales,
+        disponibilidadDomingo: body.disponibilidadDomingo ?? 'no',
         // Pipeline de generación automática
         comidasPorDia:        body.comidasPorDia ?? 4,
         minutosPorSesion:     body.minutosPorSesion ?? 60,

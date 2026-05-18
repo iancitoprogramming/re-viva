@@ -85,6 +85,8 @@ export default function OnboardingPage() {
     preferenciasAlimentarias: '', lesiones: '', fechaNacimiento: '',
     // Paso 1bis — pipeline (entrenamiento + comidas)
     minutosPorSesion: '60', comidasPorDia: '4',
+    // Disponibilidad domingo (solo relevante si diasEntrenamiento === 3)
+    disponibilidadDomingo: 'no' as 'siempre' | 'aveces' | 'no',
     // Paso 2 — estilo de vida
     experiencia: '', actividadLaboral: '', practicaDeportes: false,
     quiereMejorarDeporte: '', deportes: '' as string,
@@ -162,6 +164,7 @@ export default function OnboardingPage() {
         equipamiento,
         metasFisicas,
         deportes: deportesList,
+        disponibilidadDomingo: form.disponibilidadDomingo,
         // Salud
         alergias, intolerancias, alimentosQueNoConsume,
         condicionesMedicasDeclaradas, lesionesActuales, lesionesPasadas,
@@ -241,6 +244,38 @@ export default function OnboardingPage() {
                     type="number" placeholder="60" min="20" max="180" step="5"
                     value={form.minutosPorSesion} onChange={handleChange} />
                 </div>
+
+                {/* Disponibilidad domingo — solo para 3x/semana */}
+                {form.diasEntrenamiento === '3' && (
+                  <div className="flex flex-col gap-2">
+                    <label className={labelClass}>
+                      ¿Tenés disponibilidad para entrenar un domingo?
+                    </label>
+                    <p className="text-xs text-ink-muted -mt-1">
+                      Para planes de 3 días, esto define si podemos incluir el domingo en tu semana.
+                    </p>
+                    <div className="flex gap-2">
+                      {([
+                        { value: 'siempre', label: 'Sí, siempre' },
+                        { value: 'aveces',  label: 'A veces' },
+                        { value: 'no',      label: 'No' },
+                      ] as const).map(op => (
+                        <button
+                          key={op.value}
+                          type="button"
+                          onClick={() => setForm(f => ({ ...f, disponibilidadDomingo: op.value }))}
+                          className={`flex-1 py-2 rounded-xl text-sm border transition-all font-medium ${
+                            form.disponibilidadDomingo === op.value
+                              ? 'bg-primary text-ivory border-primary'
+                              : 'bg-surface border-edge text-ink-secondary hover:border-primary/40'
+                          }`}
+                        >
+                          {op.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <FormInput label="¿Cuántas comidas por día hacés?" name="comidasPorDia"
                   type="number" placeholder="4" min="2" max="6" step="1"

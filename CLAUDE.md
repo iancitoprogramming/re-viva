@@ -732,9 +732,28 @@ Ante cualquier decisión de producto, UX o automatización, priorizar:
   - Día B → Hipertrofia
   - Día C → Metabólico
 
-#### Distribución semanal estándar
-- Sin domingo disponible: **Lunes / Miércoles / Viernes**
-- Con gimnasio 24/7 o domingo disponible: rotar para incluir Domingo **solo si el cliente lo confirma en el onboarding**.
+#### Distribución semanal — lógica según `disponibilidadDomingo`
+
+El campo `disponibilidadDomingo` del perfil del cliente (campo en la DB y en el onboarding) controla esto:
+
+| Valor | Distribución generada |
+|-------|-----------------------|
+| `"siempre"` | Rotar FBEOD incluyendo domingo cuando sea óptimo (ej. Lun / Mié / Dom) |
+| `"aveces"` | Distribución estándar fija **Lunes / Miércoles / Viernes** |
+| `"no"` | Distribución estándar fija **Lunes / Miércoles / Viernes** |
+
+**Regla adicional:** Si el cliente no tiene gimnasio los domingos → semana tipo **Lunes a Sábado fijo**, nunca proponer domingo.
+
+---
+
+### Pregunta en el onboarding web
+
+> *"¿Tenés disponibilidad para entrenar un domingo?"*
+> Opciones: **Sí, siempre / A veces / No**
+
+- Aparece **solo cuando `diasEntrenamiento === 3`**.
+- Campo en DB: `NutritionalProfile.disponibilidadDomingo` (String, default `"no"`).
+- Migración: `20260518000000_disponibilidad_domingo`.
 
 ---
 
@@ -749,6 +768,42 @@ Si el objetivo es **RECOMPOSICION** (déficit calórico + retención/ganancia mu
 
 ---
 
-*Última actualización: 2026-05-18.*
+### Widget de recolección de datos — generación manual de rutinas
 
-*Última actualización: 2026-03-20. Flujo de conversión rediseñado, QR eliminado.*
+Cuando Ian pide generar una rutina directamente en Claude (sin pasar por la app), usar este bloque de preguntas para recolectar los datos del cliente antes de armar el plan:
+
+```
+📋 DATOS DEL CLIENTE
+
+Nombre:
+Edad:
+Género: (M / F)
+Altura (cm):
+Peso (kg):
+Objetivo: (VOLUMEN / DEFINICION / RECOMPOSICION)
+Días de entrenamiento por semana:
+¿Tiene disponibilidad para entrenar un domingo? (Sí siempre / A veces / No)
+  → Solo relevante si entrena 3x/semana — define distribución FBEOD
+Nivel de estrés: (BAJO / MEDIO / ALTO)
+Horas de sueño promedio:
+Adherencia percibida: (BAJA / MEDIA / ALTA)
+Experiencia de entrenamiento: (meses/años)
+Equipamiento disponible:
+Actividad laboral: (sedentario / moderado / activo)
+¿Practica algún deporte? ¿Cuál?
+Lesiones o limitaciones actuales:
+Preferencias alimentarias / restricciones:
+Condiciones médicas relevantes:
+Medicación actual:
+```
+
+**Cómo usar la respuesta:**
+- Si `días = 3` → aplicar FBEOD + DUP (Día A Fuerza / Día B Hipertrofia / Día C Metabólico)
+- `disponibilidadDomingo = "Sí siempre"` → rotar incluyendo domingo cuando sea óptimo
+- `disponibilidadDomingo = "A veces" o "No"` → fijar **Lunes / Miércoles / Viernes**
+- Sin gimnasio domingo → semana **Lunes a Sábado**, nunca proponer domingo
+- Objetivo RECOMPOSICION → verificar criterio de tolerancia antes de aplicar FBEOD completo
+
+---
+
+*Última actualización: 2026-05-18.*
