@@ -27,6 +27,7 @@ const BULLETS = [
 export default function CursoEntrenadores() {
   return (
     <section
+      data-reveal
       className="px-6 py-20 relative overflow-hidden"
       style={{ background: '#0a0a08', borderTop: '1px solid rgba(201,168,76,0.12)', borderBottom: '1px solid rgba(201,168,76,0.12)' }}
     >
@@ -55,7 +56,7 @@ export default function CursoEntrenadores() {
         <div className="grid md:grid-cols-2 gap-10 items-center">
 
           {/* Texto izquierda */}
-          <div>
+          <div data-reveal-child>
             <h2 className="font-serif text-3xl sm:text-4xl leading-tight mb-4" style={{ color: IVORY }}>
               ¿Sos entrenador y no<br />llegás a fin de mes?
             </h2>
@@ -86,6 +87,7 @@ export default function CursoEntrenadores() {
 
           {/* Card de compra derecha */}
           <div
+            data-card-reveal
             className="rounded-2xl p-7"
             style={{
               background: 'rgba(255,255,255,0.035)',

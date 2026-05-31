@@ -9,45 +9,60 @@ const IVORY25 = 'rgba(245,242,231,0.25)'
 export default function CTAFinal() {
   return (
     <section
+      data-reveal
       className="px-6 py-28 text-center relative overflow-hidden"
       style={{
-        background: 'linear-gradient(160deg, #0F1F16 0%, #1B3D2F 50%, #0F1F16 100%)',
+        background: 'linear-gradient(160deg, #0a0a08 0%, #0F1F16 30%, #1B3D2F 60%, #0F1F16 85%, #0a0a08 100%)',
       }}
     >
-      {/* Glow decorativo */}
+      {/* Glow decorativo dorado */}
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full pointer-events-none"
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] rounded-full pointer-events-none"
         style={{
-          background: `radial-gradient(ellipse, rgba(201,168,76,0.12) 0%, transparent 70%)`,
-          top: '-50px',
+          background: `radial-gradient(ellipse, rgba(201,168,76,0.14) 0%, transparent 70%)`,
+          top: '-80px',
+        }}
+      />
+
+      {/* Segundo glow inferior */}
+      <div
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] rounded-full pointer-events-none"
+        style={{
+          background: `radial-gradient(ellipse, rgba(201,168,76,0.08) 0%, transparent 70%)`,
+          bottom: '-40px',
         }}
       />
 
       <div className="max-w-xl mx-auto relative z-10">
 
-        <p className="text-xs font-semibold tracking-widest uppercase mb-6"
+        <p data-reveal-child
+           className="text-xs font-semibold tracking-widest uppercase mb-6"
            style={{ color: GOLD }}>
-          Proceso real. Resultados reales.
+          El momento es ahora
         </p>
 
-        <h2 className="font-serif text-3xl sm:text-5xl leading-tight mb-5"
+        <h2 data-reveal-child
+            className="font-serif text-3xl sm:text-5xl leading-tight mb-5"
             style={{ color: IVORY }}>
-          Tu proceso empieza<br />cuando vos decidís.
+          Tu mejor version<br />no esta perdida.<br />
+          <span style={{ color: GOLD }}>Esta esperando<br />ser construida.</span>
         </h2>
 
-        <p className="text-base mb-3 max-w-sm mx-auto leading-relaxed"
+        <p data-reveal-child
+           className="text-base mb-3 max-w-sm mx-auto leading-relaxed"
            style={{ color: IVORY60 }}>
-          No hay un momento perfecto para empezar. Hay un momento en que te cansás de no empezar.
+          No hay un momento perfecto para empezar. Hay un momento en que te cansas de no empezar.
         </p>
-        <p className="text-sm mb-12"
+        <p data-reveal-child
+           className="text-sm mb-12"
            style={{ color: IVORY25 }}>
           Sin contrato. Sin compromiso a largo plazo. Solo resultados.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-8">
+        <div data-reveal-child className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-8">
           <Link
             href={PLAN_CTA_HREF}
-            className="w-full sm:w-auto inline-block font-semibold px-10 py-4 rounded-2xl text-base transition-all duration-200 active:scale-[0.98] text-center shadow-md"
+            className="w-full sm:w-auto inline-block font-semibold px-10 py-4 rounded-2xl text-base transition-all duration-200 active:scale-[0.98] text-center shadow-md hero-cta-gold"
             style={{ background: GOLD, color: '#0a0a08' }}
           >
             Empezar ahora
@@ -56,7 +71,7 @@ export default function CTAFinal() {
             href={WHATSAPP_CONSULTA}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 font-medium px-8 py-4 rounded-2xl text-base transition-all"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 font-medium px-8 py-4 rounded-2xl text-base transition-all hero-cta-ghost"
             style={{
               background: 'rgba(245,242,231,0.06)',
               border: '1px solid rgba(245,242,231,0.16)',
@@ -70,7 +85,8 @@ export default function CTAFinal() {
           </a>
         </div>
 
-        <p className="text-xs font-serif italic"
+        <p data-reveal-child
+           className="text-xs font-serif italic"
            style={{ color: IVORY25 }}>
           "Controla tu cuerpo. Controla tu vida."
         </p>

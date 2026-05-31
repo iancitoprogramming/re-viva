@@ -7,29 +7,30 @@ const DIVIDER    = 'rgba(201,168,76,0.10)'
 const problemas = [
   {
     num: '01',
-    titulo: 'Llevás meses intentando cambiar y siempre terminás en el mismo lugar',
-    desc: 'YouTube, apps genéricas, rutinas de Instagram. Nada funciona porque nada fue diseñado para vos.',
+    titulo: 'Llevas meses intentando cambiar y siempre terminas en el mismo lugar',
+    desc: 'YouTube, apps genericas, rutinas de Instagram. Nada funciona porque nada fue disenado para vos.',
   },
   {
     num: '02',
-    titulo: 'Los resultados no llegan y no sabés qué estás haciendo mal',
-    desc: 'Sin estructura calórica clara ni seguimiento real, el cuerpo no responde. La motivación cae sola.',
+    titulo: 'Los resultados no llegan y no sabes que estas haciendo mal',
+    desc: 'Sin estructura calorica clara ni seguimiento real, el cuerpo no responde. La motivacion cae sola.',
   },
   {
     num: '03',
-    titulo: 'No tenés tiempo para entender todo lo que rodea al entrenamiento',
-    desc: 'Tenés trabajo, familia y responsabilidades. La alimentación y la recuperación siempre quedan en segundo plano.',
+    titulo: 'No tenes tiempo para entender todo lo que rodea al entrenamiento',
+    desc: 'Tenes trabajo, familia y responsabilidades. La alimentacion y la recuperacion siempre quedan en segundo plano.',
   },
   {
     num: '04',
-    titulo: 'Arrancás bien y a los 30 días ya no existe el hábito',
-    desc: 'Sin acompañamiento ni plan claro, el ciclo se repite. No es falta de voluntad — es falta de estructura.',
+    titulo: 'Arrancas bien y a los 30 dias ya no existe el habito',
+    desc: 'Sin acompanamiento ni plan claro, el ciclo se repite. No es falta de voluntad — es falta de estructura.',
   },
 ]
 
 export default function Problemas() {
   return (
     <section
+      data-reveal
       className="px-6 py-24"
       style={{
         background:
@@ -39,18 +40,19 @@ export default function Problemas() {
       <div className="max-w-3xl mx-auto">
 
         {/* Header */}
-        <div className="mb-14">
+        <div className="mb-14" data-reveal-child>
           <p className="text-xs font-semibold tracking-widest uppercase mb-4"
              style={{ color: GOLD }}>
             El problema real
           </p>
           <h2 className="font-serif text-3xl sm:text-4xl leading-tight mb-4"
-              style={{ color: IVORY }}>
-            ¿Cuánto tiempo llevás<br className="hidden sm:block" /> intentando cambiar?
+              style={{ color: IVORY }}
+              data-gold-underline>
+            Cuanto tiempo llevas intentando cambiar?
           </h2>
           <p className="text-base max-w-md leading-relaxed"
              style={{ color: IVORY_60 }}>
-            La mayoría arranca con motivación y termina en el mismo lugar. No porque no pueda — sino porque nadie le dio la estructura correcta.
+            La mayoria arranca con motivacion y termina en el mismo lugar. No porque no pueda — sino porque nadie le dio la estructura correcta.
           </p>
         </div>
 
@@ -59,6 +61,7 @@ export default function Problemas() {
           {problemas.map((p) => (
             <div
               key={p.num}
+              data-reveal-child
               className="py-6 flex gap-5 items-start"
               style={{ borderBottom: `1px solid ${DIVIDER}` }}
             >
@@ -81,9 +84,9 @@ export default function Problemas() {
         </div>
 
         {/* Cierre */}
-        <div className="mt-12 pt-8" style={{ borderTop: `1px solid ${DIVIDER}` }}>
+        <div data-reveal-child className="mt-12 pt-8" style={{ borderTop: `1px solid ${DIVIDER}` }}>
           <p className="font-serif text-xl sm:text-2xl leading-snug" style={{ color: IVORY }}>
-            Si llegaste hasta acá, ya sabés que algo tiene que cambiar.{' '}
+            Si llegaste hasta aca, ya sabes que algo tiene que cambiar.{' '}
             <span style={{ color: GOLD }}>Para eso existe REVIVA.</span>
           </p>
         </div>

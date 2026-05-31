@@ -1,10 +1,12 @@
 // Landing page — REVIVA by IGZ Trainer
-// Server component. Composición de secciones aisladas en /components/landing
+// Server component. Composicion de secciones aisladas en /components/landing
 
 import LandingHeader  from '@/components/landing/LandingHeader'
 import LandingFooter  from '@/components/landing/LandingFooter'
 import CursorGlow     from '@/components/CursorGlow'
+import ScrollProvider from '@/components/ScrollProvider'
 import Hero           from '@/components/landing/Hero'
+import Metodologia    from '@/components/landing/Metodologia'
 import Problemas      from '@/components/landing/Problemas'
 import QueIncluye     from '@/components/landing/QueIncluye'
 import Trainer        from '@/components/landing/Trainer'
@@ -20,42 +22,47 @@ export default function LandingPage() {
   return (
     <>
       <CursorGlow />
-      <LandingHeader />
-      <main>
-        {/* 1. Identidad: quién podés ser */}
-        <Hero />
+      <ScrollProvider>
+        <LandingHeader />
+        <main>
+          {/* 1. Identidad: quien podes ser */}
+          <Hero />
 
-        {/* 2. Dolor: el lector se reconoce */}
-        <Problemas />
+          {/* 1.5. Credenciales metodologicas */}
+          <Metodologia />
 
-        {/* 3. Propuesta: qué recibís */}
-        <QueIncluye />
+          {/* 2. Dolor: el lector se reconoce */}
+          <Problemas />
 
-        {/* 5. Confianza: quién es Ian */}
-        <Trainer />
+          {/* 3. Propuesta: que recibis */}
+          <QueIncluye />
 
-        {/* 6. Prueba social: resultados reales */}
-        <Resultados />
+          {/* 5. Confianza: quien es Ian */}
+          <Trainer />
 
-        {/* 7. Proceso: cómo funciona */}
-        <ComoFunciona />
+          {/* 6. Prueba social: resultados reales */}
+          <Resultados />
 
-        {/* 8. Conversión: planes y precios */}
-        <Planes />
+          {/* 7. Proceso: como funciona */}
+          <ComoFunciona />
 
-        {/* 9. Sección para entrenadores — curso rentable */}
-        <CursoEntrenadores />
+          {/* 8. Conversion: planes y precios */}
+          <Planes />
 
-        {/* 10. Cierre emocional */}
-        <CTAFinal />
+          {/* 9. Seccion para entrenadores — curso rentable */}
+          <CursoEntrenadores />
 
-        {/* 10. Medios de pago */}
-        <Pagos />
+          {/* 10. Cierre emocional */}
+          <CTAFinal />
 
-        {/* 11. Legales */}
-        <Terminos />
-      </main>
-      <LandingFooter />
+          {/* 10. Medios de pago */}
+          <Pagos />
+
+          {/* 11. Legales */}
+          <Terminos />
+        </main>
+        <LandingFooter />
+      </ScrollProvider>
     </>
   )
 }

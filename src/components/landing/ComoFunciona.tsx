@@ -28,6 +28,7 @@ const pasos = [
 export default function ComoFunciona() {
   return (
     <section
+      data-reveal
       className="px-6 py-20"
       style={{
         background:
@@ -35,7 +36,7 @@ export default function ComoFunciona() {
       }}
     >
       <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-12">
+        <div data-reveal-child className="text-center mb-12">
           <p className="text-xs font-semibold tracking-widest uppercase mb-3"
              style={{ color: GOLD }}>
             El proceso
@@ -52,7 +53,7 @@ export default function ComoFunciona() {
 
         <div className="flex flex-col">
           {pasos.map((paso, i) => (
-            <div key={paso.num} className="flex gap-5">
+            <div key={paso.num} data-reveal-child className="flex gap-5">
               {/* Indicador de paso */}
               <div className="flex flex-col items-center">
                 <div

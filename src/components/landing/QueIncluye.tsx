@@ -13,33 +13,34 @@ const items = [
   {
     num: '01',
     titulo: 'Plan alimentario',
-    desc: 'Estructura calórica y macros adaptada a tu cuerpo, objetivo y estilo de vida. No es una dieta — es un sistema.',
+    desc: 'Estructura calorica y macros adaptada a tu cuerpo, objetivo y estilo de vida. No es una dieta — es un sistema.',
   },
   {
     num: '02',
     titulo: 'Rutina de entrenamiento',
-    desc: 'Programa diseñado para tu nivel, frecuencia y disponibilidad. Progresivo, medible y ajustable.',
+    desc: 'Programa disenado para tu nivel, frecuencia y disponibilidad. Progresivo, medible y ajustable.',
   },
   {
     num: '03',
-    titulo: 'Guía de suplementación',
-    desc: 'Qué usar, cuándo y cómo. Sin humo, sin ventas de suplementos. Con criterio y evidencia.',
+    titulo: 'Guia de suplementacion',
+    desc: 'Que usar, cuando y como. Sin humo, sin ventas de suplementos. Con criterio y evidencia.',
   },
   {
     num: '04',
-    titulo: 'Guía de meal prep',
-    desc: 'Cómo organizar tu semana para que la alimentación no sea un problema logístico. Simple y aplicable.',
+    titulo: 'Guia de meal prep',
+    desc: 'Como organizar tu semana para que la alimentacion no sea un problema logistico. Simple y aplicable.',
   },
   {
     num: '05',
     titulo: 'Lista de compras semanal',
-    desc: 'Todo lo que necesitás comprar para seguir el plan sin complicaciones. Lista a lista.',
+    desc: 'Todo lo que necesitas comprar para seguir el plan sin complicaciones. Lista a lista.',
   },
 ]
 
 export default function QueIncluye() {
   return (
     <section
+      data-reveal
       className="px-6 py-24"
       style={{
         background:
@@ -49,23 +50,25 @@ export default function QueIncluye() {
       <div className="max-w-3xl mx-auto">
 
         {/* Header */}
-        <div className="mb-14">
+        <div className="mb-14" data-reveal-child>
           <p className="text-xs font-semibold tracking-widest uppercase mb-4"
              style={{ color: GOLD }}>
             Incluido en todos los planes
           </p>
           <h2 className="font-serif text-3xl sm:text-4xl leading-tight mb-4"
-              style={{ color: IVORY }}>
-            No es solo entrenamiento.<br className="hidden sm:block" /> Es un sistema completo.
+              style={{ color: IVORY }}
+              data-gold-underline>
+            No es solo entrenamiento. Es un sistema completo.
           </h2>
           <p className="text-base max-w-md leading-relaxed"
              style={{ color: IVORY60 }}>
-            Cada proceso REVIVA incluye los cinco componentes que hacen posible un cambio real, sostenible y sin improvisación.
+            Cada proceso REVIVA incluye los cinco componentes que hacen posible un cambio real, sostenible y sin improvisacion.
           </p>
         </div>
 
         {/* Items — glass card */}
         <div
+          data-card-reveal
           className="flex flex-col rounded-3xl overflow-hidden"
           style={{
             background: GLASS,
@@ -101,6 +104,7 @@ export default function QueIncluye() {
 
         {/* CTA inline */}
         <div
+          data-reveal-child
           className="mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl px-7 py-6"
           style={{
             background: '#1B3D2F',
@@ -109,18 +113,18 @@ export default function QueIncluye() {
         >
           <div>
             <p className="font-serif text-lg leading-snug mb-1" style={{ color: IVORY }}>
-              Todo incluido. Sin extras. Sin módulos aparte.
+              Todo incluido. Sin extras. Sin modulos aparte.
             </p>
             <p className="text-xs" style={{ color: IVORY40 }}>
-              Alimentación + entrenamiento + acompañamiento real.
+              Alimentacion + entrenamiento + acompanamiento real.
             </p>
           </div>
           <Link
             href={PLAN_CTA_HREF}
-            className="flex-shrink-0 font-semibold px-6 py-3 rounded-xl text-sm transition-all active:scale-[0.98] whitespace-nowrap"
+            className="flex-shrink-0 font-semibold px-6 py-3 rounded-xl text-sm transition-all active:scale-[0.98] whitespace-nowrap hero-cta-gold"
             style={{ background: GOLD, color: '#0a0a08' }}
           >
-            Empezar →
+            Empezar
           </Link>
         </div>
 

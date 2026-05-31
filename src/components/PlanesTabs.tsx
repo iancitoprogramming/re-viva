@@ -195,6 +195,7 @@ export default function PlanesTabs() {
       {tabMain === 'on-demand' && (
         <div className="max-w-md mx-auto">
           <div
+            data-card-reveal
             className="rounded-2xl p-6 flex flex-col gap-5"
             style={{ background: GLASS_HI, border: `1px solid ${BORDER}`, backdropFilter: 'blur(14px)' }}
           >

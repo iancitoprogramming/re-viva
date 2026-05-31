@@ -6,6 +6,7 @@ const IVORY60 = 'rgba(245,242,231,0.60)'
 export default function Planes() {
   return (
     <section
+      data-reveal
       className="px-6 py-20"
       id="planes"
       style={{
@@ -14,7 +15,7 @@ export default function Planes() {
       }}
     >
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-10">
+        <div data-reveal-child className="text-center mb-10">
           <h2 className="font-serif text-3xl sm:text-4xl mb-3"
               style={{ color: IVORY }}>
             Elegí tu punto de partida.

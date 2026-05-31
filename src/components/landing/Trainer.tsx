@@ -15,6 +15,7 @@ const credenciales = [
 export default function Trainer() {
   return (
     <section
+      data-reveal
       className="px-6 py-24"
       style={{
         background:
@@ -26,7 +27,7 @@ export default function Trainer() {
         <div className="grid sm:grid-cols-2 gap-12 items-center">
 
           {/* Foto de Ian */}
-          <div className="order-2 sm:order-1">
+          <div data-reveal-child className="order-2 sm:order-1">
             <div
               className="aspect-[4/5] rounded-3xl overflow-hidden relative"
               style={{ background: '#1B3D2F' }}
@@ -44,7 +45,7 @@ export default function Trainer() {
           </div>
 
           {/* Texto */}
-          <div className="order-1 sm:order-2">
+          <div data-reveal-child className="order-1 sm:order-2">
             <p className="text-xs font-semibold tracking-widest uppercase mb-4"
                style={{ color: GOLD }}>
               Quién está detrás de REVIVA
