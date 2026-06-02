@@ -4,33 +4,8 @@ import { INSTAGRAM_URL, PLAN_CTA_HREF } from '@/lib/constants'
 const GOLD    = '#C9A84C'
 const IVORY   = '#F5F2E7'
 const IVORY60 = 'rgba(245,242,231,0.60)'
-const IVORY40 = 'rgba(245,242,231,0.40)'
 const GLASS   = 'rgba(255,255,255,0.035)'
 const BORDER  = 'rgba(201,168,76,0.13)'
-
-const resultados = [
-  {
-    quote: 'Baje 11 kg en 14 semanas sin dejar de comer lo que me gusta. La estructura hace toda la diferencia.',
-    nombre: 'Martin, 38',
-    contexto: 'Objetivo: definicion · Plan Online 100%',
-  },
-  {
-    quote: 'Llevaba 3 anos entrenando sin ver resultados. En 90 dias cambie mas que en todo ese tiempo.',
-    nombre: 'Lucia, 34',
-    contexto: 'Objetivo: recomposicion · Plan Online + Presencial',
-  },
-  {
-    quote: 'Lo mejor no fue solo el fisico. Fue entender por que hacemos cada cosa. Ahora se cuidarme solo.',
-    nombre: 'Diego, 42',
-    contexto: 'Objetivo: volumen · Plan Presencial 3x/sem',
-  },
-]
-
-const metricas = [
-  { valor: '90', unidad: 'dias', desc: 'promedio para resultados visibles' },
-  { valor: '11', unidad: 'kg', desc: 'perdida promedio en definicion' },
-  { valor: '96', unidad: '%', desc: 'de adherencia al primer mes' },
-]
 
 export default function Resultados() {
   return (
@@ -42,10 +17,10 @@ export default function Resultados() {
           'radial-gradient(ellipse at 20% 50%, rgba(201,168,76,0.05) 0%, transparent 50%), #0a0a08',
       }}
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-3xl mx-auto">
 
         {/* Header */}
-        <div className="mb-14" data-reveal-child>
+        <div className="mb-12" data-reveal-child>
           <p className="text-xs font-semibold tracking-widest uppercase mb-4"
              style={{ color: GOLD }}>
             Resultados reales
@@ -53,71 +28,15 @@ export default function Resultados() {
           <h2 className="font-serif text-3xl sm:text-4xl leading-tight mb-4"
               style={{ color: IVORY }}
               data-gold-underline>
-            Esto es lo que pasa cuando hay metodo.
+            Esto es lo que pasa cuando hay método.
           </h2>
           <p className="text-base max-w-md leading-relaxed"
              style={{ color: IVORY60 }}>
-            Numeros y palabras de personas reales que pasaron por el proceso. Sin filtros, sin edicion.
+            Las transformaciones hablan solas. Seguí <strong style={{ color: IVORY }}>@igztrainer</strong> para ver casos reales de personas que pasaron por el proceso.
           </p>
         </div>
 
-        {/* Metricas */}
-        <div className="grid grid-cols-3 gap-4 mb-12" data-reveal-child>
-          {metricas.map((m) => (
-            <div
-              key={m.desc}
-              className="text-center py-6 rounded-2xl"
-              style={{ background: GLASS, border: `1px solid ${BORDER}` }}
-            >
-              <div className="flex items-baseline justify-center gap-1 mb-1">
-                <span className="font-serif text-3xl sm:text-4xl font-bold" style={{ color: GOLD }}>
-                  {m.valor}
-                </span>
-                <span className="text-sm font-medium" style={{ color: IVORY40 }}>{m.unidad}</span>
-              </div>
-              <p className="text-xs px-2" style={{ color: IVORY40 }}>{m.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Testimonios */}
-        <div className="flex flex-col gap-4 mb-10">
-          {resultados.map((r, i) => (
-            <div
-              key={i}
-              data-card-reveal
-              className="rounded-2xl p-6 sm:p-8 transition-all duration-300"
-              style={{
-                background: GLASS,
-                border: `1px solid ${BORDER}`,
-                backdropFilter: 'blur(14px)',
-              }}
-            >
-              <svg className="w-6 h-6 mb-3 opacity-30" fill={GOLD} viewBox="0 0 24 24">
-                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
-              </svg>
-              <p className="font-serif text-lg sm:text-xl leading-snug mb-4" style={{ color: IVORY }}>
-                {r.quote}
-              </p>
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'rgba(201,168,76,0.15)', border: `1px solid rgba(201,168,76,0.25)` }}
-                >
-                  <span className="text-xs font-bold" style={{ color: GOLD }}>
-                    {r.nombre.charAt(0)}
-                  </span>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold" style={{ color: IVORY }}>{r.nombre}</p>
-                  <p className="text-xs" style={{ color: IVORY40 }}>{r.contexto}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Instagram card */}
+        {/* Instagram card — glass */}
         <div
           data-card-reveal
           className="rounded-3xl p-8 sm:p-12 flex flex-col sm:flex-row items-center gap-8"
@@ -127,7 +46,8 @@ export default function Resultados() {
             backdropFilter: 'blur(14px)',
           }}
         >
-          {/* Icono Instagram */}
+
+          {/* Ícono Instagram */}
           <div className="flex-shrink-0 w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm"
                style={{ background: 'linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045)' }}>
             <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -160,10 +80,11 @@ export default function Resultados() {
                   background: 'transparent',
                 }}
               >
-                Empezar mi proceso
+                Empezar mi proceso →
               </Link>
             </div>
           </div>
+
         </div>
 
       </div>
