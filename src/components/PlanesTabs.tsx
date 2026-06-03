@@ -102,7 +102,7 @@ const planesOnline = [
     precio: '$236.500',
     unidad: '3 meses',
     desc: 'El compromiso que construye hábitos reales.',
-    detalle: '≈ $78.833 por mes',
+    detalle: '≈ $78.800 por mes',
   },
   {
     nombre: 'Online + Presencial',
@@ -110,7 +110,7 @@ const planesOnline = [
     precio: '$269.500',
     unidad: '3 meses',
     desc: 'Plan trimestral con 1 clase presencial semanal.',
-    detalle: '≈ $89.833 por mes',
+    detalle: '≈ $89.800 por mes',
   },
 ]
 
@@ -126,9 +126,9 @@ const presencial = {
     { key: 'presencial-5x-trimestral',  sesiones: '5 veces por semana', precio: '$759.000',   unidad: '3 meses', clases: '60 clases' },
   ],
   semestral: [
-    { key: 'presencial-3x-semestral',   sesiones: '3 veces por semana', precio: '$990.000',   unidad: '6 meses', clases: '72 clases' },
-    { key: 'presencial-4x-semestral',   sesiones: '4 veces por semana', precio: '$1.267.200', unidad: '6 meses', clases: '96 clases' },
-    { key: 'presencial-5x-semestral',   sesiones: '5 veces por semana', precio: '$1.320.000', unidad: '6 meses', clases: '120 clases'},
+    { key: 'presencial-3x-semestral',   sesiones: '3 veces por semana', precio: '$1.020.000', unidad: '6 meses', clases: '72 clases' },
+    { key: 'presencial-4x-semestral',   sesiones: '4 veces por semana', precio: '$1.300.000', unidad: '6 meses', clases: '96 clases' },
+    { key: 'presencial-5x-semestral',   sesiones: '5 veces por semana', precio: '$1.500.000', unidad: '6 meses', clases: '120 clases'},
   ],
 }
 

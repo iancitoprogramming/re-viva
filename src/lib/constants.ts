@@ -80,19 +80,19 @@ export const PLANES_MP = {
   'presencial-3x-semestral': {
     titulo: 'Presencial 3 veces/semana — Semestral',
     descripcion: 'Entrenamiento privado presencial 3 veces por semana. 6 meses — 72 clases.',
-    monto: 990000,
+    monto: 1020000,
     badge: 'Semestral',
   },
   'presencial-4x-semestral': {
     titulo: 'Presencial 4 veces/semana — Semestral',
     descripcion: 'Entrenamiento privado presencial 4 veces por semana. 6 meses — 96 clases.',
-    monto: 1267200,
+    monto: 1300000,
     badge: 'Semestral',
   },
   'presencial-5x-semestral': {
     titulo: 'Presencial 5 veces/semana — Semestral',
     descripcion: 'Entrenamiento privado presencial 5 veces por semana. 6 meses — 120 clases.',
-    monto: 1320000,
+    monto: 1500000,
     badge: 'Semestral',
   },
   'ebook-ryan-humiston': {
