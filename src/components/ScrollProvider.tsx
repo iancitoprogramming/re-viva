@@ -1,14 +1,34 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef } from 'react'
 import Lenis from '@studio-freight/lenis'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
+// Lenis takes over scroll, so plain `<a href="#section">` clicks stop working —
+// the browser's native jump-to-anchor doesn't move Lenis's virtual scroll position.
+// This context lets any link ask Lenis to scroll to an id; it returns false when
+// there's no matching element on the current page (e.g. #planes from /entrenadores),
+// so callers can fall back to normal cross-page navigation.
+type ScrollToSection = (id: string) => boolean
+const LenisContext = createContext<ScrollToSection | null>(null)
+
+export function useScrollToSection() {
+  return useContext(LenisContext)
+}
+
 export default function ScrollProvider({ children }: { children: React.ReactNode }) {
   const lenisRef = useRef<Lenis | null>(null)
+
+  const scrollToSection = useCallback<ScrollToSection>((id) => {
+    const target = document.getElementById(id)
+    const lenis = lenisRef.current
+    if (!target || !lenis) return false
+    lenis.scrollTo(target)
+    return true
+  }, [])
 
   useEffect(() => {
     // Respect reduced motion
@@ -23,8 +43,19 @@ export default function ScrollProvider({ children }: { children: React.ReactNode
 
     // Sync Lenis with GSAP ScrollTrigger
     lenis.on('scroll', ScrollTrigger.update)
-    gsap.ticker.add((time) => lenis.raf(time * 1000))
+    const tick = (time: number) => lenis.raf(time * 1000)
+    gsap.ticker.add(tick)
     gsap.ticker.lagSmoothing(0)
+
+    // Landed here with a hash already in the URL (e.g. clicked "Planes" from
+    // /entrenadores) — jump to it once Lenis is ready to own the scroll position.
+    if (window.location.hash) {
+      const id = window.location.hash.slice(1)
+      requestAnimationFrame(() => {
+        const target = document.getElementById(id)
+        if (target) lenis.scrollTo(target, { immediate: true })
+      })
+    }
 
     // ─── Section reveal animations ───
     const sections = document.querySelectorAll('[data-reveal]')
@@ -111,9 +142,9 @@ export default function ScrollProvider({ children }: { children: React.ReactNode
     return () => {
       lenis.destroy()
       ScrollTrigger.getAll().forEach(t => t.kill())
-      gsap.ticker.remove(lenis.raf)
+      gsap.ticker.remove(tick)
     }
   }, [])
 
-  return <>{children}</>
+  return <LenisContext.Provider value={scrollToSection}>{children}</LenisContext.Provider>
 }

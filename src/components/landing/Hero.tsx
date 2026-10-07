@@ -6,6 +6,7 @@ import { INSTAGRAM_URL } from '@/lib/constants'
 import dynamic from 'next/dynamic'
 import MagneticEl from '@/components/MagneticEl'
 import { gsap } from 'gsap'
+import { useScrollToSection } from '@/components/ScrollProvider'
 
 const HeroShader = dynamic(() => import('./HeroShader'), { ssr: false })
 
@@ -17,8 +18,15 @@ const IVORY70 = 'rgba(245,242,231,0.70)'
 const IVORY45 = 'rgba(245,242,231,0.45)'
 const IVORY30 = 'rgba(245,242,231,0.30)'
 
-export default function Hero() {
+export default function Hero({ standalone = false }: { standalone?: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const scrollToSection = useScrollToSection()
+
+  function handlePlanesClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    if (!scrollToSection?.('planes')) return // acá no hay #planes (ej. /ads) — que navegue el Link
+    e.preventDefault()
+    history.pushState(null, '', standalone ? '/#planes' : '#planes')
+  }
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -52,7 +60,7 @@ export default function Hero() {
 
   return (
     <section
-      className="min-h-[calc(100svh-64px)] flex flex-col justify-center px-6 py-20 relative overflow-hidden"
+      className={`${standalone ? 'min-h-screen' : 'min-h-[calc(100svh-64px)]'} flex flex-col justify-center px-6 py-20 relative overflow-hidden`}
       style={{ background: 'linear-gradient(180deg, #0A0A08 0%, #0F2A1F 60%, #1B3D2F 100%)' }}
     >
       {/* WebGL Shader Background — parallax target */}
@@ -129,7 +137,9 @@ export default function Hero() {
         >
           <MagneticEl strength={0.28}>
             <Link
-              href="#planes"
+              // En /ads (standalone) no existe la seccion #planes — llevar al home
+              href={standalone ? '/#planes' : '#planes'}
+              onClick={handlePlanesClick}
               className="w-full sm:w-auto block font-semibold px-8 py-4 rounded-2xl text-base transition-all duration-200 active:scale-[0.97] text-center hero-cta-gold"
               style={{
                 background: GOLD,

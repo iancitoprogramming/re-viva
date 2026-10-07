@@ -2,12 +2,30 @@
 
 import Link from 'next/link'
 import { INSTAGRAM_URL } from '@/lib/constants'
+import { useScrollToSection } from '@/components/ScrollProvider'
 
 const GOLD    = '#C9A84C'
 const IVORY50 = 'rgba(245,242,231,0.50)'
 const IVORY25 = 'rgba(245,242,231,0.25)'
 
 export default function LandingFooter() {
+  const scrollToSection = useScrollToSection()
+
+  function handleAnchorClick(id: string) {
+    return (e: React.MouseEvent<HTMLAnchorElement>) => {
+      if (!scrollToSection?.(id)) return // esta página no tiene la sección — que navegue al home
+      e.preventDefault()
+      history.pushState(null, '', `/#${id}`)
+    }
+  }
+
+  const links: { href: string; label: string; external?: boolean; anchor?: string }[] = [
+    { href: '/#planes',    label: 'Planes',    anchor: 'planes' },
+    { href: '/#pagos',     label: 'Pagos',     anchor: 'pagos'  },
+    { href: INSTAGRAM_URL, label: 'Instagram', external: true   },
+    { href: '/login',      label: 'Ingresar'                    },
+  ]
+
   return (
     <footer
       className="px-6 py-8"
@@ -26,12 +44,7 @@ export default function LandingFooter() {
           <span className="text-xs ml-2" style={{ color: IVORY25 }}>by IGZ Trainer</span>
         </div>
         <div className="flex gap-6">
-          {[
-            { href: '#planes',    label: 'Planes' },
-            { href: '#pagos',     label: 'Pagos' },
-            { href: INSTAGRAM_URL, label: 'Instagram', external: true },
-            { href: '/login',     label: 'Ingresar' },
-          ].map(({ href, label, external }) =>
+          {links.map(({ href, label, external, anchor }) =>
             external ? (
               <a
                 key={label}
@@ -49,6 +62,7 @@ export default function LandingFooter() {
               <Link
                 key={label}
                 href={href}
+                onClick={anchor ? handleAnchorClick(anchor) : undefined}
                 className="text-xs transition-colors duration-200"
                 style={{ color: IVORY25 }}
               >
