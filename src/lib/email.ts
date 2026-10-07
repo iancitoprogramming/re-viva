@@ -9,21 +9,30 @@ import type { OnboardingData, IGZResult } from '@/types'
 // lo cual es normal — nodemailer maneja la conexión correctamente.
 
 function crearTransporter() {
+  const user = process.env.GMAIL_USER
+  const pass = process.env.GMAIL_APP_PASSWORD
+
+  // Sin credenciales nodemailer falla con un error de SMTP poco legible.
+  // Cortamos antes y con mensaje claro: las 6 funciones de este archivo
+  // llaman a crearTransporter() dentro de un try/catch que lo loguea.
+  if (!user || !pass) {
+    throw new Error(
+      'Faltan credenciales SMTP. Definí GMAIL_USER y GMAIL_APP_PASSWORD en .env y en Vercel.'
+    )
+  }
+
   return nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
     secure: false, // TLS
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD,
-    },
+    auth: { user, pass },
   })
 }
 
 const TRAINER_EMAIL = process.env.TRAINER_EMAIL!
-const FROM_EMAIL    = process.env.GMAIL_USER
-  ? `REVIVA IGZ <${process.env.GMAIL_USER}>`
-  : 'REVIVA IGZ <noreply@reviva.com>'
+// Gmail SMTP solo acepta como remitente la cuenta autenticada: el From
+// tiene que ser GMAIL_USER. No hay fallback posible.
+const FROM_EMAIL    = `REVIVA IGZ <${process.env.GMAIL_USER}>`
 
 // Etiquetas legibles para los enums
 const labels = {
@@ -454,5 +463,47 @@ export async function enviarRecordatorioVencimiento(
     console.log(`[EMAIL] Recordatorio vencimiento enviado a: ${email}`)
   } catch (err: unknown) {
     console.error('[EMAIL] Error recordatorio vencimiento:', (err as Error).message)
+  }
+}
+
+// ─── EMAIL: notificación al trainer — pago aprobado en Mercado Pago ──────────
+// Antes vivía en api/payments/webhook con un cliente de Resend aparte y un
+// `from` inválido (noreply@reviva.recuperar). Un solo transporte para todo.
+export async function enviarNotificacionPagoAprobado(
+  nombreCliente: string,
+  emailCliente: string,
+  planTipo: string,
+  monto: number,
+): Promise<void> {
+  try {
+    const transporter = crearTransporter()
+    await transporter.sendMail({
+      from:    FROM_EMAIL,
+      to:      TRAINER_EMAIL,
+      subject: `✅ Pago aprobado — ${nombreCliente}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; background: #F8F5EF; padding: 32px 20px;">
+          <div style="text-align: center; margin-bottom: 28px;">
+            <span style="font-size: 22px; font-weight: 700; color: #2D5A3D; letter-spacing: 2px;">REVIVA</span>
+            <span style="font-size: 12px; color: #9B9589; margin-left: 6px;">by IGZ Trainer</span>
+          </div>
+          <div style="background: #FFFFFF; border-radius: 16px; border: 1px solid #DDD8CC; padding: 32px;">
+            <p style="color: #1A2416; font-size: 16px; margin: 0 0 20px 0;"><strong>Nuevo pago vía Mercado Pago</strong></p>
+            <p style="color: #6B7B64; font-size: 14px; margin: 0 0 6px 0;"><strong>Cliente:</strong> ${nombreCliente} (${emailCliente})</p>
+            <p style="color: #6B7B64; font-size: 14px; margin: 0 0 6px 0;"><strong>Plan:</strong> ${planTipo}</p>
+            <p style="color: #6B7B64; font-size: 14px; margin: 0 0 20px 0;"><strong>Monto:</strong> $${monto.toLocaleString('es-AR')}</p>
+            <p style="color: #9B9589; font-size: 13px; margin: 0;">
+              El pago ya fue confirmado por Mercado Pago. El cliente está esperando la activación del plan.
+            </p>
+          </div>
+          <p style="color: #9B9589; font-size: 11px; text-align: center; margin-top: 20px;">
+            REVIVA · IGZ Trainer · Email automático
+          </p>
+        </div>
+      `,
+    })
+    console.log(`[EMAIL] Aviso de pago aprobado enviado al trainer (${nombreCliente})`)
+  } catch (err: unknown) {
+    console.error('[EMAIL] Error aviso de pago aprobado:', (err as Error).message)
   }
 }
