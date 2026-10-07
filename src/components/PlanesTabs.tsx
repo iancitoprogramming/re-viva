@@ -546,7 +546,7 @@ export default function PlanesTabs() {
                   <span className="font-serif text-2xl font-bold" style={{ color: GOLD }}>
                     {plan.precio}
                   </span>
-                  <span className="text-sm" style={{ color: IVORY40 }}>/ {plan.unidad}</span>
+                  <span className="text-sm whitespace-nowrap" style={{ color: IVORY40 }}>/ {plan.unidad}</span>
                 </div>
 
                 {PRECIO_TRANSFERENCIA[plan.key] && (
