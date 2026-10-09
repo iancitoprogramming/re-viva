@@ -14,7 +14,6 @@ export const PLAN_CTA_HREF = '/login?modo=registro'
 // No pasan por /api/payments/create-preference, así que el webhook NO los
 // registra en la DB — por eso el CTA de la landing sigue siendo el registro y
 // estos links se ofrecen en /pendiente, cuando ya sabemos quién es el cliente.
-// Faltan: trimestral 4x y 5x (Ian tiene que crearlos en MP).
 export const MP_LINKS = {
   onlineMensual:           'https://mpago.la/2iEJkBV', // Online — $88.000/mes
   onlinePresencialMensual: 'https://mpago.la/2JHcHnP', // Online + 1 clase — $110.000/mes
@@ -22,9 +21,9 @@ export const MP_LINKS = {
   individual3x:            'https://mpago.la/1ZnSaet', // Individual 3x/sem — $312.000/mes
   individual4x:            'https://mpago.la/159padT', // Individual 4x/sem — $416.000/mes
   individual5x:            'https://mpago.la/1w4HaAm', // Individual 5x/sem — $520.000/mes
-  individual2xTrimestral:  'https://mpago.la/29mgwyM', // Trimestral 2x/sem — OJO: el link se creó por $561.000 y el precio vigente es $561.600
+  individual2xTrimestral:  'https://mpago.la/29mgwyM', // Trimestral 2x/sem — $561.600 / 3 meses
   individual3xTrimestral:  'https://mpago.la/2X1eVi2', // Trimestral 3x/sem — $842.400 / 3 meses
-  duo2x:                   'https://mpago.la/1mHq7SK', // En dúo 2x/sem — OJO: link por $145.000, precio vigente $145.600
+  duo2x:                   'https://mpago.la/1mHq7SK', // En dúo 2x/sem — $145.600/mes
   duo3x:                   'https://mpago.la/2h1PKhZ', // En dúo 3x/sem — $218.400/mes
   trios2x:                 'https://mpago.la/1XyJsF4', // En tríos 2x/sem — $124.800/mes
   trios3x:                 'https://mpago.la/1KAkXbm', // En tríos 3x/sem — $187.200/mes
