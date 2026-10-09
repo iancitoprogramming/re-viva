@@ -30,15 +30,18 @@
 
 | Capa | Tecnología |
 |------|-----------|
-| Framework | Next.js 16.1.6 (App Router) |
+| Framework | Next.js 16.1.7 (App Router) |
 | UI | React 19, Tailwind CSS 4 |
 | ORM | Prisma 7 con adapter `pg` |
 | Base de datos | PostgreSQL (Supabase) |
-| Auth | JWT (jsonwebtoken) + cookie httpOnly |
+| Auth | JWT (jsonwebtoken) + cookie httpOnly · WebAuthn para passkeys |
 | Passwords | bcryptjs (10 rounds) |
-| Email | Resend |
+| Email | Resend (SDK oficial, `src/lib/email.ts`) |
 | Deploy | Vercel |
 | Tipado | TypeScript |
+| Pagos | Mercado Pago (checkout propio + links de suscripción) |
+| IA | Anthropic (pipeline de planes) · Gemini (templates) |
+| Archivos | Vercel Blob |
 
 **Dependencia notable sin uso:** `@supabase/supabase-js` está en `package.json` pero nunca se importa en el código. El proyecto usa Prisma directo con `pg` para la DB. No hace falta Supabase client SDK. Se puede remover.
 
@@ -114,19 +117,49 @@ DIRECT_URL="postgresql://..."   # Usado por Prisma Migrate (conexión directa, s
 # JWT
 JWT_SECRET="string_aleatorio_minimo_32_chars"
 
-# Email (Resend)
+# Email (Resend) — sin estas dos NINGÚN mail sale
 RESEND_API_KEY="re_xxxxxxxxxxxx"
+RESEND_FROM_EMAIL="REVIVA IGZ <noreply@revivabyigz.com>"   # Dominio verificado en Resend
 
-# Trainer
-TRAINER_EMAIL="ian@igztrainer.com"
-ADMIN_EMAILS="ian@igztrainer.com"   # Comma-separated. Define quién puede acceder a /admin
+# Trainer y admin
+TRAINER_EMAIL="ian@igztrainer.com"          # Destino de las notificaciones
+ADMIN_EMAILS="ian@igztrainer.com"           # Comma-separated. Define acceso a /admin
+REVIVA_CONTACT_EMAIL="hola@igztrainer.com"  # Email de contacto en los textos legales
+
+# Mercado Pago
+MP_ACCESS_TOKEN="APP_USR-..."
+MP_PUBLIC_KEY="APP_USR-..."
+NEXT_PUBLIC_MP_PUBLIC_KEY="APP_USR-..."     # Mismo valor, expuesto al browser
+MP_WEBHOOK_SECRET="..."                     # MP > Webhooks > Clave secreta
+
+# URLs
+NEXT_PUBLIC_BASE_URL="https://re-viva.vercel.app"   # back_urls de MP. Sin trailing slash
+NEXT_PUBLIC_SITE_URL="https://www.revivabyigz.com"  # Dominio público: canonicals, sitemap, OG
+
+# WebAuthn (login con passkey)
+WEBAUTHN_RPID="re-viva.vercel.app"            # Dominio, sin protocolo
+WEBAUTHN_ORIGIN="https://re-viva.vercel.app"  # Con protocolo
+
+# Crons de Vercel
+CRON_SECRET="string_aleatorio"   # Si falta, /api/cron/* responde 503
+
+# Vercel Blob (archivos de clientes en el back office)
+REVIVA_READ_WRITE_TOKEN="vercel_blob_rw_..."
+
+# IA
+ANTHROPIC_API_KEY="sk-ant-..."   # Pipeline de generación de planes
+GEMINI_API_KEY="AIza..."         # api/admin/templates/generar-ia
 ```
 
 ### Notas importantes sobre las env vars
 
 - **`DATABASE_URL` vs `DIRECT_URL`:** Supabase provee dos URLs. `DATABASE_URL` usa el connection pooler (puerto 6543) y es la que usa Prisma en runtime. `DIRECT_URL` es la conexión directa (puerto 5432) y se necesita para `prisma migrate`. Si solo hay una URL, usar la directa para ambas en dev.
 - **`ADMIN_EMAILS`:** La función `esAdmin()` en `src/lib/auth.ts` splitea esta variable por coma. Si está vacía, nadie es admin. Si hay un space después de la coma, puede fallar — la función hace `.trim()` así que está cubierto.
-- **`RESEND_API_KEY`:** En `src/lib/email.ts` hay un fallback `|| ''` para que el build de Vercel no falle si la variable no está en build-time. El string vacío evita el error de inicialización del módulo. El valor real debe estar en las env vars de Vercel para que el envío de emails funcione en runtime.
+- **`RESEND_FROM_EMAIL`:** Tiene que ser una dirección de un dominio verificado en Resend. Si no lo está, la API rechaza el envío. El default del código es `noreply@revivabyigz.com`.
+- **`RESEND_API_KEY`:** El cliente de Resend se instancia dentro de `enviarMail()`, no a nivel de módulo, así que una variable ausente no rompe el build — falla el envío con un mensaje claro en los logs.
+- **`CRON_SECRET`:** Vercel la manda como `Authorization: Bearer <valor>` al invocar los crons de `vercel.json`. Si no está definida, las rutas `/api/cron/*` devuelven 503 en vez de quedar abiertas al público.
+- **`NEXT_PUBLIC_BASE_URL` vs `NEXT_PUBLIC_SITE_URL`:** La primera es el deploy que atiende las back_urls de Mercado Pago. La segunda es el dominio con el que el sitio quiere ser indexado (`src/lib/site.ts`). Hoy son distintas.
+- **Nombre del token de Blob:** el código lee `REVIVA_READ_WRITE_TOKEN`, no `BLOB_READ_WRITE_TOKEN`.
 
 ---
 
@@ -189,11 +222,38 @@ Las páginas verifican `/api/auth/me` en `useEffect`:
 | GET | `/api/auth/me` | JWT cookie | Devuelve usuario actual |
 | POST | `/api/auth/recuperar` | Ninguna | Envía código de recuperación |
 | POST | `/api/auth/reset-password` | Ninguna | Cambia contraseña con código |
+| POST | `/api/auth/webauthn/register-options` · `/register` | JWT cookie | Alta de passkey |
+| POST | `/api/auth/webauthn/login-options` · `/login` | Ninguna | Login con passkey |
 | POST | `/api/onboarding` | JWT cookie | Crea perfil nutricional + plan |
+| POST | `/api/checkin` | JWT cookie | Check-in de seguimiento del cliente |
+| GET | `/api/leaderboard` | JWT cookie | Ranking de clientes |
+| GET/POST | `/api/curso/progreso` | JWT cookie | Progreso en los cursos |
+| GET | `/api/archivos/[id]` | JWT cookie | Descarga un archivo del cliente |
+| POST | `/api/payments/create-preference` | JWT cookie | Crea preferencia de pago en MP |
+| POST | `/api/payments/process` | JWT cookie | Procesa el pago del brick |
+| POST | `/api/payments/webhook` | Firma MP | Notificación asíncrona de Mercado Pago |
+| POST | `/api/plans/generate` · `/generate-batch` | Admin JWT | Generación de planes con IA |
+| GET | `/api/cron/cumpleanos` | CRON_SECRET | Saludo de cumpleaños (diario, 12 UTC) |
+| GET | `/api/cron/vencimientos` | CRON_SECRET | Aviso de vencimiento a 7 días |
 | GET | `/api/admin/clientes` | Admin JWT | Lista todos los clientes |
 | GET | `/api/admin/cliente/[id]` | Admin JWT | Detalle de cliente |
+| GET | `/api/admin/cliente/[id]/consentimientos` | Admin JWT | Consentimientos legales del cliente |
+| GET | `/api/admin/consentimientos-pendientes` | Admin JWT | Clientes con consentimientos sin firmar |
+| POST | `/api/admin/registrar-cliente` | Admin JWT | Alta manual de cliente + envío de credenciales |
+| DELETE | `/api/admin/delete-cliente/[id]` | Admin JWT | Baja de cliente |
 | POST | `/api/admin/activar-plan/[id]` | Admin JWT | Activa plan con macros del trainer |
-| PATCH | `/api/admin/entrega/[id]` | Admin JWT | Actualiza estado de entrega de un componente |
+| PATCH | `/api/admin/entrega/[id]` | Admin JWT | Estado de entrega de un componente |
+| GET/POST/DELETE | `/api/admin/archivos/[userId]` | Admin JWT | Archivos del cliente (Vercel Blob) |
+| GET | `/api/admin/ebooks-pendientes` | Admin JWT | Ebooks pagados sin entregar |
+| POST | `/api/admin/ebooks/[id]/entregar` | Admin JWT | Marca el ebook como entregado |
+| CRUD | `/api/admin/foods` · `/foods/[id]` | Admin JWT | Base de alimentos |
+| CRUD | `/api/admin/meal-plans` · `/[id]` | Admin JWT | Planes de comida |
+| GET | `/api/admin/meal-plans/[id]/shopping-list` | Admin JWT | Lista de compras del plan |
+| CRUD | `/api/admin/templates` · `/[id]` | Admin JWT | Templates de planes |
+| POST | `/api/admin/templates/generar-ia` | Admin JWT | Genera template con Gemini |
+| GET | `/api/admin/reviews` · `/[planId]` | Admin JWT | Revisión de planes generados |
+| POST | `/api/admin/reviews/[planId]/approve` · `/reject` · `/regenerate` | Admin JWT | Aprueba, rechaza o regenera |
+| GET | `/api/test/mp` | Admin JWT | Diagnóstico de credenciales de MP |
 
 **Cómo funciona el check de admin:** Cada ruta admin llama a `esAdmin(payload.email)` que verifica si el email del JWT está en `ADMIN_EMAILS`. No hay tabla de roles — se maneja por env var.
 
@@ -291,7 +351,7 @@ Calcula la recomendación nutricional pre-cálculo que el trainer ve al revisar 
 ### BUG RESUELTO: Build de Vercel falla por RESEND_API_KEY
 **Síntoma:** El build de Vercel fallaba si `RESEND_API_KEY` no estaba disponible en build-time.
 **Causa:** `new Resend(undefined)` lanza error al importar el módulo.
-**Fix aplicado:** `src/lib/email.ts` usa `process.env.RESEND_API_KEY || ''` como fallback. El string vacío evita el error de inicialización. El valor real debe estar en las env vars de Vercel para que funcione en runtime.
+**Fix aplicado:** el cliente de Resend se instancia dentro de `enviarMail()`, no a nivel de módulo. Una variable ausente no rompe el build; falla el envío con un error explícito.
 
 ### CAMBIO UX: QR de pago eliminado de pendiente/page.tsx
 **Razón:** El QR (`/public/qr-pago.png`) no existía y mostraba un placeholder roto. El botón de WhatsApp cubre 100% del caso de uso. El QR se eliminó completamente (en mobile y desktop). La página es más limpia y directa.
@@ -303,10 +363,22 @@ Calcula la recomendación nutricional pre-cálculo que el trainer ve al revisar 
 ### CAMBIO UX: Sección "Problemas comunes" agregada en landing
 **Razón:** Antes de mostrar la solución, el usuario necesita verse reflejado en el problema. La sección aparece entre el Hero y "Qué incluye", con 4 pain points del público objetivo.
 
-### BUG CONOCIDO: Dominio de email no verificado en Resend
-**Síntoma:** Los emails de recuperación de contraseña pueden no entregarse.
-**Causa:** El `from` en `src/lib/email.ts` es `noreply@reviva.recuperar` — un dominio que muy probablemente no está verificado en Resend. Resend requiere dominio verificado para enviar desde él.
-**Estado:** Sin fix. Para solucionar: verificar un dominio real en Resend (ej. `noreply@igztrainer.com`) y actualizar el campo `from` en ambas funciones de email.
+### BUG RESUELTO: el sistema de mails estaba muerto
+**Síntoma:** ningún email salía en producción — ni recuperación de contraseña, ni credenciales de cliente, ni avisos al trainer, ni los crons.
+**Causa:** `email.ts` había migrado de Resend a Nodemailer con Gmail SMTP, pero `GMAIL_APP_PASSWORD` nunca se cargó en Vercel. En paralelo, `api/payments/webhook` mandaba por su cuenta con un cliente de Resend aparte y `from: noreply@reviva.recuperar`, un dominio inexistente que Resend rechaza siempre.
+**Fix aplicado:** todo el envío volvió a Resend, con un solo `enviarMail()` en `src/lib/email.ts`. Se eliminó Nodemailer. El `from` sale de `RESEND_FROM_EMAIL`.
+**Detalle que importa:** el SDK de Resend **no tira excepción** cuando la API rechaza un envío — devuelve `{ error }`. `enviarMail()` lo chequea y lanza. Sin eso, los fallos pasan callados.
+**Pendiente:** verificar `revivabyigz.com` en Resend (los 4 registros DNS los carga quien administra el dominio) y cargar `RESEND_FROM_EMAIL` en Vercel.
+
+### BUG RESUELTO: los crons estaban abiertos al público
+**Síntoma:** cualquiera podía invocar `/api/cron/cumpleanos` y `/api/cron/vencimientos`.
+**Causa:** el guard era `if (process.env.CRON_SECRET && ...)` y `CRON_SECRET` no estaba definida en Vercel, así que la condición nunca se evaluaba.
+**Fix aplicado:** ahora es fail-closed — sin `CRON_SECRET` la ruta devuelve 503.
+
+### CAMBIO: la landing del dev se mergeó a este repo
+**Qué pasó:** un dev externo (`Valen330/re-viva-site`) trabajó la landing en un repo nuevo, sin backend. De ahí se trajeron el fix de anchors con Lenis, el bundle de SEO (robots, sitemap, OG image, canonicals), `/ads` y los links de suscripción de Mercado Pago.
+**Qué NO se trajo:** el dev había reemplazado todos los CTA por links de WhatsApp porque su repo no tiene app. Acá el embudo sigue siendo registro → onboarding → pago.
+**Ojo con los `mpago.la`:** son preapprovals que no pasan por `create-preference`, así que el webhook no los registra en la DB. Por eso se ofrecen en `/pendiente`, no en las cards de la landing.
 
 ---
 
@@ -362,12 +434,12 @@ Fix sugerido: Crear `middleware.ts` en la raíz que verifique el JWT en `re-viva
 `/api/auth/login` y `/api/auth/recuperar` no tienen rate limiting. Son vulnerables a brute force y spam.
 Fix sugerido: Usar Vercel Edge Config + IP-based rate limiting, o middleware con un contador en memoria/Redis.
 
-**3. Dominio Resend no verificado**
-Ver Bug #4 en la sección anterior.
+**3. Dominio `revivabyigz.com` sin verificar en Resend**
+El código ya manda por Resend, pero hasta que no estén los 4 registros DNS (DKIM, SPF y MX en `send`, DMARC) la API rechaza todo. El DNS está en Namecheap y lo administra el dev externo.
 
 ### Media prioridad
 
-**4. `@supabase/supabase-js` instalado pero sin usar**
+**4. `@supabase/supabase-js` instalado pero sin usar** (verificado: 0 imports en `src/` y `scripts/`)
 Dependencia fantasma. Pesa ~500kb.
 Fix: `npm uninstall @supabase/supabase-js`
 
@@ -806,4 +878,4 @@ Medicación actual:
 
 ---
 
-*Última actualización: 2026-05-18.*
+*Última actualización: 2026-10-09.*
