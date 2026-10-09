@@ -1,38 +1,27 @@
-// Servicio de email con Nodemailer (SMTP)
-// Compatible con Gmail, Outlook, Zoho, cualquier proveedor SMTP
+// Servicio de email con Resend
+//
+// El `from` tiene que ser una dirección de un dominio verificado en Resend
+// (revivabyigz.com). Si no lo está, Resend rechaza el envío.
 
-import nodemailer from 'nodemailer'
+import { Resend } from 'resend'
 import type { OnboardingData, IGZResult } from '@/types'
 
-// ─── Transporter singleton ────────────────────────────────────────────────────
-// Se crea una vez y se reutiliza. En Vercel (serverless) se crea por invocación,
-// lo cual es normal — nodemailer maneja la conexión correctamente.
-
-function crearTransporter() {
-  const user = process.env.GMAIL_USER
-  const pass = process.env.GMAIL_APP_PASSWORD
-
-  // Sin credenciales nodemailer falla con un error de SMTP poco legible.
-  // Cortamos antes y con mensaje claro: las 6 funciones de este archivo
-  // llaman a crearTransporter() dentro de un try/catch que lo loguea.
-  if (!user || !pass) {
-    throw new Error(
-      'Faltan credenciales SMTP. Definí GMAIL_USER y GMAIL_APP_PASSWORD en .env y en Vercel.'
-    )
-  }
-
-  return nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // TLS
-    auth: { user, pass },
-  })
-}
-
 const TRAINER_EMAIL = process.env.TRAINER_EMAIL!
-// Gmail SMTP solo acepta como remitente la cuenta autenticada: el From
-// tiene que ser GMAIL_USER. No hay fallback posible.
-const FROM_EMAIL    = `REVIVA IGZ <${process.env.GMAIL_USER}>`
+const FROM_EMAIL    = process.env.RESEND_FROM_EMAIL ?? 'REVIVA IGZ <noreply@revivabyigz.com>'
+
+type Mail = { from: string; to: string; subject: string; html: string }
+
+// Todos los envíos pasan por acá. Resend NO tira excepción cuando la API
+// rechaza el mail: devuelve { error }. Si no se mira, el fallo pasa callado
+// y el try/catch de cada función nunca se entera.
+async function enviarMail(mail: Mail): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) throw new Error('Falta RESEND_API_KEY en el entorno (.env y Vercel).')
+  if (!mail.to) throw new Error('Destinatario vacío — revisar TRAINER_EMAIL.')
+
+  const { error } = await new Resend(apiKey).emails.send(mail)
+  if (error) throw new Error(`Resend rechazó el envío — ${error.name}: ${error.message}`)
+}
 
 // Etiquetas legibles para los enums
 const labels = {
@@ -52,8 +41,7 @@ export async function enviarCodigoRecuperacion(
   console.log(`[EMAIL] Enviando código de recuperación a: ${email}`)
 
   try {
-    const transporter = crearTransporter()
-    await transporter.sendMail({
+    await enviarMail({
       from:    FROM_EMAIL,
       to:      email,
       subject: 'Tu código para restablecer la contraseña — REVIVA',
@@ -108,8 +96,7 @@ export async function enviarNotificacionNuevoCliente(
   console.log(`[EMAIL] Notificando nuevo cliente a trainer: ${TRAINER_EMAIL}`)
 
   try {
-    const transporter = crearTransporter()
-    await transporter.sendMail({
+    await enviarMail({
       from:    FROM_EMAIL,
       to:      TRAINER_EMAIL,
       subject: `Nuevo cliente: ${nombreCliente}`,
@@ -217,8 +204,7 @@ export async function enviarEmailActivacion(
   }
 
   try {
-    const transporter = crearTransporter()
-    await transporter.sendMail({
+    await enviarMail({
       from:    FROM_EMAIL,
       to:      emailCliente,
       subject: `Tu plan está listo, ${nombreCliente} — REVIVA`,
@@ -302,8 +288,7 @@ export async function enviarCredencialesCliente(
   const loginUrl = `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://reviva.vercel.app'}/login`
 
   try {
-    const transporter = crearTransporter()
-    await transporter.sendMail({
+    await enviarMail({
       from:    FROM_EMAIL,
       to:      email,
       subject: `${nombre}, tu acceso a REVIVA está listo`,
@@ -366,8 +351,7 @@ export async function enviarFelicitacionCumpleanos(
 ): Promise<void> {
   const dashUrl = `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://reviva.igztrainer.com'}/login?redirect=/dashboard`
   try {
-    const transporter = crearTransporter()
-    await transporter.sendMail({
+    await enviarMail({
       from:    FROM_EMAIL,
       to:      email,
       subject: `¡Feliz cumpleaños, ${nombre}! — REVIVA`,
@@ -416,8 +400,7 @@ export async function enviarRecordatorioVencimiento(
   const waUrl    = `https://wa.me/${process.env.WHATSAPP_NUMBER ?? '5491122835621'}?text=${encodeURIComponent(`Hola Ian, quiero renovar mi plan de REVIVA.`)}`
 
   try {
-    const transporter = crearTransporter()
-    await transporter.sendMail({
+    await enviarMail({
       from:    FROM_EMAIL,
       to:      email,
       subject: `Tu plan REVIVA vence en ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}`,
@@ -476,8 +459,7 @@ export async function enviarNotificacionPagoAprobado(
   monto: number,
 ): Promise<void> {
   try {
-    const transporter = crearTransporter()
-    await transporter.sendMail({
+    await enviarMail({
       from:    FROM_EMAIL,
       to:      TRAINER_EMAIL,
       subject: `✅ Pago aprobado — ${nombreCliente}`,
