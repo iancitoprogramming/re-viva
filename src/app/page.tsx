@@ -1,6 +1,7 @@
 // Landing page — REVIVA by IGZ Trainer
 // Server component. Composicion de secciones aisladas en /components/landing
 
+import type { Metadata } from 'next'
 import LandingHeader  from '@/components/landing/LandingHeader'
 import LandingFooter  from '@/components/landing/LandingFooter'
 import CursorGlow     from '@/components/CursorGlow'
@@ -17,6 +18,10 @@ import Pagos          from '@/components/landing/Pagos'
 import CursoEntrenadores from '@/components/landing/CursoEntrenadores'
 import CTAFinal       from '@/components/landing/CTAFinal'
 import Terminos       from '@/components/landing/Terminos'
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+}
 
 export default function LandingPage() {
   return (

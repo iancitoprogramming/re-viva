@@ -3,6 +3,13 @@
 
 import nodemailer from 'nodemailer'
 import type { OnboardingData, IGZResult } from '@/types'
+import {
+  etiqueta, etiquetas, OBSTACULOS, HORARIOS_ENTRENAMIENTO, FRECUENCIA_COME_AFUERA,
+  LUGARES_COME_AFUERA, SESIONES_COCINA, SUPERMERCADOS,
+} from '@/lib/cuestionario'
+import type { CategoriaCompra } from '@prisma/client'
+import { agruparPorCategoria, cantidadLegible } from '@/lib/compras'
+import { PRECIO_GESTION_COMPRA, SITE_URL, WHATSAPP_COMPRA_DFY, WHATSAPP_VIDEOLLAMADA } from '@/lib/constants'
 
 // ─── Transporter singleton ────────────────────────────────────────────────────
 // Se crea una vez y se reutiliza. En Vercel (serverless) se crea por invocación,
@@ -130,6 +137,12 @@ export async function enviarNotificacionNuevoCliente(
                 ['Nivel de estrés',    labels.estres[perfil.nivelEstres as keyof typeof labels.estres]],
                 ['Horas de sueño',     `${perfil.horasSueno} hs/noche`],
                 ['Adherencia',         labels.adherencia[perfil.adherencia as keyof typeof labels.adherencia]],
+                ['Horario entrenamiento', etiqueta(HORARIOS_ENTRENAMIENTO, perfil.horarioEntrenamiento)],
+                ['Come afuera',        `${etiqueta(FRECUENCIA_COME_AFUERA, perfil.comeAfuera)}${perfil.lugaresComeAfuera?.length ? ` (${etiquetas(LUGARES_COME_AFUERA, perfil.lugaresComeAfuera)})` : ''}`],
+                ['Cocina',             etiqueta(SESIONES_COCINA, perfil.sesionesCocina)],
+                ['Supermercado',       etiqueta(SUPERMERCADOS, perfil.supermercado)],
+                ['Obstáculos',         etiquetas(OBSTACULOS, perfil.obstaculos)],
+                ['Resultado soñado',   perfil.resultadoSonado || '—'],
               ].map(([k, v], i) => `
                 <tr style="background: ${i % 2 === 0 ? '#F8F5EF' : '#FFFFFF'};">
                   <td style="padding: 8px 12px; color: #6B7B64; width: 45%;">${k}</td>
@@ -454,5 +467,86 @@ export async function enviarRecordatorioVencimiento(
     console.log(`[EMAIL] Recordatorio vencimiento enviado a: ${email}`)
   } catch (err: unknown) {
     console.error('[EMAIL] Error recordatorio vencimiento:', (err as Error).message)
+  }
+}
+
+// ─── EMAIL: lista de compras semanal (interna → cliente) ─────────────────────
+// Diagrama del mail: encabezado → semana + 1 línea de cómo usarla → tabla por
+// categoría (Proteínas, Carbohidratos, Verduras, Frutas, Lácteos, Almacén,
+// Suplementos) → notas del trainer → escalera de servicio (DIY / DWY / DFY).
+const escaparHtml = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
+export async function enviarListaCompras(datos: {
+  nombre: string
+  email: string
+  semana: number
+  notas: string | null
+  items: { nombre: string; categoria: CategoriaCompra; cantidad: number; unidad: string }[]
+  supermercado: string | null
+}): Promise<boolean> {
+  const primerNombre = escaparHtml(datos.nombre.split(' ')[0])
+  const grupos = agruparPorCategoria(datos.items)
+  const tieneSuplementos = grupos.some(g => g.key === 'suplementos')
+  const supermercado = datos.supermercado && datos.supermercado !== 'otro'
+    ? escaparHtml(etiqueta(SUPERMERCADOS, datos.supermercado)) : 'tu supermercado online'
+  const precioCompra = `$${PRECIO_GESTION_COMPRA.toLocaleString('es-AR')}`
+
+  const tablas = grupos.map(g => `
+    <h3 style="color: #2D5A3D; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 6px 0;">${g.label}</h3>
+    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+      ${g.items.map(i => `
+        <tr>
+          <td style="padding: 7px 0; border-bottom: 1px solid #EDE8DF; color: #1A2416;">☐ ${escaparHtml(i.nombre)}</td>
+          <td style="padding: 7px 0; border-bottom: 1px solid #EDE8DF; color: #1A2416; font-weight: 700; text-align: right; white-space: nowrap;">${cantidadLegible(i.cantidad, i.unidad)}</td>
+        </tr>`).join('')}
+    </table>`).join('')
+
+  const escalon = (n: string, titulo: string, texto: string, cta: string | null, href: string | null) => `
+    <tr><td style="padding: 10px 0; border-bottom: 1px solid #EDE8DF; vertical-align: top;">
+      <p style="margin: 0; font-size: 14px; color: #1A2416;"><strong>${n}. ${titulo}</strong></p>
+      <p style="margin: 4px 0 0 0; font-size: 13px; color: #6B7B64; line-height: 1.5;">${texto}</p>
+      ${cta && href ? `<a href="${href}" style="display: inline-block; margin-top: 8px; color: #2D5A3D; font-weight: 700; font-size: 13px;">${cta} →</a>` : ''}
+    </td></tr>`
+
+  try {
+    const transporter = crearTransporter()
+    await transporter.sendMail({
+      from:    FROM_EMAIL,
+      to:      datos.email,
+      subject: `Tu lista de compras — Semana ${datos.semana}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; background: #F8F5EF; padding: 24px 16px;">
+          <div style="background: #2D5A3D; color: white; padding: 20px 24px; border-radius: 12px 12px 0 0;">
+            <p style="margin: 0; font-size: 11px; opacity: 0.7; text-transform: uppercase; letter-spacing: 2px;">REVIVA · IGZ Trainer</p>
+            <h1 style="margin: 6px 0 0 0; font-size: 20px;">Semana ${datos.semana}: tu lista de compras</h1>
+          </div>
+          <div style="background: white; padding: 24px; border-radius: 0 0 12px 12px; border: 1px solid #DDD8CC; border-top: none;">
+            <p style="color: #1A2416; font-size: 15px; margin: 0 0 6px 0;">${primerNombre}, esto es todo lo que necesitás para la semana.</p>
+            <p style="color: #6B7B64; font-size: 13px; margin: 0; line-height: 1.5;">
+              Cantidades totales de la semana, como se compran (en crudo). Comprá todo junto y cociná siguiendo tu guía de meal prep.
+            </p>
+            ${tablas}
+            ${tieneSuplementos ? `<p style="color: #6B7B64; font-size: 12px; margin: 12px 0 0 0;">Los suplementos que recomendamos, con link: <a href="${SITE_URL}/suplementos" style="color: #2D5A3D;">revivabyigz.com/suplementos</a>. Algunos links son de afiliado.</p>` : ''}
+            ${datos.notas ? `<div style="background: #FEF9EC; border-radius: 10px; padding: 12px 14px; margin-top: 20px; font-size: 13px; color: #1A2416; line-height: 1.5;"><strong>Nota de Ian:</strong> ${escaparHtml(datos.notas)}</div>` : ''}
+
+            <h2 style="color: #1A2416; font-size: 15px; margin: 28px 0 4px 0;">¿Cómo querés resolver la compra?</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+              ${escalon('1', 'Hacelo vos', 'Con esta lista, tu guía de meal prep y la guía para comer afuera. Sin costo extra.', null, null)}
+              ${escalon('2', 'Lo hacemos juntos', 'Videollamada para armar la compra o resolver dudas del plan. Sin costo extra.', 'Agendar videollamada', WHATSAPP_VIDEOLLAMADA)}
+              ${escalon('3', 'Lo hago por vos', `Armo y hago tu compra en ${supermercado}. Gestión: ${precioCompra} (la mercadería y el envío los pagás aparte con tu tarjeta). Te pido dirección, horario para recibir y los datos de la tarjeta. Al recibir, el titular tiene que estar presente con DNI y la tarjeta física con la que se pagó; si no, el súper no entrega.`, 'Quiero que me hagas la compra', WHATSAPP_COMPRA_DFY)}
+            </table>
+          </div>
+          <p style="color: #9B9589; font-size: 11px; text-align: center; margin-top: 16px;">
+            REVIVA · IGZ Trainer · <a href="${SITE_URL}/terminos" style="color: #9B9589;">Términos</a>
+          </p>
+        </div>
+      `,
+    })
+    console.log(`[EMAIL] Lista de compras semana ${datos.semana} enviada a: ${datos.email}`)
+    return true
+  } catch (err: unknown) {
+    console.error('[EMAIL] Error lista de compras:', (err as Error).message)
+    return false
   }
 }
