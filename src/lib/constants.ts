@@ -9,6 +9,46 @@ export const WHATSAPP_CONSULTA   = `https://wa.me/${WHATSAPP_NUMBER}?text=${enco
 
 export const PLAN_CTA_HREF = '/login?modo=registro'
 
+// CTA de un plan: registro → cuestionario → /pendiente, arrastrando el plan elegido
+// (login honra `redirect`, onboarding reenvía `plan` a /pendiente).
+export function planCtaHref(planKey?: string): string {
+  if (!planKey) return PLAN_CTA_HREF
+  return `${PLAN_CTA_HREF}&redirect=${encodeURIComponent(`/onboarding?plan=${planKey}`)}`
+}
+
+// ─── Links de suscripción MercadoPago (débito automático) ─────────────────────
+// Fuente: links enviados por Ian (ago 2026). Cada uno es un preapproval_plan_id
+// de MP — el cobro se renueva solo cada mes. Presencial va directo al link;
+// online pasa primero por registro + cuestionario y el link aparece en /pendiente.
+export const MP_LINKS = {
+  onlineMensual:           'https://mpago.la/2iEJkBV', // Online — $88.000/mes
+  onlinePresencialMensual: 'https://mpago.la/2JHcHnP', // Online + 1 clase — $110.000/mes
+  individual2x:            'https://mpago.la/21mEnfS', // Individual 2x/sem — $208.000/mes
+  individual3x:            'https://mpago.la/1ZnSaet', // Individual 3x/sem — $312.000/mes
+  individual4x:            'https://mpago.la/159padT', // Individual 4x/sem — $416.000/mes
+  individual5x:            'https://mpago.la/1w4HaAm', // Individual 5x/sem — $520.000/mes
+  individual2xTrimestral:  'https://mpago.la/29mgwyM', // Trimestral 2x/sem — $561.000 / 3 meses
+  individual3xTrimestral:  'https://mpago.la/2X1eVi2', // Trimestral 3x/sem — $842.400 / 3 meses
+  duo2x:                   'https://mpago.la/1mHq7SK', // En dúo 2x/sem — $145.000/mes
+  duo3x:                   'https://mpago.la/2h1PKhZ', // En dúo 3x/sem — $218.400/mes
+  trios2x:                 'https://mpago.la/1XyJsF4', // En tríos 2x/sem — $124.800/mes
+  trios3x:                 'https://mpago.la/1KAkXbm', // En tríos 3x/sem — $187.200/mes
+} as const
+
+// Plan elegido en la landing → link de débito automático (se muestra en /pendiente)
+export const MP_SUSCRIPCION_POR_PLAN: Record<string, string> = {
+  'online-mensual':            MP_LINKS.onlineMensual,
+  'online-presencial-mensual': MP_LINKS.onlinePresencialMensual,
+}
+
+// ─── Escalera de servicio (Documento de Nutrición) ────────────────────────────
+// Nivel 3 "Lo hago por vos": Ian arma y hace la compra online por el cliente.
+export const PRECIO_GESTION_COMPRA = 15000
+export const WHATSAPP_COMPRA_DFY = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola Ian, quiero que me hagas la compra de la semana (servicio "Lo hago por vos").')}`
+export const WHATSAPP_VIDEOLLAMADA = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola Ian, quiero agendar la videollamada para armar la compra / revisar mi plan.')}`
+
+export const SITE_URL = 'https://www.revivabyigz.com'
+
 // ─── Planes disponibles ────────────────────────────────────────────────────────
 export const PLANES_MP = {
   'on-demand': {
@@ -44,25 +84,25 @@ export const PLANES_MP = {
   'presencial-3x-mensual': {
     titulo: 'Presencial 3 veces/semana — Mensual',
     descripcion: 'Entrenamiento privado presencial 3 veces por semana.',
-    monto: 198000,
+    monto: 312000,
     badge: 'Presencial',
   },
   'presencial-4x-mensual': {
     titulo: 'Presencial 4 veces/semana — Mensual',
     descripcion: 'Entrenamiento privado presencial 4 veces por semana.',
-    monto: 246400,
+    monto: 416000,
     badge: 'Presencial',
   },
   'presencial-5x-mensual': {
     titulo: 'Presencial 5 veces/semana — Mensual',
     descripcion: 'Entrenamiento privado presencial 5 veces por semana.',
-    monto: 286000,
+    monto: 520000,
     badge: 'Presencial',
   },
   'presencial-3x-trimestral': {
     titulo: 'Presencial 3 veces/semana — Trimestral',
     descripcion: 'Entrenamiento privado presencial 3 veces por semana. 3 meses — 36 clases.',
-    monto: 514800,
+    monto: 842400,
     badge: 'Trimestral',
   },
   'presencial-4x-trimestral': {

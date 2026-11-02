@@ -2,12 +2,23 @@
 
 import Link from 'next/link'
 import { INSTAGRAM_URL } from '@/lib/constants'
+import { useScrollToSection } from '@/components/ScrollProvider'
 
 const GOLD    = '#C9A84C'
 const IVORY50 = 'rgba(245,242,231,0.50)'
 const IVORY25 = 'rgba(245,242,231,0.25)'
 
 export default function LandingFooter() {
+  const scrollToSection = useScrollToSection()
+
+  // Mismo criterio que el header: Lenis no responde a anchors nativos.
+  function handleAnchorClick(e: React.MouseEvent<HTMLAnchorElement>, href: string) {
+    const id = href.split('#')[1]
+    if (!id || !scrollToSection?.(id)) return
+    e.preventDefault()
+    history.pushState(null, '', href)
+  }
+
   return (
     <footer
       className="px-6 py-8"
@@ -25,12 +36,14 @@ export default function LandingFooter() {
           </span>
           <span className="text-xs ml-2" style={{ color: IVORY25 }}>by IGZ Trainer</span>
         </div>
-        <div className="flex gap-6">
+        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
           {[
-            { href: '#planes',    label: 'Planes' },
-            { href: '#pagos',     label: 'Pagos' },
-            { href: INSTAGRAM_URL, label: 'Instagram', external: true },
-            { href: '/login',     label: 'Ingresar' },
+            { href: '/#planes',     label: 'Planes' },
+            { href: '/#pagos',      label: 'Pagos' },
+            { href: '/suplementos', label: 'Suplementos' },
+            { href: '/terminos',    label: 'Términos' },
+            { href: INSTAGRAM_URL,  label: 'Instagram', external: true },
+            { href: '/login',       label: 'Ingresar' },
           ].map(({ href, label, external }) =>
             external ? (
               <a
@@ -49,6 +62,7 @@ export default function LandingFooter() {
               <Link
                 key={label}
                 href={href}
+                onClick={href.includes('#') ? e => handleAnchorClick(e, href) : undefined}
                 className="text-xs transition-colors duration-200"
                 style={{ color: IVORY25 }}
               >
