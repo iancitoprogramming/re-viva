@@ -4,6 +4,12 @@ import { obtenerTokenDeRequest, verificarToken } from '@/lib/auth'
 import { correrMotorIGZ } from '@/lib/igzEngine'
 import { enviarNotificacionNuevoCliente } from '@/lib/email'
 import type { OnboardingData } from '@/types'
+import { HORARIOS_ENTRENAMIENTO, FRECUENCIA_COME_AFUERA, SESIONES_COCINA } from '@/lib/cuestionario'
+
+// Solo acepta valores conocidos del cuestionario (el resto se descarta)
+function opcionValida(opciones: readonly { value: string }[], v: unknown): string | null {
+  return typeof v === 'string' && opciones.some(o => o.value === v) ? v : null
+}
 
 function getClientIp(request: Request): string {
   return (
@@ -36,6 +42,12 @@ export async function POST(request: Request) {
       if (body[campo as keyof OnboardingData] === undefined || body[campo as keyof OnboardingData] === '') {
         return NextResponse.json({ error: `El campo "${campo}" es obligatorio.` }, { status: 400 })
       }
+    }
+
+    // El horario define dónde van las comidas pre y post entreno: es obligatorio.
+    const horarioEntrenamiento = opcionValida(HORARIOS_ENTRENAMIENTO, body.horarioEntrenamiento)
+    if (!horarioEntrenamiento) {
+      return NextResponse.json({ error: 'Elegí en qué horario entrenás.' }, { status: 400 })
     }
 
     // Normalización defensiva: la altura debe estar en cm.
@@ -94,6 +106,9 @@ export async function POST(request: Request) {
     const lesionesPasadas              = toStringArray(body.lesionesPasadas)
     const medicacionActual             = toStringArray(body.medicacionActual)
     const flagsEspeciales              = toStringArray(body.flagsEspeciales)
+    const obstaculos                   = toStringArray(body.obstaculos)
+    const lugaresComeAfuera            = toStringArray(body.lugaresComeAfuera)
+    const suplementosActuales          = toStringArray(body.suplementosActuales)
 
     // Auto-flag por edad
     if (typeof body.edad === 'number' && body.edad >= 65 && !flagsEspeciales.includes('adulto_mayor_65plus')) {
@@ -128,6 +143,15 @@ export async function POST(request: Request) {
         metasFisicas:         body.metasFisicas ?? [],
         flagsEspeciales,
         disponibilidadDomingo: body.disponibilidadDomingo ?? 'no',
+        // Cuestionario v2
+        resultadoSonado:      body.resultadoSonado?.trim() || null,
+        obstaculos,
+        horarioEntrenamiento,
+        comeAfuera:           opcionValida(FRECUENCIA_COME_AFUERA, body.comeAfuera) ?? 'nunca',
+        lugaresComeAfuera,
+        sesionesCocina:       opcionValida(SESIONES_COCINA, body.sesionesCocina),
+        supermercado:         body.supermercado || null,
+        suplementosActuales,
         // Pipeline de generación automática
         comidasPorDia:        body.comidasPorDia ?? 4,
         minutosPorSesion:     body.minutosPorSesion ?? 60,
