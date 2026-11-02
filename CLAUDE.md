@@ -26,7 +26,9 @@
 
 **Qué hace:** Plataforma de coaching nutricional y de entrenamiento. El cliente se registra, completa un formulario de onboarding, paga manualmente (transferencia), y el trainer (Ian) activa un plan personalizado desde el panel admin.
 
-**Estado:** MVP funcional, deployado en Vercel.
+**Estado:** MVP funcional, deployado en Vercel. Versión unificada (nov 2026): esta es la única versión; de `Valen330/re-viva-site` se rescató SEO, `/ads`, fix de Lenis y links de suscripción MP. Ver `docs/unificacion.md`.
+
+**Docs de negocio y operación:** `docs/oferta-reviva.md` (oferta Hormozi), `docs/entregables.md` (estructura de los DOCX, flujo de armado, catálogo, listas de compras), `docs/plantillas/*.docx` (plantillas con marca, se regeneran con `npx tsx scripts/generar-plantillas-docx.ts`).
 
 | Capa | Tecnología |
 |------|-----------|
@@ -36,7 +38,7 @@
 | Base de datos | PostgreSQL (Supabase) |
 | Auth | JWT (jsonwebtoken) + cookie httpOnly |
 | Passwords | bcryptjs (10 rounds) |
-| Email | Resend |
+| Email | nodemailer + Gmail SMTP (`GMAIL_USER`, `GMAIL_APP_PASSWORD`). Resend está instalado pero **no se usa** |
 | Deploy | Vercel |
 | Tipado | TypeScript |
 
@@ -151,6 +153,9 @@ ADMIN_EMAILS="ian@igztrainer.com"   # Comma-separated. Define quién puede acced
 ### Onboarding
 `POST /api/onboarding` (requiere cookie válida) → crea `NutritionalProfile` → corre Motor IGZ → crea `NutritionalPlan` en estado PENDIENTE con valores IGZ pre-calculados → envía email al trainer (async, no bloquea) → devuelve `{ ok: true }`
 
+### Cuestionario v2 (nov 2026)
+Además de lo anterior pide: **horario de entrenamiento (obligatorio)**, resultado soñado, obstáculos, cuántas comidas hace afuera y dónde, cuántas sesiones de cocina puede hacer, supermercado y suplementos actuales. Opciones en `src/lib/cuestionario.ts`. Los planes pasan `?plan=` por login → onboarding → `/pendiente` (ahí se ofrece el débito automático MP de los planes online mensuales).
+
 ### Journey completo del cliente (flujo de conversión rediseñado)
 ```
 / (landing — ve Hero, Problemas, Qué incluye, Planes con precios)
@@ -194,6 +199,11 @@ Las páginas verifican `/api/auth/me` en `useEffect`:
 | GET | `/api/admin/cliente/[id]` | Admin JWT | Detalle de cliente |
 | POST | `/api/admin/activar-plan/[id]` | Admin JWT | Activa plan con macros del trainer |
 | PATCH | `/api/admin/entrega/[id]` | Admin JWT | Actualiza estado de entrega de un componente |
+| GET/POST | `/api/admin/suplementos` | Admin JWT | Catálogo de suplementos (+ clics 30 días) / alta |
+| PATCH/DELETE | `/api/admin/suplementos/[id]` | Admin JWT | Editar (link de afiliado, publicar) / borrar |
+| GET/PUT/DELETE | `/api/admin/compras/[userId]` | Admin JWT | Listas de compras semanales (texto pegado → items) |
+| POST | `/api/admin/compras/[userId]/enviar` | Admin JWT | Manda por mail las semanas elegidas |
+| GET | `/suplementos/ir/[slug]?o=` | Ninguna | Registra clic y redirige al link de afiliado |
 
 **Cómo funciona el check de admin:** Cada ruta admin llama a `esAdmin(payload.email)` que verifica si el email del JWT está en `ADMIN_EMAILS`. No hay tabla de roles — se maneja por env var.
 
@@ -219,6 +229,14 @@ Las páginas verifican `/api/auth/me` en `useEffect`:
 - **Valores del trainer** (se llenan al activar): `clasificacion`, `calorias`, `proteina`, `hidratos`, `grasas`, `notasTrainer`, `activadoEn`
 - **Pre-cálculo IGZ** (solo visible para trainer): `igzClasificacion`, `igzCalorias`, `igzProteina`, `igzHidratos`, `igzGrasas`
 - **Tracking de entrega** (5 componentes): `estadoAlimentacion`, `estadoEntrenamiento`, `estadoSuplementacion`, `estadoMealPrep`, `estadoListaCompras` (cada uno: PENDIENTE|EN_PROGRESO|ENTREGADO)
+
+**`ShoppingList` / `ShoppingListItem`** — listas de compras semanales, internas (solo admin, se envían por mail). Una por `userId + semana`. Categoría `CategoriaCompra` (ex `FoodCategoria`, + `ALMACEN`).
+
+**`Suplemento` / `SuplementoClick`** — catálogo público `/suplementos` (afiliados) y registro de clics. Solo se publica si `activo` y tiene `linkAfiliado`.
+
+**Eliminados (nov 2026):** `Food`, `MealPlanTemplate`, `TemplateMeal(Item)`, `MealPlan`, `PlanMeal(Item)`. Los gramajes se calculan fuera de la web; respaldo en `docs/respaldo/`.
+
+**Ojo con las migraciones:** el workflow `migrate.yml` viene fallando y en prod hubo cambios a mano. Antes de deployar leer `docs/unificacion.md` §3–5.
 
 **`ResetToken`** — tokens de recuperación de contraseña
 - `userId`, `codigo` (6 dígitos), `expiresAt` (15 min), `usado` (bool)
@@ -784,6 +802,12 @@ Objetivo: (VOLUMEN / DEFINICION / RECOMPOSICION)
 Días de entrenamiento por semana:
 ¿Tiene disponibilidad para entrenar un domingo? (Sí siempre / A veces / No)
   → Solo relevante si entrena 3x/semana — define distribución FBEOD
+Horario de entrenamiento: (mañana / mediodía / tarde / noche)  ← obligatorio, ubica pre y post entreno
+¿Cuántas comidas hace afuera por semana? ¿Dónde?  ← ≥3 → Guía para comer afuera
+¿Cuántas veces por semana puede cocinar? (2 / 1 / no cocina)  ← dimensiona el meal prep
+Supermercado habitual:  ← nivel "Lo hago por vos"
+¿Qué quiere lograr y para cuándo? (resultado soñado)
+Suplementos que ya toma:
 Nivel de estrés: (BAJO / MEDIO / ALTO)
 Horas de sueño promedio:
 Adherencia percibida: (BAJA / MEDIA / ALTA)
@@ -806,4 +830,14 @@ Medicación actual:
 
 ---
 
-*Última actualización: 2026-05-18.*
+### Documentos de cliente (Entrenamiento + Nutrición)
+
+- Estructura y flujo completo: `docs/entregables.md`. Plantillas: `docs/plantillas/`.
+- Gramajes exactos siempre. **Proteínas se pesan cocidas, hidratos crudos** (excepciones en la plantilla). Medidas caseras solo en la Guía para comer afuera.
+- Una lista de compras por cada semana del plan, por categoría, con totales.
+- **Suplementos:** pedir el link de afiliado a Ian **antes de cerrar el documento**. Se abren las páginas de los productos en Chrome (extensión de Claude), se espera que Ian devuelva los links con el nombre, se cargan en `/admin/suplementos`, y en el documento va el link de "Copiar link para el documento".
+- Al final del de Nutrición siempre va la escalera DIY / DWY / DFY ($15.000 la gestión de compra; titular con DNI + tarjeta física al recibir).
+
+---
+
+*Última actualización: 2026-11-02.*
