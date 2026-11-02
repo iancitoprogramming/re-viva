@@ -15,7 +15,9 @@ const playfair = Playfair_Display({
   variable: '--font-playfair',
   display: 'swap',
   style: ['normal', 'italic'],
-  weight: ['400', '500', '600', '700'],
+  // Sin `weight`: se pide la fuente variable (400–900). Con pesos fijos, Google
+  // a veces responde URLs `fonts.gstatic.com/l/font?kit=…&skey=…` que el loader
+  // de fuentes de Turbopack no resuelve y el build de Vercel falla.
 })
 
 export const metadata: Metadata = {
