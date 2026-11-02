@@ -131,13 +131,13 @@ const presencial = {
       { sesiones: '5 veces por semana', precio: '$520.000', unidad: 'mes',     detalle: null as string | null, mpLink: MP_LINKS.individual5x as string },
     ],
     trimestral: [
-      { sesiones: '2 veces por semana', precio: '$561.000', unidad: '3 meses', detalle: '≈ $187.000 por mes' as string | null, mpLink: MP_LINKS.individual2xTrimestral as string },
+      { sesiones: '2 veces por semana', precio: '$561.600', unidad: '3 meses', detalle: '≈ $187.200 por mes' as string | null, mpLink: MP_LINKS.individual2xTrimestral as string },
       { sesiones: '3 veces por semana', precio: '$842.400', unidad: '3 meses', detalle: '≈ $280.800 por mes' as string | null, mpLink: MP_LINKS.individual3xTrimestral as string },
     ],
   },
   duo: {
     mensual: [
-      { sesiones: '2 veces por semana', precio: '$145.000', unidad: 'mes', detalle: null as string | null, mpLink: MP_LINKS.duo2x as string },
+      { sesiones: '2 veces por semana', precio: '$145.600', unidad: 'mes', detalle: null as string | null, mpLink: MP_LINKS.duo2x as string },
       { sesiones: '3 veces por semana', precio: '$218.400', unidad: 'mes', detalle: null as string | null, mpLink: MP_LINKS.duo3x as string },
     ],
   },

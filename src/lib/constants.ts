@@ -17,7 +17,7 @@ export function planCtaHref(planKey?: string): string {
 }
 
 // ─── Links de suscripción MercadoPago (débito automático) ─────────────────────
-// Fuente: links enviados por Ian (ago 2026). Cada uno es un preapproval_plan_id
+// Fuente: links enviados por Ian (ago 2026); trimestral 2x y dúo 2x actualizados en MP (oct 2026). Cada uno es un preapproval_plan_id
 // de MP — el cobro se renueva solo cada mes. Presencial va directo al link;
 // online pasa primero por registro + cuestionario y el link aparece en /pendiente.
 export const MP_LINKS = {
@@ -27,9 +27,9 @@ export const MP_LINKS = {
   individual3x:            'https://mpago.la/1ZnSaet', // Individual 3x/sem — $312.000/mes
   individual4x:            'https://mpago.la/159padT', // Individual 4x/sem — $416.000/mes
   individual5x:            'https://mpago.la/1w4HaAm', // Individual 5x/sem — $520.000/mes
-  individual2xTrimestral:  'https://mpago.la/29mgwyM', // Trimestral 2x/sem — $561.000 / 3 meses
+  individual2xTrimestral:  'https://mpago.la/29mgwyM', // Trimestral 2x/sem — $561.600 / 3 meses
   individual3xTrimestral:  'https://mpago.la/2X1eVi2', // Trimestral 3x/sem — $842.400 / 3 meses
-  duo2x:                   'https://mpago.la/1mHq7SK', // En dúo 2x/sem — $145.000/mes
+  duo2x:                   'https://mpago.la/1mHq7SK', // En dúo 2x/sem — $145.600/mes
   duo3x:                   'https://mpago.la/2h1PKhZ', // En dúo 3x/sem — $218.400/mes
   trios2x:                 'https://mpago.la/1XyJsF4', // En tríos 2x/sem — $124.800/mes
   trios3x:                 'https://mpago.la/1KAkXbm', // En tríos 3x/sem — $187.200/mes
