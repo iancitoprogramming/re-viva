@@ -4,7 +4,7 @@
 -- de elección puede leer el link de afiliado de la DB por id.
 -- Fuera, por no estar en el research: proteína vegetal, psyllium,
 -- multivitamínico. Cafeína queda fuera de la web: "el café alcanza".
--- Todo arranca inactivo: se publica desde /admin/suplementos al cargar el link.
+-- Los 14 quedan activos con su link de afiliado: ver el UPDATE del final.
 
 DELETE FROM "Suplemento"
 WHERE "id" IN ('sup_creatina','sup_whey','sup_proteina_vegetal','sup_cafeina','sup_omega3',
@@ -100,3 +100,46 @@ INSERT INTO "Suplemento" ("id", "slug", "nombre", "objetivos", "paraQueSirve", "
   '3,2 a 6,4 g por día repartidos en varias tomas, durante 4 semanas o más: funciona por saturación, no tomándola solo el día que entrenás. El hormigueo en cara y manos es esperable e inofensivo.',
   89, CURRENT_TIMESTAMP)
 ON CONFLICT ("slug") DO NOTHING;
+
+-- ─── Links de afiliado ───────────────────────────────────────────────────────
+-- Generados el 4/11/2026 desde la cuenta de afiliado IGZTRAINER de Mercado Libre
+-- (etiqueta `goldenwalhalla`). Una opción por slug, elegida con el criterio de
+-- content/suplementos/research.md: RNPA, monohidrato sin sabor, Creapure cuando
+-- entra en presupuesto, EPA+DHA declarado, bisglicinato y no óxido.
+-- El relevamiento completo, con las opciones descartadas, está en
+-- content/suplementos/links-afiliados-cargados.md.
+--
+-- Ojo: los links de ML Argentina caen en el perfil social del afiliado
+-- (mercadolibre.com.ar/social/goldenvalhalla) con el producto destacado y un
+-- botón "Ir a producto". No hay opción de link directo en el programa.
+--
+-- Solo se cargan las fichas que todavía no tienen link, así no se pisa nada
+-- cargado a mano desde /admin/suplementos.
+
+UPDATE "Suplemento" AS s SET
+  "marca"         = v."marca",
+  "linkAfiliado"  = v."link",
+  "precioArs"     = v."precio",
+  "relevadoEn"    = CURRENT_TIMESTAMP,
+  "activo"        = TRUE,
+  "actualizadoEn" = CURRENT_TIMESTAMP
+FROM (VALUES
+  -- Lo básico
+  ('balanza-cocina',  'Gadnic',         'https://meli.la/1zauWn6', 16999),
+  ('balanza-personal','Silfab',         'https://meli.la/1KWJyYi', 26000),
+  ('cinta-metrica',    NULL,            'https://meli.la/2tDdiFF', 20790),
+  ('shaker',          'ENA Sport',      'https://meli.la/2cg2LnX', 17451),
+  ('botella',         'MTL',            'https://meli.la/29c6HHD', 20360),
+  -- Nivel 1
+  ('creatina',        'ENA Sport',      'https://meli.la/2oZTAt3', 71200),
+  ('whey',            'ENA Sport',      'https://meli.la/2FR9owa', 102000),
+  ('vitamina-d',      'NOW',            'https://meli.la/1nxa4iA', 33000),
+  ('omega-3',         'Vits',           'https://meli.la/2rB7hA5', 31999),
+  -- Nivel 2
+  ('colageno',        'WPN',            'https://meli.la/2NSpyL7', 30600),
+  ('vitamina-c',      'Nature Made',    'https://meli.la/1xu4Jyt', 52283),
+  ('magnesio',        'ENA Sport',      'https://meli.la/2aDaTvq', 17460),
+  ('electrolitos',    'Vits',           'https://meli.la/2s38CMt', 42680),
+  ('beta-alanina',    'Star Nutrition', 'https://meli.la/1FVecYD', 33099)
+) AS v("slug", "marca", "link", "precio")
+WHERE s."slug" = v."slug" AND s."linkAfiliado" IS NULL;

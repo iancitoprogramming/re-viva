@@ -1,5 +1,12 @@
 # Links de afiliado — checklist
 
+> **Resuelto el 4/11/2026.** Los links se generaron desde la cuenta IGZTRAINER
+> (etiqueta `goldenwalhalla`) y ya están cargados en la migración
+> `20261104000100_catalogo_segun_research`: una opción por slug, activa.
+> El relevamiento completo — las 33 opciones, con precios y lo que quedó pendiente —
+> está en [`links-afiliados-cargados.md`](./links-afiliados-cargados.md).
+> Lo de abajo queda como registro del criterio y de los candidatos originales.
+
 > Pasame por el chat, para cada producto: **slug · nombre exacto de la publicación · link de afiliado** (y el precio si lo ves).
 > Ejemplo: `creatina · Creatina ENA Sport 300g sin sabor · https://mercadolibre.com/sec/xxxx · $27.866`
 > Los cargo en la tabla `Suplemento` (migración `20261104000100_catalogo_segun_research` mientras no esté deployado; después, desde `/admin/suplementos`) y quedan publicados en `/suplementos`.
