@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { planCtaHref, MP_LINKS } from '@/lib/constants'
+import { planCtaHref, PRECIO_TRANSFERENCIA } from '@/lib/constants'
 
 const GOLD    = '#C9A84C'
 const IVORY   = '#F5F2E7'
@@ -81,78 +81,82 @@ const planOnDemand = {
 
 const planesOnline = [
   {
+    key: 'online-mensual',
     nombre: 'Online 100%',
     duracion: 'Mensual',
     precio: '$88.000',
     unidad: '/ mes',
     desc: 'Seguimiento alimentario, guía de entrenamiento y hábitos saludables.',
-    detalle: null as string | null,
-    key: 'online-mensual',
-    mpLink: null as string | null,
+    detalle: null,
   },
   {
+    key: 'online-presencial-mensual',
     nombre: 'Online + Presencial',
     duracion: 'Mensual',
     precio: '$110.000',
     unidad: '/ mes',
     desc: 'Plan online con 1 clase presencial por semana incluida.',
-    detalle: null as string | null,
-    key: 'online-presencial-mensual',
-    mpLink: null as string | null,
+    detalle: null,
   },
   {
+    key: 'online-trimestral',
     nombre: 'Online 100%',
     duracion: 'Trimestral',
     precio: '$236.500',
     unidad: '3 meses',
     desc: 'El compromiso que construye hábitos reales.',
     detalle: '≈ $78.800 por mes',
-    key: 'online-trimestral',
-    mpLink: null as string | null,
   },
   {
+    key: 'online-presencial-trimestral',
     nombre: 'Online + Presencial',
     duracion: 'Trimestral',
     precio: '$269.500',
     unidad: '3 meses',
     desc: 'Plan trimestral con 1 clase presencial semanal.',
     detalle: '≈ $89.800 por mes',
-    key: 'online-presencial-trimestral',
-    mpLink: null as string | null,
   },
 ]
 
 const presencial = {
   individual: {
     mensual: [
-      { sesiones: '2 veces por semana', precio: '$208.000', unidad: 'mes',     detalle: null as string | null, mpLink: MP_LINKS.individual2x as string },
-      { sesiones: '3 veces por semana', precio: '$312.000', unidad: 'mes',     detalle: null as string | null, mpLink: MP_LINKS.individual3x as string },
-      { sesiones: '4 veces por semana', precio: '$416.000', unidad: 'mes',     detalle: null as string | null, mpLink: MP_LINKS.individual4x as string },
-      { sesiones: '5 veces por semana', precio: '$520.000', unidad: 'mes',     detalle: null as string | null, mpLink: MP_LINKS.individual5x as string },
+      { key: 'individual-2x-mensual', sesiones: '2 veces por semana', precio: '$208.000', unidad: 'mes', detalle: null as string | null },
+      { key: 'individual-3x-mensual', sesiones: '3 veces por semana', precio: '$312.000', unidad: 'mes', detalle: null as string | null },
+      { key: 'individual-4x-mensual', sesiones: '4 veces por semana', precio: '$416.000', unidad: 'mes', detalle: null as string | null },
+      { key: 'individual-5x-mensual', sesiones: '5 veces por semana', precio: '$520.000', unidad: 'mes', detalle: null as string | null },
     ],
     trimestral: [
-      { sesiones: '2 veces por semana', precio: '$561.600', unidad: '3 meses', detalle: '≈ $187.200 por mes' as string | null, mpLink: MP_LINKS.individual2xTrimestral as string },
-      { sesiones: '3 veces por semana', precio: '$842.400', unidad: '3 meses', detalle: '≈ $280.800 por mes' as string | null, mpLink: MP_LINKS.individual3xTrimestral as string },
+      { key: 'individual-2x-trimestral', sesiones: '2 veces por semana', precio: '$561.600', unidad: '3 meses', detalle: '≈ $187.200 por mes' as string | null },
+      { key: 'individual-3x-trimestral', sesiones: '3 veces por semana', precio: '$842.400', unidad: '3 meses', detalle: '≈ $280.800 por mes' as string | null },
+      { key: 'individual-4x-trimestral', sesiones: '4 veces por semana', precio: '$1.123.200', unidad: '3 meses', detalle: '≈ $374.400 por mes' as string | null },
+      { key: 'individual-5x-trimestral', sesiones: '5 veces por semana', precio: '$1.404.000', unidad: '3 meses', detalle: '≈ $468.000 por mes' as string | null },
     ],
   },
   duo: {
     mensual: [
-      { sesiones: '2 veces por semana', precio: '$145.600', unidad: 'mes', detalle: null as string | null, mpLink: MP_LINKS.duo2x as string },
-      { sesiones: '3 veces por semana', precio: '$218.400', unidad: 'mes', detalle: null as string | null, mpLink: MP_LINKS.duo3x as string },
+      { key: 'duo-2x-mensual', sesiones: '2 veces por semana', precio: '$145.600', unidad: 'mes', detalle: 'por persona' as string | null },
+      { key: 'duo-3x-mensual', sesiones: '3 veces por semana', precio: '$218.400', unidad: 'mes', detalle: 'por persona' as string | null },
     ],
   },
   trios: {
     mensual: [
-      { sesiones: '2 veces por semana', precio: '$124.800', unidad: 'mes', detalle: null as string | null, mpLink: MP_LINKS.trios2x as string },
-      { sesiones: '3 veces por semana', precio: '$187.200', unidad: 'mes', detalle: null as string | null, mpLink: MP_LINKS.trios3x as string },
+      { key: 'trio-2x-mensual', sesiones: '2 veces por semana', precio: '$124.800', unidad: 'mes', detalle: 'por persona' as string | null },
+      { key: 'trio-3x-mensual', sesiones: '3 veces por semana', precio: '$187.200', unidad: 'mes', detalle: 'por persona' as string | null },
     ],
   },
 }
 
 const notaPresencial: Record<TabPres, string> = {
-  individual: 'Entrenamiento privado presencial, 100% personalizado. Agenda reservada para vos.',
-  duo:        'Entrená junto a otra persona. Mismo nivel de exigencia, precio compartido.',
+  individual: 'Entrenamiento privado presencial, 100% personalizado. Agenda reservada para vos. Por transferencia, 6% menos.',
+  duo:        'Entrenás junto a otra persona. Mismo nivel de exigencia, precio compartido.',
   trios:      'Grupo reducido de 3 personas. La energía del grupo, la atención de un personal trainer.',
+}
+
+const etiquetaPresencial: Record<TabPres, string> = {
+  individual: 'Individual',
+  duo:        'En dúo',
+  trios:      'En tríos',
 }
 
 // ─── CHECK ICON ──────────────────────────────────────────────────────────────
@@ -177,13 +181,14 @@ type TabPres = 'individual' | 'duo' | 'trios'
 type TabPresDuracion = 'mensual' | 'trimestral'
 
 export default function PlanesTabs() {
-  const [tabMain, setTabMain]             = useState<TabMain>('on-demand')
-  const [tabPres, setTabPres]             = useState<TabPres>('individual')
-  const [tabPresDuracion, setTabPresDuracion] = useState<TabPresDuracion>('mensual')
-  const [ebookIdx, setEbookIdx]           = useState(0)
+  const [tabMain, setTabMain]   = useState<TabMain>('on-demand')
+  const [tabPres, setTabPres]   = useState<TabPres>('individual')
+  const [tabDur, setTabDur]     = useState<TabPresDuracion>('mensual')
+  const [ebookIdx, setEbookIdx] = useState(0)
 
-  const presencialCards = tabPres === 'individual'
-    ? presencial.individual[tabPresDuracion]
+  // Trimestral solo existe en individual; en duo y trios es mensual nomas.
+  const cardsPresencial = tabPres === 'individual'
+    ? presencial.individual[tabDur]
     : presencial[tabPres].mensual
 
   return (
@@ -309,8 +314,6 @@ export default function PlanesTabs() {
                 )}
               </div>
 
-              {/* Online: primero registro + cuestionario. El débito automático
-                  de MP se ofrece en /pendiente, con el perfil ya cargado. */}
               <Link
                 href={planCtaHref(plan.key)}
                 className="text-center font-semibold py-3 rounded-xl text-sm transition-all"
@@ -464,13 +467,13 @@ export default function PlanesTabs() {
                   <span className="text-sm" style={{ color: IVORY40 }}>pago único</span>
                 </div>
 
-                <Link
+                <a
                   href={eb.href}
                   className="block text-center font-semibold py-3.5 rounded-xl text-sm transition-all active:scale-[0.98]"
                   style={{ background: GOLD, color: '#0a0a08' }}
                 >
                   {eb.key === 'ebook-rentable' ? 'Acceder al curso' : 'Comprar ebook'}
-                </Link>
+                </a>
               </div>
             ))}
           </div>
@@ -482,13 +485,9 @@ export default function PlanesTabs() {
       {tabMain === 'presencial' && (
         <div>
 
-          {/* Sub-tabs grupo */}
-          <div className="flex gap-2 mb-4 overflow-x-auto no-scrollbar pb-1">
-            {([
-              ['individual', 'Individual'],
-              ['duo',        'En dúo'],
-              ['trios',      'En tríos'],
-            ] as [TabPres, string][]).map(([sub, label]) => (
+          {/* Sub-tabs formato */}
+          <div className="flex gap-2 mb-3 overflow-x-auto no-scrollbar pb-1">
+            {(['individual', 'duo', 'trios'] as TabPres[]).map((sub) => (
               <button
                 key={sub}
                 onClick={() => setTabPres(sub)}
@@ -498,25 +497,25 @@ export default function PlanesTabs() {
                   : { background: 'transparent', color: IVORY55, border: `1px solid ${BORDER}` }
                 }
               >
-                {label}
+                {etiquetaPresencial[sub]}
               </button>
             ))}
           </div>
 
-          {/* Sub-tabs duración (solo Individual tiene opción trimestral) */}
+          {/* Sub-tabs duracion — solo individual tiene trimestral */}
           {tabPres === 'individual' && (
-            <div className="flex gap-1.5 mb-5 p-1 rounded-xl w-fit" style={{ background: GLASS, border: `1px solid ${BORDER}` }}>
+            <div className="flex gap-2 mb-5 overflow-x-auto no-scrollbar pb-1">
               {(['mensual', 'trimestral'] as TabPresDuracion[]).map((sub) => (
                 <button
                   key={sub}
-                  onClick={() => setTabPresDuracion(sub)}
-                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                  style={tabPresDuracion === sub
-                    ? { background: 'rgba(201,168,76,0.15)', color: GOLD }
-                    : { background: 'transparent', color: IVORY55 }
+                  onClick={() => setTabDur(sub)}
+                  className="flex-shrink-0 px-3.5 py-1 rounded-full text-xs font-medium transition-all"
+                  style={tabDur === sub
+                    ? { background: 'rgba(201,168,76,0.12)', color: GOLD, border: `1px solid rgba(201,168,76,0.22)` }
+                    : { background: 'transparent', color: IVORY40, border: `1px solid ${BORDER}` }
                   }
                 >
-                  {sub.charAt(0).toUpperCase() + sub.slice(1)}
+                  {sub === 'mensual' ? 'Mensual' : 'Trimestral · 10% off'}
                 </button>
               ))}
             </div>
@@ -525,14 +524,13 @@ export default function PlanesTabs() {
           {/* Nota contextual */}
           <p className="text-xs mb-6 italic" style={{ color: IVORY40 }}>
             {notaPresencial[tabPres]}
-            {tabPres === 'individual' && tabPresDuracion === 'trimestral' && ' 3 meses de proceso intensivo.'}
           </p>
 
           {/* Cards */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {presencialCards.map((plan) => (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {cardsPresencial.map((plan) => (
               <div
-                key={plan.sesiones}
+                key={plan.key}
                 className="rounded-2xl p-6 flex flex-col gap-3"
                 style={{ background: GLASS, border: `1px solid ${BORDER}`, backdropFilter: 'blur(14px)' }}
               >
@@ -540,24 +538,35 @@ export default function PlanesTabs() {
                   {plan.sesiones}
                 </h3>
 
+                {plan.detalle && (
+                  <p className="text-xs font-semibold tracking-wide" style={{ color: GOLD }}>
+                    {plan.detalle}
+                  </p>
+                )}
+
                 <div className="flex-1" />
 
                 <div className="flex items-baseline gap-1">
                   <span className="font-serif text-2xl font-bold" style={{ color: GOLD }}>
                     {plan.precio}
                   </span>
-                  <span className="text-sm" style={{ color: IVORY40 }}>/ {plan.unidad}</span>
+                  <span className="text-sm whitespace-nowrap" style={{ color: IVORY40 }}>/ {plan.unidad}</span>
                 </div>
-                {plan.detalle && (
-                  <p className="text-xs font-medium -mt-1" style={{ color: GOLD }}>
-                    {plan.detalle}
+
+                {PRECIO_TRANSFERENCIA[plan.key] && (
+                  <p className="text-xs" style={{ color: IVORY40 }}>
+                    o ${PRECIO_TRANSFERENCIA[plan.key].toLocaleString('es-AR')} por transferencia
                   </p>
                 )}
 
-                <a
-                  href={plan.mpLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                {plan.unidad === '3 meses' && (
+                  <p className="text-xs" style={{ color: IVORY40 }}>
+                    Hasta 3 cuotas
+                  </p>
+                )}
+
+                <Link
+                  href={`/checkout?plan=${plan.key}`}
                   className="text-center font-semibold py-3 rounded-xl text-sm transition-all"
                   style={{
                     background: 'rgba(201,168,76,0.10)',
@@ -565,8 +574,8 @@ export default function PlanesTabs() {
                     border: `1px solid rgba(201,168,76,0.20)`,
                   }}
                 >
-                  Pagar con MercadoPago
-                </a>
+                  Quiero este plan
+                </Link>
               </div>
             ))}
           </div>

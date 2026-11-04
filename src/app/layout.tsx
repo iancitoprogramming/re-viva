@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
+import { SITE_URL } from '@/lib/site'
 import './globals.css'
-
-const SITE_URL = 'https://www.revivabyigz.com'
 
 const inter = Inter({
   subsets: ['latin'],

@@ -114,7 +114,7 @@ export default function AdminSuplementosPage() {
         <Campo label="Marca / producto exacto"><input className={inputClass} value={borrador.marca} onChange={e => setBorrador(b => ({ ...b, marca: e.target.value }))} /></Campo>
         <Campo label="Precio aprox. (ARS)"><input className={inputClass} type="number" value={borrador.precioArs} onChange={e => setBorrador(b => ({ ...b, precioArs: e.target.value }))} /></Campo>
       </div>
-      <Campo label="Link de afiliado (el que devuelve Ian)">
+      <Campo label="Link de afiliado (el que devuelve Ian) — la publicación tiene que mostrar RNPA vigente">
         <input className={inputClass} value={borrador.linkAfiliado} placeholder="https://..." onChange={e => setBorrador(b => ({ ...b, linkAfiliado: e.target.value }))} />
       </Campo>
       <Campo label="Objetivos (solapas)">

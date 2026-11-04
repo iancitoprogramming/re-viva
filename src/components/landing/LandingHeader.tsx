@@ -81,6 +81,16 @@ export default function LandingHeader() {
           </Link>
 
           <Link
+            href="/curso-rentable"
+            className="hidden md:block text-xs tracking-wider uppercase transition-colors duration-200"
+            style={{ color: IVORY40 }}
+            onMouseEnter={e => (e.currentTarget.style.color = IVORY70)}
+            onMouseLeave={e => (e.currentTarget.style.color = IVORY40)}
+          >
+            Para entrenadores
+          </Link>
+
+          <Link
             href="/login"
             className="relative text-sm font-medium transition-colors duration-200 overflow-hidden"
             style={{ color: hoverLogin ? GOLD : IVORY70 }}

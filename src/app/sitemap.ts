@@ -1,8 +1,7 @@
 import type { MetadataRoute } from 'next'
+import { SITE_URL } from '@/lib/site'
 
-const SITE_URL = 'https://www.revivabyigz.com'
-
-// /ads queda fuera a propósito (landing para tráfico pago, noindex).
+// Solo rutas públicas. /ads queda fuera a propósito (tráfico pago, noindex).
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
@@ -22,6 +21,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${SITE_URL}/terminos`,
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
+      url: `${SITE_URL}/contact`,
       changeFrequency: 'yearly',
       priority: 0.3,
     },

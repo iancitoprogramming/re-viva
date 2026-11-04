@@ -6,8 +6,13 @@ import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import LandingHeader from '@/components/landing/LandingHeader'
 import LandingFooter from '@/components/landing/LandingFooter'
-import { OBJETIVOS_SUPLEMENTO, AVISO_AFILIADOS, type ObjetivoSuplementoValue } from '@/lib/suplementos'
+import { OBJETIVOS_SUPLEMENTO, TEXTO_TRANSPARENCIA_AFILIADOS, AVISO_CONSULTA_MEDICA, type ObjetivoSuplementoValue } from '@/lib/suplementos'
 import { WHATSAPP_CONSULTA } from '@/lib/constants'
+import { SUPLEMENTOS as RESEARCH, DESCARTADOS } from '@/lib/suplementos/catalogo'
+
+// Lo que dice la evidencia de cada producto (research de Ian). El slug de la DB
+// es el mismo id de catalogo.ts; los elementos base no tienen esta ficha.
+const NIVEL: Record<1 | 2, string> = { 1: 'Evidencia sólida', 2: 'Útil según el caso' }
 
 export const dynamic = 'force-dynamic'
 
@@ -73,9 +78,13 @@ export default async function SuplementosPage({
           })}
         </div>
 
-        <p className="text-xs leading-relaxed mb-8 p-3 rounded-xl" style={{ color: IVORY40, border: `1px solid ${BORDER}` }}>
-          {AVISO_AFILIADOS}
-        </p>
+        {/* Transparencia (CLAUDE.md §14): texto fijo, tipografía normal */}
+        <div className="mb-8 p-4 rounded-xl flex flex-col gap-2" style={{ border: `1px solid ${BORDER}` }}>
+          <p className="text-sm font-semibold" style={{ color: IVORY }}>{TEXTO_TRANSPARENCIA_AFILIADOS.titulo}</p>
+          {[...TEXTO_TRANSPARENCIA_AFILIADOS.parrafos, AVISO_CONSULTA_MEDICA].map(t => (
+            <p key={t} className="text-sm leading-relaxed" style={{ color: IVORY60 }}>{t}</p>
+          ))}
+        </div>
 
         {productos.length === 0 ? (
           <div className="text-center py-16">
@@ -110,6 +119,7 @@ export default async function SuplementosPage({
                 <Dato titulo="Para qué sirve" texto={p.paraQueSirve} />
                 <Dato titulo="A quién se lo recomendamos" texto={p.aQuienSeRecomienda} />
                 <Dato titulo="Cómo se usa (según etiqueta)" texto={p.comoSeUsa} />
+                <Evidencia slug={p.slug} />
 
                 <div className="mt-auto pt-2 flex items-center justify-between gap-3">
                   {p.precioArs ? (
@@ -131,6 +141,23 @@ export default async function SuplementosPage({
             ))}
           </div>
         )}
+
+        {/* Nivel 3 del research: lo que el marketing vende y no recomendamos */}
+        <section className="mt-14">
+          <h2 className="font-serif text-2xl mb-2" style={{ color: IVORY }}>Lo que no recomendamos (y por qué)</h2>
+          <p className="text-sm mb-5" style={{ color: IVORY60 }}>Se venden mucho. No hacen lo que prometen.</p>
+          <div className="flex flex-col gap-3">
+            {DESCARTADOS.map(d => (
+              <details key={d.id} className="rounded-2xl p-4" style={{ background: GLASS, border: `1px solid ${BORDER}` }}>
+                <summary className="cursor-pointer text-sm font-semibold" style={{ color: IVORY }}>
+                  {d.nombre} <span className="font-normal" style={{ color: IVORY40 }}>— promete: {d.promesa}</span>
+                </summary>
+                <p className="text-sm leading-relaxed mt-3" style={{ color: IVORY60 }}>{d.porQueNo}</p>
+                <Fuentes fuentes={d.fuentes} />
+              </details>
+            ))}
+          </div>
+        </section>
       </main>
       <LandingFooter />
     </div>
@@ -143,5 +170,32 @@ function Dato({ titulo, texto }: { titulo: string; texto: string }) {
       <p className="text-[11px] uppercase tracking-wider mb-0.5" style={{ color: GOLD }}>{titulo}</p>
       <p className="text-sm leading-relaxed" style={{ color: IVORY60 }}>{texto}</p>
     </div>
+  )
+}
+
+function Evidencia({ slug }: { slug: string }) {
+  const r = RESEARCH.find(x => x.id === slug)
+  if (!r) return null
+  return (
+    <details>
+      <summary className="cursor-pointer text-[11px] uppercase tracking-wider" style={{ color: GOLD }}>
+        {NIVEL[r.nivel]} · qué dice la evidencia
+      </summary>
+      <p className="text-sm leading-relaxed mt-1" style={{ color: IVORY60 }}>{r.evidencia}</p>
+      <Fuentes fuentes={r.fuentes} />
+    </details>
+  )
+}
+
+function Fuentes({ fuentes }: { fuentes: { titulo: string; url: string }[] }) {
+  if (!fuentes.length) return null
+  return (
+    <ul className="mt-2 flex flex-col gap-1">
+      {fuentes.map(f => (
+        <li key={f.url}>
+          <a href={f.url} target="_blank" rel="noopener noreferrer" className="text-xs underline" style={{ color: IVORY40 }}>{f.titulo}</a>
+        </li>
+      ))}
+    </ul>
   )
 }
