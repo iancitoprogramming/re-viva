@@ -85,19 +85,13 @@ Plantilla: `docs/plantillas/Plantilla-Nutricion.docx`.
   - publicar u ocultar (no deja publicar un producto sin link);
   - ver clics de los últimos 30 días;
   - copiar el link para los documentos.
-- **Carga inicial (inactiva):**
-  - Creatina monohidrato
-  - Proteína whey
-  - Proteína vegetal
-  - Cafeína
-  - Omega 3
-  - Vitamina D3
-  - Magnesio
-  - Electrolitos
-  - Psyllium
-  - Multivitamínico
-
-  Al cargar la marca, ajustar "cómo se usa" a la etiqueta de esa marca.
+- **Contenido:** sale del research de Ian (`src/lib/suplementos/catalogo.ts` + `content/suplementos/research.md`). Los slugs de la tabla son los ids de ese archivo.
+  - **Lo básico:** balanza de cocina, balanza personal, cinta métrica, shaker y botella. La balanza va primero: sin ella el plan es una estimación.
+  - **Nivel 1:** creatina, whey, omega-3, vitamina D3.
+  - **Nivel 2:** colágeno + vitamina C, magnesio, electrolitos, beta-alanina.
+  - **Lo que no recomendamos:** BCAA, glutamina, tribulus, L-carnitina. Sección fija al pie del catálogo, sin links.
+  - Cada ficha muestra el nivel de evidencia y las fuentes (desplegable).
+- **Links pendientes:** checklist en `content/suplementos/links-afiliados.md`. Todo arranca oculto hasta que tenga link.
 
 ## 5. Listas de compras por mail (interno)
 

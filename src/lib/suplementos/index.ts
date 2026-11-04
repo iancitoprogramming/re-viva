@@ -3,6 +3,7 @@
 import { SITE_URL } from '@/lib/site'
 
 export const OBJETIVOS_SUPLEMENTO = [
+  { value: 'ELEMENTOS_BASE',    label: 'Lo básico',         slug: 'lo-basico' },
   { value: 'GANANCIA_MUSCULAR', label: 'Ganancia muscular', slug: 'ganancia-muscular' },
   { value: 'PERDIDA_GRASA',     label: 'Pérdida de grasa',  slug: 'perdida-de-grasa' },
   { value: 'RENDIMIENTO',       label: 'Rendimiento',       slug: 'rendimiento' },

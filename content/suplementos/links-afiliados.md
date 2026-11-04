@@ -1,8 +1,18 @@
 # Links de afiliado — checklist
 
-> Pegá el link de afiliado de Mercado Libre en la línea de cada producto y marcá la casilla.
-> Cuando esté completo, los cargo en `src/lib/suplementos/catalogo.ts`.
+> Pasame por el chat, para cada producto: **slug · nombre exacto de la publicación · link de afiliado** (y el precio si lo ves).
+> Ejemplo: `creatina · Creatina ENA Sport 300g sin sabor · https://mercadolibre.com/sec/xxxx · $27.866`
+> Los cargo en la tabla `Suplemento` (migración `20261104000100_catalogo_segun_research` mientras no esté deployado; después, desde `/admin/suplementos`) y quedan publicados en `/suplementos`.
+> Si elegís dos opciones del mismo producto (ej. creatina Creapure y la accesible), van como dos fichas.
 > El criterio de cada producto está en `content/suplementos/research.md`.
+
+| Slug | Producto |
+|---|---|
+| `balanza-cocina` · `balanza-personal` · `cinta-metrica` · `shaker` · `botella` | Lo básico |
+| `creatina` · `whey` · `omega-3` · `vitamina-d` | Nivel 1 |
+| `colageno` · `vitamina-c` · `magnesio` · `electrolitos` · `beta-alanina` | Nivel 2 |
+
+Cafeína no lleva link (el café alcanza).
 
 ---
 
