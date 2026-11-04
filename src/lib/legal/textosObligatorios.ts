@@ -118,17 +118,6 @@ Una vez que tengas esa consulta realizada, confirmalo en tu perfil y
 generamos tu plan en 24-48hs.
   `.trim(),
 
-  disclaimerAfiliados: `
-SUPLEMENTOS Y LINKS DE AFILIADO
-
-Algunos links de suplementos de este documento son links de afiliado: si
-comprás a través de ellos, Re-Viva puede recibir una comisión, sin costo
-extra para vos. Los productos se eligen por eficiencia y precio-calidad.
-Ningún suplemento es obligatorio para tener resultados y ninguna
-recomendación reemplaza una consulta médica, sobre todo si tomás
-medicación, estás embarazada o tenés una condición de salud.
-  `.trim(),
-
   pieDePagina: `Re-Viva · Igztrainer · Plan personal e intransferible · No reemplaza consulta médica profesional`,
 };
 

@@ -39,6 +39,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ use
     enviadas.push(lista.semana)
   }
 
-  if (!enviadas.length) return NextResponse.json({ error: 'No se pudo enviar el mail. Revisá GMAIL_USER / GMAIL_APP_PASSWORD.' }, { status: 502 })
+  if (!enviadas.length) return NextResponse.json({ error: 'No se pudo enviar el mail. Revisá RESEND_API_KEY / RESEND_FROM_EMAIL en Vercel.' }, { status: 502 })
   return NextResponse.json({ ok: true, enviadas })
 }

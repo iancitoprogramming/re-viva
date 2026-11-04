@@ -11,9 +11,20 @@ export const OBJETIVOS_SUPLEMENTO = [
 
 export type ObjetivoSuplementoValue = (typeof OBJETIVOS_SUPLEMENTO)[number]['value']
 
-export const AVISO_AFILIADOS =
-  'Algunos links son de afiliado: si comprás a través de ellos, Re-Viva puede recibir una comisión sin costo extra para vos. ' +
-  'Elegimos cada producto por eficiencia y precio-calidad. Ningún suplemento reemplaza una consulta médica.'
+// Bloque de transparencia obligatorio (CLAUDE.md §14). Texto fijo, en tipografía
+// normal — nunca en letra chica. Va en todo entregable que incluya productos.
+export const TEXTO_TRANSPARENCIA_AFILIADOS = {
+  titulo: 'Sobre los links de esta sección',
+  parrafos: [
+    'Los enlaces son links de afiliado: si comprás a través de ellos, recibo una comisión de la plataforma. No modifica el precio que pagás vos.',
+    'Los productos están elegidos por composición, dosis por porción y relación precio-calidad al momento de armar el plan. Si conseguís el mismo producto más barato en otro lado, compralo ahí.',
+    'Ningún suplemento de esta lista es imprescindible para que el plan funcione. Si querés, lo revisamos y priorizamos según tu presupuesto.',
+  ],
+} as const
+
+// En el catálogo público se suma la aclaración médica.
+export const AVISO_CONSULTA_MEDICA =
+  'Ninguna recomendación reemplaza una consulta médica, sobre todo si tomás medicación, estás embarazada o tenés una condición de salud.'
 
 export type OrigenClick = 'catalogo' | 'documento' | 'mail'
 

@@ -22,6 +22,7 @@ import {
   PRECIO_GESTION_COMPRA, WHATSAPP_COMPRA_DFY, WHATSAPP_VIDEOLLAMADA,
 } from '../src/lib/constants'
 import { SITE_URL } from '../src/lib/site'
+import { TEXTO_TRANSPARENCIA_AFILIADOS } from '../src/lib/suplementos'
 
 // ─── Marca ────────────────────────────────────────────────────────────────────
 const C = { gold: 'C9A84C', goldLight: 'F6EFD9', dark: '0A0A08', green: '1B3D2F', gray: '8A8A80' }
@@ -272,7 +273,10 @@ function plantillaNutricion(): Document {
     tabla(['Suplemento', 'Para qué', 'Cuándo', 'Cuánto', 'Dónde comprarlo'], [
       ['{{Creatina monohidrato}}', '{{fuerza y masa muscular}}', '{{todos los días, con una comida}}', '{{5 g}}', '{{link del catálogo}}'],
     ]),
-    p('Ninguno es obligatorio. Catálogo completo: ', link('revivabyigz.com/suplementos', `${SITE_URL}/suplementos`), '. Algunos links son de afiliado.'),
+    p('Catálogo completo: ', link('revivabyigz.com/suplementos', `${SITE_URL}/suplementos`), '.'),
+    // Bloque de transparencia (CLAUDE.md §14): texto fijo, tipografía normal, siempre que haya productos
+    p(negrita(TEXTO_TRANSPARENCIA_AFILIADOS.titulo)),
+    ...TEXTO_TRANSPARENCIA_AFILIADOS.parrafos.map(t => p(t)),
 
     h1('5. Lista de compras'),
     p('Una por semana. Cantidades totales de la semana, como se compran (en crudo). Te llega también por mail.'),
@@ -347,7 +351,7 @@ function plantillaNutricion(): Document {
 
     ...legales([
       TEXTOS_LEGALES.disclaimerProfesional, TEXTOS_LEGALES.disclaimerNutricional,
-      TEXTOS_LEGALES.disclaimerAfiliados, TEXTOS_LEGALES.descargoResponsabilidad,
+      TEXTOS_LEGALES.descargoResponsabilidad,
       TEXTOS_LEGALES.propiedadIntelectual, getProteccionDatos(),
     ]),
   ])

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import LandingHeader from '@/components/landing/LandingHeader'
 import LandingFooter from '@/components/landing/LandingFooter'
-import { OBJETIVOS_SUPLEMENTO, AVISO_AFILIADOS, type ObjetivoSuplementoValue } from '@/lib/suplementos'
+import { OBJETIVOS_SUPLEMENTO, TEXTO_TRANSPARENCIA_AFILIADOS, AVISO_CONSULTA_MEDICA, type ObjetivoSuplementoValue } from '@/lib/suplementos'
 import { WHATSAPP_CONSULTA } from '@/lib/constants'
 
 export const dynamic = 'force-dynamic'
@@ -73,9 +73,13 @@ export default async function SuplementosPage({
           })}
         </div>
 
-        <p className="text-xs leading-relaxed mb-8 p-3 rounded-xl" style={{ color: IVORY40, border: `1px solid ${BORDER}` }}>
-          {AVISO_AFILIADOS}
-        </p>
+        {/* Transparencia (CLAUDE.md §14): texto fijo, tipografía normal */}
+        <div className="mb-8 p-4 rounded-xl flex flex-col gap-2" style={{ border: `1px solid ${BORDER}` }}>
+          <p className="text-sm font-semibold" style={{ color: IVORY }}>{TEXTO_TRANSPARENCIA_AFILIADOS.titulo}</p>
+          {[...TEXTO_TRANSPARENCIA_AFILIADOS.parrafos, AVISO_CONSULTA_MEDICA].map(t => (
+            <p key={t} className="text-sm leading-relaxed" style={{ color: IVORY60 }}>{t}</p>
+          ))}
+        </div>
 
         {productos.length === 0 ? (
           <div className="text-center py-16">

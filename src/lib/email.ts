@@ -13,6 +13,7 @@ import {
 import { agruparPorCategoria, cantidadLegible } from '@/lib/compras'
 import { PRECIO_GESTION_COMPRA, WHATSAPP_COMPRA_DFY, WHATSAPP_VIDEOLLAMADA } from '@/lib/constants'
 import { SITE_URL } from '@/lib/site'
+import { TEXTO_TRANSPARENCIA_AFILIADOS } from '@/lib/suplementos'
 
 const TRAINER_EMAIL = process.env.TRAINER_EMAIL!
 const FROM_EMAIL    = process.env.RESEND_FROM_EMAIL ?? 'REVIVA IGZ <noreply@revivabyigz.com>'
@@ -560,7 +561,10 @@ export async function enviarListaCompras(datos: {
               Cantidades totales de la semana, como se compran (en crudo). Comprá todo junto y cociná siguiendo tu guía de meal prep.
             </p>
             ${tablas}
-            ${tieneSuplementos ? `<p style="color: #6B7B64; font-size: 12px; margin: 12px 0 0 0;">Los suplementos que recomendamos, con link: <a href="${SITE_URL}/suplementos" style="color: #2D5A3D;">revivabyigz.com/suplementos</a>. Algunos links son de afiliado.</p>` : ''}
+            ${tieneSuplementos ? `
+              <p style="color: #1A2416; font-size: 14px; margin: 16px 0 6px 0;">Los suplementos, con link: <a href="${SITE_URL}/suplementos" style="color: #2D5A3D;">revivabyigz.com/suplementos</a></p>
+              <p style="color: #1A2416; font-size: 14px; font-weight: 700; margin: 12px 0 4px 0;">${TEXTO_TRANSPARENCIA_AFILIADOS.titulo}</p>
+              ${TEXTO_TRANSPARENCIA_AFILIADOS.parrafos.map(t => `<p style="color: #1A2416; font-size: 14px; line-height: 1.5; margin: 0 0 6px 0;">${t}</p>`).join('')}` : ''}
             ${datos.notas ? `<div style="background: #FEF9EC; border-radius: 10px; padding: 12px 14px; margin-top: 20px; font-size: 13px; color: #1A2416; line-height: 1.5;"><strong>Nota de Ian:</strong> ${escaparHtml(datos.notas)}</div>` : ''}
 
             <h2 style="color: #1A2416; font-size: 15px; margin: 28px 0 4px 0;">¿Cómo querés resolver la compra?</h2>
