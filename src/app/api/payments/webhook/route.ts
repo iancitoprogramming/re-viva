@@ -8,6 +8,7 @@ import { MercadoPagoConfig, Payment } from 'mercadopago'
 import { prisma } from '@/lib/prisma'
 import { createHmac } from 'crypto'
 import { ES_EBOOK } from '@/lib/constants'
+import { enviarNotificacionPagoAprobado } from '@/lib/email'
 
 const mp = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN!,
@@ -86,7 +87,7 @@ export async function POST(request: Request) {
 
         // Notificar al trainer si el pago fue aprobado
         if (status === 'approved') {
-          void notificarPagoAprobado(
+          void enviarNotificacionPagoAprobado(
             dbPayment.user.nombre,
             dbPayment.user.email,
             dbPayment.planTipo,
@@ -101,31 +102,5 @@ export async function POST(request: Request) {
     console.error('[Webhook MP]', error)
     // Siempre 200 para que MP no reintente
     return NextResponse.json({ ok: true })
-  }
-}
-
-async function notificarPagoAprobado(
-  nombre: string,
-  emailCliente: string,
-  planTipo: string,
-  amount: number,
-) {
-  try {
-    const { Resend } = await import('resend')
-    const resend = new Resend(process.env.RESEND_API_KEY || '')
-    await resend.emails.send({
-      from: 'noreply@reviva.recuperar',
-      to: process.env.TRAINER_EMAIL ?? '',
-      subject: `✅ Pago aprobado — ${nombre}`,
-      html: `
-        <h2>Nuevo pago recibido vía Mercado Pago</h2>
-        <p><strong>Cliente:</strong> ${nombre} (${emailCliente})</p>
-        <p><strong>Plan:</strong> ${planTipo}</p>
-        <p><strong>Monto:</strong> $${amount.toLocaleString('es-AR')}</p>
-        <p>El pago fue confirmado por Mercado Pago. El cliente está esperando la activación de su plan.</p>
-      `,
-    })
-  } catch (err) {
-    console.error('[Webhook notificar trainer]', err)
   }
 }

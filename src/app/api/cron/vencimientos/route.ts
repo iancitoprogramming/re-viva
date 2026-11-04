@@ -6,8 +6,14 @@ import { prisma } from '@/lib/prisma'
 import { enviarRecordatorioVencimiento } from '@/lib/email'
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  // Sin CRON_SECRET el endpoint queda público: cualquiera podría disparar el
+  // envío masivo de emails. Preferimos que no corra antes que corra abierto.
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret) {
+    console.error('[CRON] CRON_SECRET no configurado — endpoint deshabilitado.')
+    return NextResponse.json({ error: 'Cron no configurado.' }, { status: 503 })
+  }
+  if (request.headers.get('authorization') !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

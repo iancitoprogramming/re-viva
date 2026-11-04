@@ -19,8 +19,9 @@ import {
 } from 'docx'
 import { TEXTOS_LEGALES, getProteccionDatos } from '../src/lib/legal/textosObligatorios'
 import {
-  PRECIO_GESTION_COMPRA, SITE_URL, WHATSAPP_COMPRA_DFY, WHATSAPP_VIDEOLLAMADA,
+  PRECIO_GESTION_COMPRA, WHATSAPP_COMPRA_DFY, WHATSAPP_VIDEOLLAMADA,
 } from '../src/lib/constants'
+import { SITE_URL } from '../src/lib/site'
 
 // ─── Marca ────────────────────────────────────────────────────────────────────
 const C = { gold: 'C9A84C', goldLight: 'F6EFD9', dark: '0A0A08', green: '1B3D2F', gray: '8A8A80' }

@@ -1,6 +1,6 @@
 // Catálogo de suplementos recomendados — helpers compartidos (web, admin, DOCX, mails).
 
-import { SITE_URL } from '@/lib/constants'
+import { SITE_URL } from '@/lib/site'
 
 export const OBJETIVOS_SUPLEMENTO = [
   { value: 'GANANCIA_MUSCULAR', label: 'Ganancia muscular', slug: 'ganancia-muscular' },
