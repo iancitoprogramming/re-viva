@@ -26,7 +26,7 @@
 | Checkout MercadoPago | Checkout Pro + Payment Brick + webhook + tabla Payment | Solo links `mpago.la` | **Lucas** |
 | Login / registro | JWT + bcrypt + recuperación + biometría | — | **Lucas** |
 | Panel admin | Clientes, activación, entregas, revisiones IA, ebooks, consentimientos | — | **Lucas** (menos alimentos/plantillas, ver §5) |
-| Mails | nodemailer + Gmail SMTP (*Resend instalado pero sin uso*) | — | **Lucas** |
+| Mails | nodemailer + Gmail SMTP en `main` (nunca funcionó en prod) | — | **Lucas**; pasan a Resend en #31 (rama de Ian) |
 | SEO | Título y descripción | metadataBase, OG/Twitter, robots, sitemap, canonicals, ícono, imagen OG | **Dev** |
 | Scroll a `#planes` | Bug: con Lenis el link no scrollea + leak del ticker | Arreglado | **Dev** |
 | `/ads` (tráfico pago) | — | Landing standalone, noindex | **Dev** |
@@ -77,6 +77,20 @@ Auditado contra Supabase (`re-viva`, sa-east-1) el 2026-11-02.
 | `/entrenadores` como página propia | Duplicaba `/curso-rentable`. Queda como redirect 308 para no perder SEO. |
 | Presencial semestral y 4x/5x trimestral | Ian no mandó link ni precio nuevo. No se muestran, pero siguen en `PLANES_MP` por los clientes que ya los tienen. |
 | Motor de comidas en la web (Food, plantillas, plan builder, generación IA de plantillas) | Pedido explícito: los gramajes se calculan fuera de la web. Respaldo en `docs/respaldo/`. |
-| Resend | No se usa: los mails salen por Gmail SMTP (`GMAIL_USER` / `GMAIL_APP_PASSWORD`). Se corrigió CLAUDE.md. |
+| Gmail SMTP | `GMAIL_APP_PASSWORD` nunca estuvo en Vercel, así que ningún mail salía. En #31 todo pasa a Resend (`RESEND_API_KEY` + `RESEND_FROM_EMAIL`, dominio a verificar). |
 | `@supabase/supabase-js` | Sigue sin uso; no se tocó. |
 | `tsx` en devDependencies | `npm test` lo usa pero no está instalado; por ahora se corre con `npx tsx --test tests/*.test.ts`. |
+
+## 7. Segunda rama: `claude/reviva-handoff-e48fd9` (PR #31)
+
+Ian había hecho en octubre otra rama con parte del mismo trabajo, sin mergear. #30 queda como está; lo que esa rama tenía y #30 no, entra en #31 (apilado sobre #30), junto con el PR #29:
+
+| Viene de | Qué | Cómo quedó |
+|---|---|---|
+| Ian | Mails por Resend con un solo `enviarMail()` | Adoptado. La lista de compras de #30 también usa `enviarMail()`. |
+| Ian | Crons fail-closed, webhook sin cliente de Resend propio | Adoptado tal cual. |
+| Ian | Presencial por checkout propio (individual/dúo/trío, trimestral 4x y 5x, precio por transferencia) | Adoptado. Reemplaza los links `mpago.la` directos de #30 en las cards; el débito automático se ofrece en `/pendiente` para todos los planes que lo tienen. |
+| Ian | `src/lib/site.ts`, robots con disallow de la app | Adoptado + `/suplementos` y `/terminos` en el sitemap. |
+| Ian | Research de evidencia, catálogo tipado y checklist de links (`content/suplementos/`) | Base del catálogo de la web: ver `docs/entregables.md` §4. |
+| #29 | Bloque de transparencia de afiliados (CLAUDE.md §14) | En catálogo, documento de nutrición y mail de compras, en letra normal. |
+| — | Los 2 MealPlan de clientes | Decisión: no se conservan (los planes de comida se arman en los chats de Claude). La migración de borrado sigue como está. |

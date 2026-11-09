@@ -10,8 +10,7 @@ export async function POST(request: Request) {
     if (!email) return NextResponse.json({ error: 'Email requerido.' }, { status: 400 })
 
     console.log(`[RECUPERAR] Solicitud para: ${email}`)
-    console.log(`[RECUPERAR] RESEND_FROM_EMAIL: ${process.env.RESEND_FROM_EMAIL ?? '(no configurado — usando onboarding@resend.dev)'}`)
-    console.log(`[RECUPERAR] RESEND_API_KEY: ${process.env.RESEND_API_KEY ? '✅ configurada' : '❌ NO CONFIGURADA'}`)
+    console.log(`[RECUPERAR] Resend: ${process.env.RESEND_API_KEY ? '✅ API key presente' : '❌ falta RESEND_API_KEY'} · from: ${process.env.RESEND_FROM_EMAIL ?? '(default noreply@revivabyigz.com)'}`)
 
     // Buscamos el usuario — si no existe, respondemos igual para no filtrar información
     const usuario = await prisma.user.findUnique({ where: { email } })

@@ -450,6 +450,7 @@ model Suplemento {
 }
 
 enum ObjetivoSuplemento {
+  ELEMENTOS_BASE // "Lo básico": balanza, cinta, shaker, botella — antes que cualquier suplemento
   GANANCIA_MUSCULAR
   PERDIDA_GRASA
   RENDIMIENTO

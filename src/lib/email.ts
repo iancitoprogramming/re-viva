@@ -1,36 +1,36 @@
-// Servicio de email con Nodemailer (SMTP)
-// Compatible con Gmail, Outlook, Zoho, cualquier proveedor SMTP
+// Servicio de email con Resend
+//
+// El `from` tiene que ser una dirección de un dominio verificado en Resend
+// (revivabyigz.com). Si no lo está, Resend rechaza el envío.
 
-import nodemailer from 'nodemailer'
+import { Resend } from 'resend'
 import type { OnboardingData, IGZResult } from '@/types'
+import type { CategoriaCompra } from '@prisma/client'
 import {
   etiqueta, etiquetas, OBSTACULOS, HORARIOS_ENTRENAMIENTO, FRECUENCIA_COME_AFUERA,
   LUGARES_COME_AFUERA, SESIONES_COCINA, SUPERMERCADOS,
 } from '@/lib/cuestionario'
-import type { CategoriaCompra } from '@prisma/client'
 import { agruparPorCategoria, cantidadLegible } from '@/lib/compras'
-import { PRECIO_GESTION_COMPRA, SITE_URL, WHATSAPP_COMPRA_DFY, WHATSAPP_VIDEOLLAMADA } from '@/lib/constants'
-
-// ─── Transporter singleton ────────────────────────────────────────────────────
-// Se crea una vez y se reutiliza. En Vercel (serverless) se crea por invocación,
-// lo cual es normal — nodemailer maneja la conexión correctamente.
-
-function crearTransporter() {
-  return nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // TLS
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD,
-    },
-  })
-}
+import { PRECIO_GESTION_COMPRA, WHATSAPP_COMPRA_DFY, WHATSAPP_VIDEOLLAMADA } from '@/lib/constants'
+import { SITE_URL } from '@/lib/site'
+import { TEXTO_TRANSPARENCIA_AFILIADOS } from '@/lib/suplementos'
 
 const TRAINER_EMAIL = process.env.TRAINER_EMAIL!
-const FROM_EMAIL    = process.env.GMAIL_USER
-  ? `REVIVA IGZ <${process.env.GMAIL_USER}>`
-  : 'REVIVA IGZ <noreply@reviva.com>'
+const FROM_EMAIL    = process.env.RESEND_FROM_EMAIL ?? 'REVIVA IGZ <noreply@revivabyigz.com>'
+
+type Mail = { from: string; to: string; subject: string; html: string }
+
+// Todos los envíos pasan por acá. Resend NO tira excepción cuando la API
+// rechaza el mail: devuelve { error }. Si no se mira, el fallo pasa callado
+// y el try/catch de cada función nunca se entera.
+async function enviarMail(mail: Mail): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) throw new Error('Falta RESEND_API_KEY en el entorno (.env y Vercel).')
+  if (!mail.to) throw new Error('Destinatario vacío — revisar TRAINER_EMAIL.')
+
+  const { error } = await new Resend(apiKey).emails.send(mail)
+  if (error) throw new Error(`Resend rechazó el envío — ${error.name}: ${error.message}`)
+}
 
 // Etiquetas legibles para los enums
 const labels = {
@@ -50,8 +50,7 @@ export async function enviarCodigoRecuperacion(
   console.log(`[EMAIL] Enviando código de recuperación a: ${email}`)
 
   try {
-    const transporter = crearTransporter()
-    await transporter.sendMail({
+    await enviarMail({
       from:    FROM_EMAIL,
       to:      email,
       subject: 'Tu código para restablecer la contraseña — REVIVA',
@@ -106,8 +105,7 @@ export async function enviarNotificacionNuevoCliente(
   console.log(`[EMAIL] Notificando nuevo cliente a trainer: ${TRAINER_EMAIL}`)
 
   try {
-    const transporter = crearTransporter()
-    await transporter.sendMail({
+    await enviarMail({
       from:    FROM_EMAIL,
       to:      TRAINER_EMAIL,
       subject: `Nuevo cliente: ${nombreCliente}`,
@@ -221,8 +219,7 @@ export async function enviarEmailActivacion(
   }
 
   try {
-    const transporter = crearTransporter()
-    await transporter.sendMail({
+    await enviarMail({
       from:    FROM_EMAIL,
       to:      emailCliente,
       subject: `Tu plan está listo, ${nombreCliente} — REVIVA`,
@@ -306,8 +303,7 @@ export async function enviarCredencialesCliente(
   const loginUrl = `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://reviva.vercel.app'}/login`
 
   try {
-    const transporter = crearTransporter()
-    await transporter.sendMail({
+    await enviarMail({
       from:    FROM_EMAIL,
       to:      email,
       subject: `${nombre}, tu acceso a REVIVA está listo`,
@@ -370,8 +366,7 @@ export async function enviarFelicitacionCumpleanos(
 ): Promise<void> {
   const dashUrl = `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://reviva.igztrainer.com'}/login?redirect=/dashboard`
   try {
-    const transporter = crearTransporter()
-    await transporter.sendMail({
+    await enviarMail({
       from:    FROM_EMAIL,
       to:      email,
       subject: `¡Feliz cumpleaños, ${nombre}! — REVIVA`,
@@ -420,8 +415,7 @@ export async function enviarRecordatorioVencimiento(
   const waUrl    = `https://wa.me/${process.env.WHATSAPP_NUMBER ?? '5491122835621'}?text=${encodeURIComponent(`Hola Ian, quiero renovar mi plan de REVIVA.`)}`
 
   try {
-    const transporter = crearTransporter()
-    await transporter.sendMail({
+    await enviarMail({
       from:    FROM_EMAIL,
       to:      email,
       subject: `Tu plan REVIVA vence en ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}`,
@@ -470,6 +464,47 @@ export async function enviarRecordatorioVencimiento(
   }
 }
 
+// ─── EMAIL: notificación al trainer — pago aprobado en Mercado Pago ──────────
+// Antes vivía en api/payments/webhook con un cliente de Resend aparte y un
+// `from` inválido (noreply@reviva.recuperar). Un solo transporte para todo.
+export async function enviarNotificacionPagoAprobado(
+  nombreCliente: string,
+  emailCliente: string,
+  planTipo: string,
+  monto: number,
+): Promise<void> {
+  try {
+    await enviarMail({
+      from:    FROM_EMAIL,
+      to:      TRAINER_EMAIL,
+      subject: `✅ Pago aprobado — ${nombreCliente}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; background: #F8F5EF; padding: 32px 20px;">
+          <div style="text-align: center; margin-bottom: 28px;">
+            <span style="font-size: 22px; font-weight: 700; color: #2D5A3D; letter-spacing: 2px;">REVIVA</span>
+            <span style="font-size: 12px; color: #9B9589; margin-left: 6px;">by IGZ Trainer</span>
+          </div>
+          <div style="background: #FFFFFF; border-radius: 16px; border: 1px solid #DDD8CC; padding: 32px;">
+            <p style="color: #1A2416; font-size: 16px; margin: 0 0 20px 0;"><strong>Nuevo pago vía Mercado Pago</strong></p>
+            <p style="color: #6B7B64; font-size: 14px; margin: 0 0 6px 0;"><strong>Cliente:</strong> ${nombreCliente} (${emailCliente})</p>
+            <p style="color: #6B7B64; font-size: 14px; margin: 0 0 6px 0;"><strong>Plan:</strong> ${planTipo}</p>
+            <p style="color: #6B7B64; font-size: 14px; margin: 0 0 20px 0;"><strong>Monto:</strong> $${monto.toLocaleString('es-AR')}</p>
+            <p style="color: #9B9589; font-size: 13px; margin: 0;">
+              El pago ya fue confirmado por Mercado Pago. El cliente está esperando la activación del plan.
+            </p>
+          </div>
+          <p style="color: #9B9589; font-size: 11px; text-align: center; margin-top: 20px;">
+            REVIVA · IGZ Trainer · Email automático
+          </p>
+        </div>
+      `,
+    })
+    console.log(`[EMAIL] Aviso de pago aprobado enviado al trainer (${nombreCliente})`)
+  } catch (err: unknown) {
+    console.error('[EMAIL] Error aviso de pago aprobado:', (err as Error).message)
+  }
+}
+
 // ─── EMAIL: lista de compras semanal (interna → cliente) ─────────────────────
 // Diagrama del mail: encabezado → semana + 1 línea de cómo usarla → tabla por
 // categoría (Proteínas, Carbohidratos, Verduras, Frutas, Lácteos, Almacén,
@@ -510,8 +545,7 @@ export async function enviarListaCompras(datos: {
     </td></tr>`
 
   try {
-    const transporter = crearTransporter()
-    await transporter.sendMail({
+    await enviarMail({
       from:    FROM_EMAIL,
       to:      datos.email,
       subject: `Tu lista de compras — Semana ${datos.semana}`,
@@ -527,7 +561,10 @@ export async function enviarListaCompras(datos: {
               Cantidades totales de la semana, como se compran (en crudo). Comprá todo junto y cociná siguiendo tu guía de meal prep.
             </p>
             ${tablas}
-            ${tieneSuplementos ? `<p style="color: #6B7B64; font-size: 12px; margin: 12px 0 0 0;">Los suplementos que recomendamos, con link: <a href="${SITE_URL}/suplementos" style="color: #2D5A3D;">revivabyigz.com/suplementos</a>. Algunos links son de afiliado.</p>` : ''}
+            ${tieneSuplementos ? `
+              <p style="color: #1A2416; font-size: 14px; margin: 16px 0 6px 0;">Los suplementos, con link: <a href="${SITE_URL}/suplementos" style="color: #2D5A3D;">revivabyigz.com/suplementos</a></p>
+              <p style="color: #1A2416; font-size: 14px; font-weight: 700; margin: 12px 0 4px 0;">${TEXTO_TRANSPARENCIA_AFILIADOS.titulo}</p>
+              ${TEXTO_TRANSPARENCIA_AFILIADOS.parrafos.map(t => `<p style="color: #1A2416; font-size: 14px; line-height: 1.5; margin: 0 0 6px 0;">${t}</p>`).join('')}` : ''}
             ${datos.notas ? `<div style="background: #FEF9EC; border-radius: 10px; padding: 12px 14px; margin-top: 20px; font-size: 13px; color: #1A2416; line-height: 1.5;"><strong>Nota de Ian:</strong> ${escaparHtml(datos.notas)}</div>` : ''}
 
             <h2 style="color: #1A2416; font-size: 15px; margin: 28px 0 4px 0;">¿Cómo querés resolver la compra?</h2>

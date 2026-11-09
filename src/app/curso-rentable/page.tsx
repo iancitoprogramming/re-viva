@@ -8,7 +8,8 @@ import LandingHeader from '@/components/landing/LandingHeader'
 import LandingFooter from '@/components/landing/LandingFooter'
 
 export const metadata: Metadata = {
-  title: 'Curso — Personal Trainer Rentable | Re-Viva by Ian Gutiérrez',
+  title: 'Curso — Personal Trainer Rentable',
+  alternates: { canonical: '/curso-rentable' },
   description:
     'El sistema completo para que ser entrenador deje de ser un hobby y se transforme en un negocio real. Captación, conversión, retención y modelo de ingresos.',
 }
