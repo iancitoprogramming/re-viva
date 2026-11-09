@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useScrollToSection } from '@/components/ScrollProvider'
 
 const GOLD    = '#C9A84C'
 const IVORY70 = 'rgba(245,242,231,0.70)'
@@ -10,6 +11,15 @@ const IVORY40 = 'rgba(245,242,231,0.35)'
 export default function LandingHeader() {
   const [scrolled, setScrolled] = useState(false)
   const [hoverLogin, setHoverLogin] = useState(false)
+  const scrollToSection = useScrollToSection()
+
+  // Lenis maneja el scroll: un <a href="#planes"> nativo no mueve la página.
+  // Si #planes no existe en esta ruta (ej. /suplementos), dejamos navegar a /#planes.
+  function handlePlanesClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    if (!scrollToSection?.('planes')) return
+    e.preventDefault()
+    history.pushState(null, '', '/#planes')
+  }
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
@@ -51,13 +61,33 @@ export default function LandingHeader() {
         {/* Nav right */}
         <div className="flex items-center gap-6">
           <Link
-            href="#planes"
+            href="/#planes"
+            onClick={handlePlanesClick}
             className="hidden sm:block text-xs tracking-wider uppercase transition-colors duration-200"
             style={{ color: IVORY40 }}
             onMouseEnter={e => (e.currentTarget.style.color = IVORY70)}
             onMouseLeave={e => (e.currentTarget.style.color = IVORY40)}
           >
             Planes
+          </Link>
+          <Link
+            href="/suplementos"
+            className="hidden sm:block text-xs tracking-wider uppercase transition-colors duration-200"
+            style={{ color: IVORY40 }}
+            onMouseEnter={e => (e.currentTarget.style.color = IVORY70)}
+            onMouseLeave={e => (e.currentTarget.style.color = IVORY40)}
+          >
+            Suplementos
+          </Link>
+
+          <Link
+            href="/curso-rentable"
+            className="hidden md:block text-xs tracking-wider uppercase transition-colors duration-200"
+            style={{ color: IVORY40 }}
+            onMouseEnter={e => (e.currentTarget.style.color = IVORY70)}
+            onMouseLeave={e => (e.currentTarget.style.color = IVORY40)}
+          >
+            Para entrenadores
           </Link>
 
           <Link

@@ -38,3 +38,10 @@ export function esAdmin(email: string): boolean {
   const admins = (process.env.ADMIN_EMAILS ?? '').split(',').map(e => e.trim())
   return admins.includes(email)
 }
+
+// Devuelve el payload si la request es de un admin; null si no (responder 403).
+export function adminDeRequest(request: Request): JWTPayload | null {
+  const token = obtenerTokenDeRequest(request)
+  const payload = token ? verificarToken(token) : null
+  return payload && esAdmin(payload.email) ? payload : null
+}

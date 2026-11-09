@@ -36,6 +36,16 @@ export interface OnboardingData {
   // Disponibilidad de domingo (3x/semana FBEOD)
   disponibilidadDomingo?: 'siempre' | 'aveces' | 'no'
 
+  // Cuestionario v2 — datos que necesitan los entregables (ver src/lib/cuestionario.ts)
+  resultadoSonado?: string
+  obstaculos?: string[]
+  horarioEntrenamiento?: 'manana' | 'mediodia' | 'tarde' | 'noche'
+  comeAfuera?: 'nunca' | '1-2' | '3-5' | '6+'
+  lugaresComeAfuera?: string[]
+  sesionesCocina?: 'dos' | 'una' | 'no_cocino'
+  supermercado?: string
+  suplementosActuales?: string[]
+
   // Pipeline de generación automática (paso 3 del onboarding)
   comidasPorDia?: number
   minutosPorSesion?: number

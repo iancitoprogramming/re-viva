@@ -24,7 +24,7 @@ model User {
   ebookEntregas EbookEntrega[]
   checkIns    CheckIn[]
   archivos    Archivo[]
-  mealPlans   MealPlan[]
+  shoppingLists ShoppingList[]
 
   planGenerations   PlanGeneration[]
   pendingReviews    PendingTrainerReview[]
@@ -33,30 +33,40 @@ model User {
   cursosProgreso    CursoProgreso[]
 }
 
-// ─── CATÁLOGO DE ALIMENTOS ───────────────────────────────────────────────────
-// Macros expresados por 100 g (o 100 ml para líquidos). El trainer puede ajustar.
-model Food {
-  id          String       @id @default(cuid())
-  nombre      String       @unique
-  categoria   FoodCategoria
-  unidad      String       @default("g") // "g" | "ml" | "unidad"
-  // Macros por 100 g/ml
-  kcal        Float
-  proteina    Float
-  hidratos    Float
-  grasas      Float
-  // Para lista de compras (cómo se compra en la góndola)
-  unidadCompra String?     // ej. "kg", "docena", "atado"
-  notas       String?
-  activo      Boolean      @default(true)
-  creadoEn    DateTime     @default(now())
-  actualizadoEn DateTime   @updatedAt
+// ─── LISTA DE COMPRAS SEMANAL ────────────────────────────────────────────────
+// Interna (solo admin). Una lista por cliente por semana del plan. El trainer
+// la carga a partir del Documento de Nutrición (los gramajes se calculan fuera
+// de la web) y la envía por mail desde /admin/cliente/[id]/compras.
+model ShoppingList {
+  id            String    @id @default(cuid())
+  userId        String
+  semana        Int // 1, 2, 3... (una por cada semana del plan)
+  notas         String?
+  enviadoEn     DateTime? // último envío por mail
+  creadoEn      DateTime  @default(now())
+  actualizadoEn DateTime  @updatedAt
 
-  templateItems TemplateMealItem[]
-  planItems     PlanMealItem[]
+  user  User               @relation(fields: [userId], references: [id])
+  items ShoppingListItem[]
+
+  @@unique([userId, semana])
 }
 
-enum FoodCategoria {
+model ShoppingListItem {
+  id             String          @id @default(cuid())
+  shoppingListId String
+  nombre         String
+  categoria      CategoriaCompra
+  cantidad       Float // total de la semana
+  unidad         String // "g", "kg", "ml", "unidad"
+  comprado       Boolean         @default(false)
+
+  shoppingList ShoppingList @relation(fields: [shoppingListId], references: [id], onDelete: Cascade)
+}
+
+// Categorías de la lista de compras (orden en que se muestran en el mail).
+// Ex FoodCategoria: se conservan los valores viejos para no romper la tabla.
+enum CategoriaCompra {
   PROTEINA_ANIMAL
   PROTEINA_VEGETAL
   LACTEO
@@ -67,139 +77,7 @@ enum FoodCategoria {
   BEBIDA
   CONDIMENTO
   SUPLEMENTO
-}
-
-// ─── TEMPLATES DE PLAN ALIMENTARIO ───────────────────────────────────────────
-// Plantillas reutilizables que el trainer usa como punto de partida.
-model MealPlanTemplate {
-  id            String        @id @default(cuid())
-  nombre        String
-  descripcion   String?
-  // Perfil objetivo (para sugerencia automática al trainer)
-  genero        Genero?
-  objetivo      Objetivo?
-  edadMin       Int?
-  edadMax       Int?
-  adherencia    Adherencia?
-  // Macros target del template (como referencia, recalculados al instanciar)
-  kcalTarget    Float
-  proteinaTarget Float
-  hidratosTarget Float
-  grasasTarget  Float
-  notas         String?
-  generadoConIA Boolean       @default(false)
-  activo        Boolean       @default(true)
-  creadoEn      DateTime      @default(now())
-  actualizadoEn DateTime      @updatedAt
-
-  comidas TemplateMeal[]
-}
-
-model TemplateMeal {
-  id         String  @id @default(cuid())
-  templateId String
-  nombre     String  // "Desayuno", "Almuerzo", etc.
-  orden      Int
-  horaSugerida String?
-
-  template MealPlanTemplate    @relation(fields: [templateId], references: [id], onDelete: Cascade)
-  items    TemplateMealItem[]
-}
-
-model TemplateMealItem {
-  id      String @id @default(cuid())
-  mealId  String
-  foodId  String
-  gramos  Float
-  notas   String?
-
-  meal TemplateMeal @relation(fields: [mealId], references: [id], onDelete: Cascade)
-  food Food         @relation(fields: [foodId], references: [id])
-}
-
-// ─── PLAN ALIMENTARIO ASIGNADO A UN CLIENTE ──────────────────────────────────
-// Instancia concreta para un cliente. Se versiona: cada edición crea una nueva
-// versión y la anterior queda como ARCHIVADO en el historial.
-model MealPlan {
-  id            String        @id @default(cuid())
-  userId        String
-  version       Int           @default(1)
-  estado        EstadoMealPlan @default(BORRADOR)
-  // Origen
-  templateOrigenId String?    // de qué template se partió (si aplica)
-  // Macros calculados desde los items
-  kcalTotal     Float
-  proteinaTotal Float
-  hidratosTotal Float
-  grasasTotal   Float
-  // Macros target que el trainer quiso lograr (referencia)
-  kcalTarget    Float?
-  proteinaTarget Float?
-  hidratosTarget Float?
-  grasasTarget  Float?
-  notas         String?
-  creadoEn      DateTime      @default(now())
-  actualizadoEn DateTime      @updatedAt
-
-  user        User           @relation(fields: [userId], references: [id])
-  comidas     PlanMeal[]
-  shoppingList ShoppingList?
-
-  @@index([userId, version])
-}
-
-enum EstadoMealPlan {
-  BORRADOR
-  ACTIVO
-  ARCHIVADO
-}
-
-model PlanMeal {
-  id         String @id @default(cuid())
-  mealPlanId String
-  nombre     String
-  orden      Int
-  horaSugerida String?
-
-  mealPlan MealPlan        @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
-  items    PlanMealItem[]
-}
-
-model PlanMealItem {
-  id     String @id @default(cuid())
-  mealId String
-  foodId String
-  gramos Float
-  notas  String?
-
-  meal PlanMeal @relation(fields: [mealId], references: [id], onDelete: Cascade)
-  food Food     @relation(fields: [foodId], references: [id])
-}
-
-// ─── LISTA DE COMPRAS ────────────────────────────────────────────────────────
-// Autogenerada agrupando items del MealPlan. Editable por el trainer.
-model ShoppingList {
-  id         String   @id @default(cuid())
-  mealPlanId String   @unique
-  diasCubiertos Int   @default(7)
-  notas      String?
-  creadoEn   DateTime @default(now())
-  actualizadoEn DateTime @updatedAt
-
-  mealPlan MealPlan          @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
-  items    ShoppingListItem[]
-}
-
-model ShoppingListItem {
-  id             String @id @default(cuid())
-  shoppingListId String
-  nombre         String        // copiado del Food.nombre (puede editarse)
-  categoria      FoodCategoria
-  cantidad       Float         // total semanal
-  unidad         String        // "g", "kg", "ml", "unidad"
-  comprado       Boolean       @default(false)
-
-  shoppingList ShoppingList @relation(fields: [shoppingListId], references: [id], onDelete: Cascade)
+  ALMACEN
 }
 
 // ─── CÓDIGO DE RECUPERACIÓN DE CONTRASEÑA ────────────────────────────────────
@@ -243,6 +121,16 @@ model NutritionalProfile {
 
   // ── Disponibilidad de domingo (aplica solo para 3x/semana FBEOD) ────────
   disponibilidadDomingo  String   @default("no") // "siempre" | "aveces" | "no"
+
+  // ── Oferta / entregables (cuestionario v2) ───────────────────────────────
+  resultadoSonado      String? // qué quiere lograr y para cuándo, en sus palabras
+  obstaculos           String[] @default([]) // ver OBSTACULOS en src/lib/cuestionario.ts
+  horarioEntrenamiento String? // "manana" | "mediodia" | "tarde" | "noche" — ubica pre/post entreno
+  comeAfuera           String   @default("nunca") // "nunca" | "1-2" | "3-5" | "6+" comidas afuera por semana
+  lugaresComeAfuera    String[] @default([]) // parrilla|pizzeria|sushi|rotiseria|delivery|comida_rapida|kiosco|comedor_trabajo
+  sesionesCocina       String? // "dos" | "una" | "no_cocino" — sesiones de meal prep posibles por semana
+  supermercado         String? // "coto" | "carrefour" | "jumbo" | "disco" | "dia" | "changomas" | "chino" | "otro"
+  suplementosActuales  String[] @default([])
 
   // ── Campos para el motor de generación automática (paso 3 onboarding) ──
   comidasPorDia                 Int       @default(4)
@@ -534,6 +422,52 @@ model EbookEntrega {
   payment Payment @relation(fields: [paymentId], references: [id])
 
   @@index([estado, creadoEn])
+}
+
+// ─── CATÁLOGO DE SUPLEMENTOS RECOMENDADOS (afiliados) ───────────────────────
+// Solapa pública /suplementos. Mismo framework que el proyecto de skincare:
+// producto + link de afiliado + registro de clics. Un producto solo se muestra
+// cuando está activo Y tiene link de afiliado cargado.
+model Suplemento {
+  id                 String               @id @default(cuid())
+  slug               String               @unique // ancla y URL corta: /suplementos/ir/<slug>
+  nombre             String // "Creatina monohidrato"
+  marca              String? // se completa cuando Ian manda el link
+  objetivos          ObjetivoSuplemento[] // en qué solapas aparece
+  paraQueSirve       String
+  aQuienSeRecomienda String
+  comoSeUsa          String // según etiqueta del producto
+  linkAfiliado       String?
+  imagenUrl          String?
+  precioArs          Float?
+  relevadoEn         DateTime? // última vez que se chequeó precio/link
+  prioridad          Int                  @default(0) // mayor = más arriba
+  activo             Boolean              @default(false)
+  creadoEn           DateTime             @default(now())
+  actualizadoEn      DateTime             @updatedAt
+
+  clicks SuplementoClick[]
+}
+
+enum ObjetivoSuplemento {
+  ELEMENTOS_BASE // "Lo básico": balanza, cinta, shaker, botella — antes que cualquier suplemento
+  GANANCIA_MUSCULAR
+  PERDIDA_GRASA
+  RENDIMIENTO
+  SALUD_GENERAL
+}
+
+// Cada clic al link de afiliado pasa por /suplementos/ir/<slug> y queda acá.
+model SuplementoClick {
+  id           String   @id @default(cuid())
+  suplementoId String
+  origen       String? // "catalogo" | "documento" | "mail"
+  referrer     String?
+  creadoEn     DateTime @default(now())
+
+  suplemento Suplemento @relation(fields: [suplementoId], references: [id], onDelete: Cascade)
+
+  @@index([suplementoId, creadoEn])
 }
 
 // ─── ALTAS — formulario público de ingreso (/ingreso) ────────────────────────

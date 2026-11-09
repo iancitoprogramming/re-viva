@@ -1,10 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
+import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import FormInput, { FormSelect } from '@/components/FormInput'
 import Button from '@/components/Button'
 import ChipInput from '@/components/ChipInput'
+import {
+  OBSTACULOS, HORARIOS_ENTRENAMIENTO, FRECUENCIA_COME_AFUERA, LUGARES_COME_AFUERA,
+  SESIONES_COCINA, SUPERMERCADOS, ESTILOS_ALIMENTACION,
+} from '@/lib/cuestionario'
 
 const opcionesGenero     = [{ value: 'MASCULINO', label: 'Masculino' }, { value: 'FEMENINO', label: 'Femenino' }]
 const opcionesObjetivo   = [{ value: 'VOLUMEN', label: 'Ganar músculo (Volumen)' }, { value: 'DEFINICION', label: 'Perder grasa (Definición)' }, { value: 'RECOMPOSICION', label: 'Mejorar composición (Recomposición)' }]
@@ -22,6 +27,8 @@ const opcionesActividad = [
   { value: 'alto',       label: 'Alto — trabajo físico o muy activo' },
 ]
 
+const aChips = (ops: readonly { value: string; label: string }[]) => ops.map(o => ({ id: o.value, label: o.label }))
+
 const opcionesEquipamiento = [
   { id: 'gym',         label: 'Gimnasio' },
   { id: 'casa',        label: 'Equipo en casa' },
@@ -30,15 +37,6 @@ const opcionesEquipamiento = [
   { id: 'sin_equipo',  label: 'Sin equipamiento' },
 ]
 
-const opcionesMetasFisicas = [
-  { id: 'perder_grasa',      label: 'Perder grasa' },
-  { id: 'ganar_masa',        label: 'Ganar masa muscular' },
-  { id: 'mejorar_resistencia', label: 'Mejorar resistencia' },
-  { id: 'mejorar_movilidad', label: 'Mejorar movilidad/flexibilidad' },
-  { id: 'mejorar_salud',     label: 'Mejorar salud general' },
-  { id: 'mejorar_postura',   label: 'Mejorar postura' },
-  { id: 'mejorar_deporte',   label: 'Rendir mejor en mi deporte' },
-]
 
 function CheckboxGroup({
   options,
@@ -72,8 +70,46 @@ function CheckboxGroup({
   )
 }
 
+function OpcionUnica({
+  options, value, onChange,
+}: {
+  options: readonly { value: string; label: string }[]
+  value: string
+  onChange: (v: string) => void
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {options.map(o => (
+        <button
+          key={o.value}
+          type="button"
+          onClick={() => onChange(o.value)}
+          className={`py-2 px-3 rounded-xl text-sm border transition-all font-medium text-left ${
+            value === o.value
+              ? 'bg-primary text-ivory border-primary'
+              : 'bg-surface border-edge text-ink-secondary hover:border-primary/40'
+          }`}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 export default function OnboardingPage() {
+  return (
+    <Suspense fallback={null}>
+      <OnboardingForm />
+    </Suspense>
+  )
+}
+
+function OnboardingForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  // Plan elegido en la landing (viene de /login?redirect=/onboarding?plan=...)
+  const plan = searchParams.get('plan') ?? ''
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [paso, setPaso] = useState<1 | 2 | 3 | 4>(1)
@@ -82,7 +118,8 @@ export default function OnboardingPage() {
     // Paso 1 — básicos
     genero: '', edad: '', altura: '', peso: '', objetivo: '',
     diasEntrenamiento: '', nivelEstres: '', horasSueno: '', adherencia: '',
-    preferenciasAlimentarias: '', lesiones: '', fechaNacimiento: '',
+    preferenciasAlimentarias: 'Omnívoro', fechaNacimiento: '',
+    resultadoSonado: '', horarioEntrenamiento: '',
     // Paso 1bis — pipeline (entrenamiento + comidas)
     minutosPorSesion: '60', comidasPorDia: '4',
     // Disponibilidad domingo (solo relevante si diasEntrenamiento === 3)
@@ -90,10 +127,14 @@ export default function OnboardingPage() {
     // Paso 2 — estilo de vida
     experiencia: '', actividadLaboral: '', practicaDeportes: false,
     quiereMejorarDeporte: '', deportes: '' as string,
+    // Paso 2 — tu semana real (define los entregables)
+    comeAfuera: 'nunca', sesionesCocina: '', supermercado: '',
   })
 
   const [equipamiento, setEquipamiento] = useState<string[]>([])
-  const [metasFisicas, setMetasFisicas]  = useState<string[]>([])
+  const [obstaculos, setObstaculos]     = useState<string[]>([])
+  const [lugaresComeAfuera, setLugaresComeAfuera] = useState<string[]>([])
+  const [suplementosActuales, setSuplementosActuales] = useState<string[]>([])
 
   // Paso 3 — Salud y restricciones (multi-string)
   const [alergias, setAlergias]                                   = useState<string[]>([])
@@ -124,6 +165,20 @@ export default function OnboardingPage() {
 
   const todosConsentimientos = Object.values(consents).every(Boolean)
 
+  const destinoPendiente = plan ? `/pendiente?plan=${encodeURIComponent(plan)}` : '/pendiente'
+
+  // Si ya completó el perfil (ej. cliente existente que entró por "Quiero este plan"),
+  // no tiene sentido volver a pedir el formulario.
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(r => (r.ok ? r.json() : null))
+      .then(me => {
+        if (!me) return router.replace(`/login?redirect=${encodeURIComponent(`/onboarding${plan ? `?plan=${plan}` : ''}`)}`)
+        if (me.tienePerfil) router.replace(me.plan?.estado === 'ACTIVO' ? '/dashboard' : destinoPendiente)
+      })
+      .catch(() => {})
+  }, [router, plan, destinoPendiente])
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value, type } = e.target
     const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
@@ -136,6 +191,10 @@ export default function OnboardingPage() {
     const req = ['genero', 'edad', 'altura', 'peso', 'objetivo', 'diasEntrenamiento', 'nivelEstres', 'horasSueno', 'adherencia']
     for (const c of req) {
       if (!form[c as keyof typeof form]) { setError(`Completá el campo "${c}".`); return false }
+    }
+    if (!form.horarioEntrenamiento) {
+      setError('Elegí en qué horario entrenás: con eso ubicamos las comidas pre y post entreno.')
+      return false
     }
     return true
   }
@@ -162,8 +221,10 @@ export default function OnboardingPage() {
         comidasPorDia: Number(form.comidasPorDia) || 4,
         minutosPorSesion: Number(form.minutosPorSesion) || 60,
         equipamiento,
-        metasFisicas,
         deportes: deportesList,
+        obstaculos,
+        lugaresComeAfuera: form.comeAfuera === 'nunca' ? [] : lugaresComeAfuera,
+        suplementosActuales,
         disponibilidadDomingo: form.disponibilidadDomingo,
         // Salud
         alergias, intolerancias, alimentosQueNoConsume,
@@ -182,7 +243,7 @@ export default function OnboardingPage() {
       return
     }
 
-    router.push('/pendiente')
+    router.push(destinoPendiente)
   }
 
   const labelClass = 'text-sm font-medium text-ink-secondary'
@@ -199,7 +260,7 @@ export default function OnboardingPage() {
           <h1 className="text-2xl font-bold text-ink mt-4 mb-2">Tu perfil</h1>
           <p className="text-ink-muted text-sm">
             {paso === 1 && 'Primero lo básico. Rápido y preciso.'}
-            {paso === 2 && 'Contanos sobre tu estilo de vida.'}
+            {paso === 2 && 'Tu semana real. Con esto armamos compras, meal prep y horarios.'}
             {paso === 3 && 'Salud y restricciones — clave para que tu plan sea seguro.'}
             {paso === 4 && 'Último paso: declaraciones legales.'}
           </p>
@@ -236,6 +297,13 @@ export default function OnboardingPage() {
                 <FormSelect label="¿Cuál es tu objetivo principal?" name="objetivo"
                   options={opcionesObjetivo} value={form.objetivo} onChange={handleChange} required />
 
+                <div className="flex flex-col gap-1.5">
+                  <label className={labelClass}>¿Qué querés lograr en concreto, y para cuándo?</label>
+                  <p className="text-xs text-ink-muted mb-1">Ej: bajar 8 kg antes de marzo, volver a correr sin dolor, que me entre el traje del casamiento.</p>
+                  <textarea name="resultadoSonado" value={form.resultadoSonado} onChange={handleChange}
+                    placeholder="En tus palabras..." className={textareaClass} style={{ minHeight: '60px' }} />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <FormInput label="Días/semana de entrenamiento" name="diasEntrenamiento"
                     type="number" placeholder="3" min="0" max="7"
@@ -243,6 +311,13 @@ export default function OnboardingPage() {
                   <FormInput label="Min. por sesión" name="minutosPorSesion"
                     type="number" placeholder="60" min="20" max="180" step="5"
                     value={form.minutosPorSesion} onChange={handleChange} />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className={labelClass}>¿En qué horario entrenás?</label>
+                  <p className="text-xs text-ink-muted -mt-1">Ubica tus comidas pre y post entreno.</p>
+                  <OpcionUnica options={HORARIOS_ENTRENAMIENTO} value={form.horarioEntrenamiento}
+                    onChange={v => { setForm(f => ({ ...f, horarioEntrenamiento: v })); setError('') }} />
                 </div>
 
                 {/* Disponibilidad domingo — solo para 3x/semana */}
@@ -302,21 +377,9 @@ export default function OnboardingPage() {
                   />
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className={labelClass}>Preferencias o restricciones alimentarias</label>
-                  <p className="text-xs text-ink-muted mb-1">Ej: Soy vegetariano, no como pescado, soy celíaco.</p>
-                  <textarea name="preferenciasAlimentarias" value={form.preferenciasAlimentarias}
-                    onChange={handleChange} placeholder="Escribí acá lo que el trainer deba saber..."
-                    className={textareaClass} />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className={labelClass}>Lesiones o condiciones médicas</label>
-                  <p className="text-xs text-ink-muted mb-1">Ej: Me duele la rodilla al correr, operado de hernia.</p>
-                  <textarea name="lesiones" value={form.lesiones} onChange={handleChange}
-                    placeholder="Detallá cualquier dolor, lesión o condición médica..."
-                    className={textareaClass} />
-                </div>
+                <FormSelect label="¿Cómo comés?" name="preferenciasAlimentarias"
+                  options={[...ESTILOS_ALIMENTACION]} value={form.preferenciasAlimentarias} onChange={handleChange} />
+                <p className="text-xs text-ink-muted -mt-3">Alergias, intolerancias y lesiones te las pedimos en el paso 3.</p>
 
                 {error && <p className="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">{error}</p>}
 
@@ -343,12 +406,34 @@ export default function OnboardingPage() {
                     selected={equipamiento} onChange={setEquipamiento} />
                 </div>
 
-                <div className="flex flex-col gap-2">
-                  <p className={sectionLabel}>Metas adicionales</p>
-                  <p className="text-xs text-ink-muted -mt-1">Además de tu objetivo principal, ¿qué más buscás?</p>
-                  <CheckboxGroup options={opcionesMetasFisicas}
-                    selected={metasFisicas} onChange={setMetasFisicas} />
+                <div className="flex flex-col gap-2 border-t border-edge pt-4">
+                  <p className={sectionLabel}>¿Qué te frenó hasta ahora?</p>
+                  <p className="text-xs text-ink-muted -mt-1">Marcá todo lo que aplique. Cada cosa que marques tiene su solución en tu plan.</p>
+                  <CheckboxGroup options={aChips(OBSTACULOS)} selected={obstaculos} onChange={setObstaculos} />
                 </div>
+
+                <div className="flex flex-col gap-2">
+                  <p className={sectionLabel}>¿Cuántas comidas hacés afuera por semana?</p>
+                  <OpcionUnica options={FRECUENCIA_COME_AFUERA} value={form.comeAfuera}
+                    onChange={v => setForm(f => ({ ...f, comeAfuera: v }))} />
+                  {form.comeAfuera !== 'nunca' && (
+                    <>
+                      <p className="text-xs text-ink-muted mt-1">¿Dónde, generalmente?</p>
+                      <CheckboxGroup options={aChips(LUGARES_COME_AFUERA)}
+                        selected={lugaresComeAfuera} onChange={setLugaresComeAfuera} />
+                    </>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <p className={sectionLabel}>¿Cuánto podés cocinar?</p>
+                  <p className="text-xs text-ink-muted -mt-1">Armamos el meal prep para que resuelvas la semana en esas sesiones.</p>
+                  <OpcionUnica options={SESIONES_COCINA} value={form.sesionesCocina}
+                    onChange={v => setForm(f => ({ ...f, sesionesCocina: v }))} />
+                </div>
+
+                <FormSelect label="¿Dónde hacés las compras?" name="supermercado"
+                  options={[...SUPERMERCADOS]} value={form.supermercado} onChange={handleChange} />
 
                 <div className="flex flex-col gap-2">
                   <label className={labelClass}>
@@ -452,6 +537,14 @@ export default function OnboardingPage() {
                   values={medicacionActual} onChange={setMedicacionActual}
                 />
 
+                <ChipInput
+                  label="Suplementos que ya tomás"
+                  hint="Así no te recomendamos algo que ya tenés (o que no combina)."
+                  placeholder="Ninguno"
+                  values={suplementosActuales} onChange={setSuplementosActuales}
+                  sugerencias={['creatina','proteína whey','cafeína','omega 3','magnesio','multivitamínico']}
+                />
+
                 {/* Flags especiales */}
                 <div className="border-t border-edge pt-4">
                   <p className={sectionLabel}>Situaciones especiales (opcional)</p>
@@ -518,7 +611,7 @@ export default function OnboardingPage() {
 
                 <ConsentCheckbox
                   label="Acepto los Términos y Condiciones de Re-Viva"
-                  hint="Reglas de uso de la plataforma, política de cancelación y pago."
+                  hint="Pagos, suscripción y cancelación, garantía, servicio de compra y links de afiliado."
                   checked={consents.aceptaTerminosYCondiciones}
                   onChange={() => toggleConsent('aceptaTerminosYCondiciones')}
                 />
@@ -543,6 +636,11 @@ export default function OnboardingPage() {
                   checked={consents.confirmaVeracidadDatos}
                   onChange={() => toggleConsent('confirmaVeracidadDatos')}
                 />
+
+                <p className="text-xs text-ink-muted -mt-1">
+                  Leelos completos en{' '}
+                  <Link href="/terminos" target="_blank" className="text-primary underline">revivabyigz.com/terminos</Link>.
+                </p>
 
                 {!todosConsentimientos && (
                   <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3 text-sm leading-relaxed">

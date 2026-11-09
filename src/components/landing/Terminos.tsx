@@ -1,9 +1,13 @@
+import Link from 'next/link'
+
 const GOLD    = '#C9A84C'
 const IVORY   = '#F5F2E7'
 const IVORY50 = 'rgba(245,242,231,0.50)'
 const DIVIDER = 'rgba(201,168,76,0.10)'
 
 const terminos = [
+  'Débito automático: cancelás cuando quieras desde Mercado Pago o por WhatsApp.',
+  '10 días de arrepentimiento y garantía Re-Viva de 30 días en planes con seguimiento.',
   'El espacio presencial reserva agenda mensual.',
   'Las ausencias no modifican automaticamente el valor del plan.',
   'Las recuperaciones estan sujetas a disponibilidad de agenda.',
@@ -36,6 +40,9 @@ export default function Terminos() {
             </li>
           ))}
         </ul>
+        <Link href="/terminos" className="inline-block mt-6 text-sm underline" style={{ color: GOLD }}>
+          Leer términos y condiciones completos
+        </Link>
       </div>
     </section>
   )

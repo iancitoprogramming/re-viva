@@ -3,6 +3,10 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
+import {
+  etiqueta, etiquetas, OBSTACULOS, HORARIOS_ENTRENAMIENTO, FRECUENCIA_COME_AFUERA,
+  LUGARES_COME_AFUERA, SESIONES_COCINA, SUPERMERCADOS,
+} from '@/lib/cuestionario'
 import Navbar from '@/components/Navbar'
 import Button from '@/components/Button'
 import FormInput from '@/components/FormInput'
@@ -55,6 +59,14 @@ interface ClienteDetalle {
     quiereMejorarDeporte?: string | null
     metasFisicas?: string[]
     equipamiento?: string[]
+    resultadoSonado?: string | null
+    obstaculos?: string[]
+    horarioEntrenamiento?: string | null
+    comeAfuera?: string
+    lugaresComeAfuera?: string[]
+    sesionesCocina?: string | null
+    supermercado?: string | null
+    suplementosActuales?: string[]
   } | null
   archivos: ArchivoAdmin[]
   plan: ({
@@ -283,9 +295,9 @@ export default function ClienteDetallePage() {
           <Link href="/admin" className="text-sm text-primary hover:underline">
             ← Volver al panel
           </Link>
-          <Link href={`/admin/cliente/${id}/plan-builder`}
+          <Link href={`/admin/cliente/${id}/compras`}
             className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors">
-            🍽️ Plan Builder
+            🛒 Listas de compras
           </Link>
         </div>
 
@@ -495,6 +507,14 @@ export default function ClienteDetallePage() {
                 ...(cliente.perfil.deportes?.length ? [['Deportes', cliente.perfil.deportes.join(', ')]] : []),
                 ...(cliente.perfil.equipamiento?.length ? [['Equipamiento', cliente.perfil.equipamiento.join(', ')]] : []),
                 ...(cliente.perfil.metasFisicas?.length ? [['Metas físicas', cliente.perfil.metasFisicas.join(', ')]] : []),
+                // Cuestionario v2 — lo que necesitan los documentos
+                ['Horario entreno', etiqueta(HORARIOS_ENTRENAMIENTO, cliente.perfil.horarioEntrenamiento)],
+                ['Come afuera',     etiqueta(FRECUENCIA_COME_AFUERA, cliente.perfil.comeAfuera)],
+                ...(cliente.perfil.lugaresComeAfuera?.length ? [['Dónde', etiquetas(LUGARES_COME_AFUERA, cliente.perfil.lugaresComeAfuera)]] : []),
+                ['Cocina',          etiqueta(SESIONES_COCINA, cliente.perfil.sesionesCocina)],
+                ['Supermercado',    etiqueta(SUPERMERCADOS, cliente.perfil.supermercado)],
+                ...(cliente.perfil.obstaculos?.length ? [['Obstáculos', etiquetas(OBSTACULOS, cliente.perfil.obstaculos)]] : []),
+                ...(cliente.perfil.suplementosActuales?.length ? [['Suplementos actuales', cliente.perfil.suplementosActuales.join(', ')]] : []),
               ].map(([k, v]) => (
                 <div key={k} className="flex justify-between py-1.5 border-b border-edge last:border-0">
                   <span className="text-ink-secondary">{k}</span>
@@ -502,6 +522,18 @@ export default function ClienteDetallePage() {
                 </div>
               ))}
             </div>
+            {cliente.perfil.resultadoSonado && (
+              <div className="bg-surface-warm rounded-xl p-3 mb-2">
+                <p className="text-xs font-semibold text-ink-secondary mb-1">Resultado soñado</p>
+                <p className="text-sm text-ink">{cliente.perfil.resultadoSonado}</p>
+              </div>
+            )}
+            {!cliente.perfil.horarioEntrenamiento && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-2 text-sm text-amber-900">
+                Faltan datos del cuestionario v2 (horario de entrenamiento, si come afuera, cocina).
+                Pedíselos antes de armar los documentos.
+              </div>
+            )}
             {cliente.perfil.preferenciasAlimentarias && (
               <div className="bg-surface-warm rounded-xl p-3 mb-2">
                 <p className="text-xs font-semibold text-ink-secondary mb-1">Preferencias alimentarias</p>

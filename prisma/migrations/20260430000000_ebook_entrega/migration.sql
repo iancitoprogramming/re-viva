@@ -19,13 +19,20 @@ CREATE TABLE IF NOT EXISTS "EbookEntrega" (
 CREATE UNIQUE INDEX IF NOT EXISTS "EbookEntrega_paymentId_key" ON "EbookEntrega"("paymentId");
 CREATE INDEX IF NOT EXISTS "EbookEntrega_estado_creadoEn_idx" ON "EbookEntrega"("estado", "creadoEn");
 
-ALTER TABLE "EbookEntrega"
-  ADD CONSTRAINT "EbookEntrega_userId_fkey"
-  FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
-ALTER TABLE "EbookEntrega"
-  ADD CONSTRAINT "EbookEntrega_paymentId_fkey"
-  FOREIGN KEY ("paymentId") REFERENCES "Payment"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+-- Idempotente (2026-11-02): la tabla ya existe en producción (aplicada a mano).
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'EbookEntrega_userId_fkey') THEN
+    ALTER TABLE "EbookEntrega"
+      ADD CONSTRAINT "EbookEntrega_userId_fkey"
+      FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'EbookEntrega_paymentId_fkey') THEN
+    ALTER TABLE "EbookEntrega"
+      ADD CONSTRAINT "EbookEntrega_paymentId_fkey"
+      FOREIGN KEY ("paymentId") REFERENCES "Payment"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+  END IF;
+END $$;
 
 -- Trigger para updatedAt
 CREATE OR REPLACE FUNCTION update_ebook_entrega_actualizado()

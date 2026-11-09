@@ -41,3 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# Handoff de sesión: queda local. El repo es público y el doc tiene
+# precios internos e identificadores de infra.
+HANDOFF.md

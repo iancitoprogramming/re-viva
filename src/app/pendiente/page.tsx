@@ -5,7 +5,7 @@
 import { Suspense, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import WhatsAppIcon from '@/components/WhatsAppIcon'
-import { ALIAS, WHATSAPP_COMPROBANTE, INSTAGRAM_URL, WHATSAPP_NUMBER } from '@/lib/constants'
+import { ALIAS, WHATSAPP_COMPROBANTE, INSTAGRAM_URL, WHATSAPP_NUMBER, MP_SUSCRIPCION_POR_PLAN } from '@/lib/constants'
 
 function QRImage() {
   const [error, setError] = useState(false)
@@ -42,6 +42,8 @@ function PendienteContent() {
   }
 
   const checkoutHref = plan ? `/checkout?plan=${plan}` : '/checkout'
+  // Planes mensuales online: débito automático de MP (no hay que acordarse de pagar cada mes)
+  const suscripcionHref = MP_SUSCRIPCION_POR_PLAN[plan] ?? null
 
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-8">
@@ -62,6 +64,24 @@ function PendienteContent() {
             Pendiente de activación
           </div>
         </div>
+
+        {/* Opción 0: Débito automático (solo planes mensuales online) */}
+        {suscripcionHref && (
+          <a
+            href={suscripcionHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center justify-between bg-emerald-700 hover:bg-emerald-800 text-white px-6 py-4 rounded-2xl font-semibold transition-all shadow-sm active:scale-[0.98] cursor-pointer mb-2 no-underline"
+          >
+            <span>Suscribirme con débito automático</span>
+            <span className="text-xs font-normal opacity-80">Mercado Pago · cancelás cuando quieras</span>
+          </a>
+        )}
+        {suscripcionHref && (
+          <p className="text-xs text-gray-500 text-center mb-4">
+            Se renueva solo cada mes. Así no cortás el proceso por olvidarte de pagar.
+          </p>
+        )}
 
         {/* Opción 1: Pagar con Mercado Pago */}
         <a
