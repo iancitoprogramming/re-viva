@@ -456,3 +456,62 @@ export async function enviarRecordatorioVencimiento(
     console.error('[EMAIL] Error recordatorio vencimiento:', (err as Error).message)
   }
 }
+
+// ─── EMAIL: alta nueva desde el formulario público /ingreso ──────────────────
+// Va al entrenador, no al cliente. Cuerpo en texto plano con la ficha completa
+// —la misma que genera la vista interna— para poder leer el alta desde el
+// celular sin entrar al panel. Al final, el link directo a la ficha.
+//
+// Si falta configuración, lanza con un mensaje claro: el endpoint lo loguea y
+// devuelve 200 igual, porque el alta ya quedó guardada.
+export async function enviarNotificacionAlta(
+  nombre: string,
+  altaId: string,
+  prompt: string,
+  alertas: { tipo: string; texto: string }[],
+): Promise<void> {
+  const destino = process.env.ALTA_NOTIFICACION_EMAIL ?? process.env.TRAINER_EMAIL
+
+  if (!destino) {
+    throw new Error(
+      'Falta ALTA_NOTIFICACION_EMAIL (o TRAINER_EMAIL): no hay a quién avisar del alta nueva.',
+    )
+  }
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    throw new Error(
+      'Faltan GMAIL_USER y/o GMAIL_APP_PASSWORD: no se puede enviar el aviso del alta nueva.',
+    )
+  }
+
+  const base = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://revivabyigz.com'
+  const link = `${base}/admin/altas/${altaId}`
+
+  const bloqueAlertas = alertas.length
+    ? alertas.map(a => `${a.tipo === 'stop' ? '[ATENCIÓN]' : a.tipo === 'ok' ? '[OK]' : '[AVISO]'} ${a.texto}`).join('\n')
+    : 'Sin alertas.'
+
+  const cuerpo = [
+    'ALERTAS',
+    bloqueAlertas,
+    '',
+    '─────────────────────────────────────────',
+    '',
+    prompt,
+    '',
+    '─────────────────────────────────────────',
+    '',
+    `Ficha completa: ${link}`,
+  ].join('\n')
+
+  console.log(`[EMAIL] Notificando alta nueva a: ${destino}`)
+
+  const transporter = crearTransporter()
+  await transporter.sendMail({
+    from:    FROM_EMAIL,
+    to:      destino,
+    subject: `Alta Re-Viva — ${nombre}`,
+    text:    cuerpo,
+  })
+
+  console.log(`[EMAIL] Alta ${altaId} notificada OK`)
+}

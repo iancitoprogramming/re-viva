@@ -60,6 +60,7 @@ re-viva/
 │   │   │   │   ├── recuperar/route.ts    — POST: envía código 6 dígitos
 │   │   │   │   └── reset-password/route.ts — POST: cambia contraseña
 │   │   │   ├── onboarding/route.ts       — POST: crea perfil + plan PENDIENTE
+│   │   │   ├── ingreso/route.ts          — POST: alta pública del formulario /ingreso
 │   │   │   └── admin/
 │   │   │       ├── clientes/route.ts     — GET: lista todos los clientes
 │   │   │       ├── cliente/[id]/route.ts — GET: detalle de cliente
@@ -68,11 +69,14 @@ re-viva/
 │   │   ├── login/page.tsx                — Registro + login (toggle)
 │   │   ├── recuperar/page.tsx            — Recuperación de contraseña
 │   │   ├── onboarding/page.tsx           — Formulario de perfil nutricional
+│   │   ├── ingreso/page.tsx              — Formulario de ingreso público (7 pasos, sin login)
 │   │   ├── pendiente/page.tsx            — Instrucciones de pago (CBU/alias + WhatsApp)
 │   │   ├── dashboard/page.tsx            — Dashboard del cliente (ve su plan)
 │   │   ├── admin/
 │   │   │   ├── page.tsx                  — Lista de clientes para el trainer
-│   │   │   └── cliente/[id]/page.tsx     — Detalle + activar plan + tracking entregas
+│   │   │   ├── cliente/[id]/page.tsx     — Detalle + activar plan + tracking entregas
+│   │   │   ├── altas/page.tsx            — Lista de altas de /ingreso
+│   │   │   └── altas/[id]/page.tsx       — Ficha: alertas + prompt de armado + datos crudos
 │   │   ├── page.tsx                      — Landing page pública
 │   │   └── layout.tsx                    — Layout global + fuentes
 │   ├── components/
@@ -87,6 +91,9 @@ re-viva/
 │   │   ├── constants.ts    — INSTAGRAM_URL, WHATSAPP_NUMBER, ALIAS, WHATSAPP_*, PLAN_CTA_HREF
 │   │   ├── email.ts        — enviarCodigoRecuperacion, enviarNotificacionNuevoCliente
 │   │   ├── igzEngine.ts    — Motor de cálculo de macros IGZ
+│   │   ├── ingreso.ts      — Esquema + validación + normalización del formulario /ingreso
+│   │   ├── peri.ts         — Derivación peri-entreno (módulo puro)
+│   │   ├── ficha.ts        — Alertas, prompt de armado y datos crudos de un alta
 │   │   └── prisma.ts       — Instancia singleton de PrismaClient (con adapter pg)
 │   └── types/index.ts      — Tipos compartidos (JWTPayload, OnboardingData, IGZResult, etc.)
 ├── prisma/
@@ -121,6 +128,11 @@ RESEND_API_KEY="re_xxxxxxxxxxxx"
 # Trainer
 TRAINER_EMAIL="ian@igztrainer.com"
 ADMIN_EMAILS="ian@igztrainer.com"   # Comma-separated. Define quién puede acceder a /admin
+
+# Formulario de ingreso (/ingreso)
+ALTA_NOTIFICACION_EMAIL="ian@igztrainer.com"   # Aviso de alta nueva. Si falta, cae en TRAINER_EMAIL
+GMAIL_USER="cuenta@gmail.com"                  # El aviso sale por el SMTP del sitio, no por Resend
+GMAIL_APP_PASSWORD="xxxx xxxx xxxx xxxx"
 ```
 
 ### Notas importantes sobre las env vars
@@ -191,6 +203,10 @@ Las páginas verifican `/api/auth/me` en `useEffect`:
 | POST | `/api/auth/recuperar` | Ninguna | Envía código de recuperación |
 | POST | `/api/auth/reset-password` | Ninguna | Cambia contraseña con código |
 | POST | `/api/onboarding` | JWT cookie | Crea perfil nutricional + plan |
+| POST | `/api/ingreso` | Ninguna | Alta pública del formulario `/ingreso` (rate limit + honeypot) |
+| GET | `/api/admin/altas` | Admin JWT | Lista de altas, filtrable por estado |
+| GET | `/api/admin/altas/[id]` | Admin JWT | Ficha completa: alertas, prompt y datos crudos |
+| PATCH | `/api/admin/altas/[id]` | Admin JWT | Cambia estado y notas internas del alta |
 | GET | `/api/admin/clientes` | Admin JWT | Lista todos los clientes |
 | GET | `/api/admin/cliente/[id]` | Admin JWT | Detalle de cliente |
 | POST | `/api/admin/activar-plan/[id]` | Admin JWT | Activa plan con macros del trainer |
@@ -223,6 +239,20 @@ Las páginas verifican `/api/auth/me` en `useEffect`:
 
 **`ResetToken`** — tokens de recuperación de contraseña
 - `userId`, `codigo` (6 dígitos), `expiresAt` (15 min), `usado` (bool)
+
+**`Alta`** (tabla `altas`) — un envío del formulario público `/ingreso`
+- No tiene relación con `User`: es un lead, no una cuenta. Columnas en snake_case
+  (`creado_en`, `peso_kg`, `dias_entrenamiento`…) mapeadas a campos camelCase con `@map`.
+- `estado`: `nuevo` | `en_armado` | `armado` | `descartado`. `notas_internas` lo escribe el trainer.
+- Horarios: `dias_entrenamiento` (text[], en orden de semana), `horarios_entrenamiento`
+  (jsonb `{ "Martes": "11:00" }`) y `horarios_comidas` (jsonb con las cinco comidas; `null` = no la hace).
+- **RLS activada sin políticas**: el rol anónimo no lee ni escribe nada, ni con la clave pública.
+  El insert y la lectura van por el servidor (`DATABASE_URL`, nunca expuesta al bundle).
+- **La derivación peri-entreno NO se guarda.** Se recalcula siempre desde los horarios en
+  `src/lib/peri.ts`: para cada hora de entrenamiento distinta, PRE es la comida más cercana en
+  las 3 h previas y POST la más cercana en las 4 h posteriores. Si el cliente corrige un horario,
+  la derivación lo sigue. `src/lib/ficha.ts` arma con eso las alertas y el prompt de armado que
+  ve el trainer (y que viaja en el mail del alta).
 
 ### Comandos útiles
 

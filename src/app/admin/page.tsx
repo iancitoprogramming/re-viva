@@ -351,6 +351,14 @@ export default function AdminPage() {
               <p className="text-xs text-ink-muted">Catálogo de macros</p>
             </div>
           </Link>
+          <Link href="/admin/altas"
+            className="bg-surface border border-edge rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-3 col-span-2">
+            <span className="text-2xl">📝</span>
+            <div>
+              <p className="font-semibold text-ink text-sm">Altas de ingreso</p>
+              <p className="text-xs text-ink-muted">Formularios de /ingreso + prompt de armado</p>
+            </div>
+          </Link>
         </div>
 
         {/* Alertas */}

@@ -535,3 +535,81 @@ model EbookEntrega {
 
   @@index([estado, creadoEn])
 }
+
+// ─── ALTAS — formulario público de ingreso (/ingreso) ────────────────────────
+// Una fila por formulario enviado. Tabla "altas" con columnas snake_case
+// (contrato de la especificación) mapeadas a campos camelCase en el cliente.
+// RLS activada sin políticas: nadie lee ni escribe desde el rol anónimo.
+// La derivación peri-entreno NO se guarda — se recalcula siempre desde los horarios.
+model Alta {
+  id       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  creadoEn DateTime @default(now()) @map("creado_en") @db.Timestamptz(6)
+  estado   String   @default("nuevo") // nuevo | en_armado | armado | descartado
+
+  // ── Paso 1 — Quién sos ──
+  nombre        String
+  email         String
+  whatsapp      String
+  edad          Int
+  sexo          String // "Femenino" | "Masculino"
+  pesoKg        Decimal @map("peso_kg") @db.Decimal(5, 2)
+  alturaCm      Int     @map("altura_cm")
+  objetivo      String
+  experiencia   String?
+  duracionCiclo String? @map("duracion_ciclo")
+
+  // ── Paso 2 — Tus horarios ──
+  diasEntrenamiento     String[] @map("dias_entrenamiento") // nombres completos, en orden de semana
+  horariosEntrenamiento Json     @map("horarios_entrenamiento") // { "Martes": "11:00", ... }
+  horariosComidas       Json     @map("horarios_comidas") // { "desayuno": "09:45", "colacion_am": null, ... }
+  comidasSostenibles    Int      @map("comidas_sostenibles")
+  ayunas                String
+  jornadaVariable       Boolean  @map("jornada_variable")
+  jornadaDetalle        String?  @map("jornada_detalle")
+  domingo               String?
+
+  // ── Paso 3 — Cómo comés ──
+  caeMal        String  @map("cae_mal")
+  alergias      String
+  noGusta       String  @map("no_gusta")
+  cocina        String?
+  comidasAfuera String? @map("comidas_afuera")
+  balanza       String
+  finDeSemana   String? @map("fin_de_semana")
+  agua          String?
+
+  // ── Paso 4 — Salud ──
+  lesion        Boolean
+  lesionDetalle String? @map("lesion_detalle")
+  lesionEstado  String? @map("lesion_estado") // "Asintomática" | "Molestias ocasionales" | "Activa"
+  laboratorio   String
+  medicacion    String
+  sueno         String?
+  estres        String?
+  seguimiento   String?
+
+  // ── Paso 5 — Cómo vas a entrenar ──
+  lugar                 String
+  equipamiento          String?
+  sesionesConEntrenador Int?    @map("sesiones_con_entrenador")
+  sesionesSolo          Int?    @map("sesiones_solo")
+  duracionSesion        String? @map("duracion_sesion")
+  otrosDeportes         String? @map("otros_deportes")
+  ejerciciosEvitar      String? @map("ejercicios_evitar")
+  pasos                 String?
+
+  // ── Paso 6 — Cómo seguimos ──
+  presupuestoSuplementos String  @map("presupuesto_suplementos")
+  revision               String?
+  comunicacion           String?
+  intentosPrevios        String? @map("intentos_previos")
+  fechaMotivadora        String? @map("fecha_motivadora")
+  consentimiento         Boolean
+
+  // ── Interno — lo escribe el entrenador después ──
+  notasInternas String? @map("notas_internas")
+
+  @@index([creadoEn(sort: Desc)])
+  @@index([estado])
+  @@map("altas")
+}
