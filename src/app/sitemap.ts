@@ -20,6 +20,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
+      url: `${SITE_URL}/ejercicios`,
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
       url: `${SITE_URL}/terminos`,
       changeFrequency: 'yearly',
       priority: 0.3,

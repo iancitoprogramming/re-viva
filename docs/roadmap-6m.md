@@ -76,7 +76,7 @@ El presencial tiene techo de horas. El salto sale del online, y el online solo e
 
 ### Fase 1 · Enseñar sin estar (16 al 30 de noviembre)
 
-1. **Biblioteca de ejercicios:** cada ejercicio con su video, clave técnica y errores comunes. Carga desde el admin, página propia por ejercicio y link directo desde el documento de entrenamiento.
+1. **Biblioteca de ejercicios (hecha, falta migrar y cargar videos):** 131 ejercicios en 17 estaciones (`src/lib/ejercicios/catalogo.ts`). Guía de grabación en `docs/Guia-Grabacion-Ejercicios.docx`, carga de links en `/admin/ejercicios`, página por ejercicio en `/ejercicios/<slug>` para linkear desde el documento de entrenamiento. Requiere la migración `20261110000000_ejercicio_video`.
 2. **Dashboard del cliente:** sus documentos, el estado de cada entregable y sus videos. Hoy solo ve los macros.
 3. **Check-in semanal de 2 minutos** con recordatorio automático. Es lo que justifica los $88.000 por mes y lo que sostiene la garantía.
 4. **Un solo formulario de entrada.** Hoy hay dos (`/onboarding` y `/ingreso`) que piden casi lo mismo. Queda `/ingreso` como puerta, y la cuenta se crea al pagar.

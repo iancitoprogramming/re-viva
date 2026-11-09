@@ -547,3 +547,12 @@ model Alta {
   @@index([estado])
   @@map("altas")
 }
+
+// ─── BIBLIOTECA DE EJERCICIOS ────────────────────────────────────────────────
+// Un video por ejercicio. El catálogo vive en src/lib/ejercicios/catalogo.ts;
+// el slug de acá es el slug del catálogo.
+model EjercicioVideo {
+  slug          String   @id
+  videoUrl      String
+  actualizadoEn DateTime @default(now()) @updatedAt
+}
