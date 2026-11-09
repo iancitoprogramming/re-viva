@@ -29,6 +29,8 @@
 
 **Estado:** MVP funcional, deployado en Vercel. Versión unificada (nov 2026): esta es la única versión; de `Valen330/re-viva-site` se rescató SEO, `/ads`, fix de Lenis y links de suscripción MP. Ver `docs/unificacion.md`.
 
+**Roadmap y estado real (auditoría nov 2026):** `docs/roadmap-6m.md`. Leerlo antes de proponer features.
+
 **Docs de negocio y operación:** `docs/oferta-reviva.md` (oferta Hormozi), `docs/entregables.md` (estructura de los DOCX, flujo de armado, catálogo, listas de compras), `docs/plantillas/*.docx` (plantillas con marca, se regeneran con `npx tsx scripts/generar-plantillas-docx.ts`).
 
 | Capa | Tecnología |

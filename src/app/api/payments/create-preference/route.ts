@@ -32,6 +32,13 @@ export async function POST(request: Request) {
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://re-viva.vercel.app'
 
+    // El registro se crea antes que la preferencia: su id viaja como
+    // external_reference y es lo que permite al webhook encontrar el pago
+    // (los pagos del brick no siempre traen preference_id).
+    const pago = await prisma.payment.create({
+      data: { userId: payload.userId, planTipo, preferenceId: '', amount: plan.monto },
+    })
+
     const preference = new Preference(mp)
     const result = await preference.create({
       body: {
@@ -54,22 +61,18 @@ export async function POST(request: Request) {
         },
         auto_return: 'approved',
         notification_url: `${baseUrl}/api/payments/webhook`,
-        external_reference: payload.userId,
+        external_reference: pago.id,
         metadata: {
           userId: payload.userId,
           planTipo,
+          paymentDbId: pago.id,
         },
       },
     })
 
-    // Guardar la preferencia en la DB
-    await prisma.payment.create({
-      data: {
-        userId: payload.userId,
-        planTipo,
-        preferenceId: result.id!,
-        amount: plan.monto,
-      },
+    await prisma.payment.update({
+      where: { id: pago.id },
+      data:  { preferenceId: result.id! },
     })
 
     return NextResponse.json({ preferenceId: result.id })

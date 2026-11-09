@@ -6,6 +6,8 @@ import { NextResponse } from 'next/server'
 import { MercadoPagoConfig, Payment } from 'mercadopago'
 import { obtenerTokenDeRequest, verificarToken } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { PLANES_MP, type PlanMPKey } from '@/lib/constants'
+import { registrarResultadoPago } from '@/lib/pagos'
 
 const mp = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN!,
@@ -19,33 +21,44 @@ export async function POST(request: Request) {
   if (!payload) return NextResponse.json({ error: 'Token inválido' }, { status: 401 })
 
   try {
-    const formData = await request.json()
+    const { formData, preferenceId } = await request.json() as {
+      formData: Record<string, unknown>
+      preferenceId: string
+    }
+    if (!formData || !preferenceId) {
+      return NextResponse.json({ error: 'Datos de pago incompletos' }, { status: 400 })
+    }
+
+    // El pago se cobra contra el registro que creó create-preference para este
+    // usuario. El monto sale de ahí, nunca del browser.
+    const pago = await prisma.payment.findFirst({
+      where: { preferenceId, userId: payload.userId },
+    })
+    if (!pago) return NextResponse.json({ error: 'Pago no encontrado' }, { status: 404 })
+    if (pago.status === 'approved') {
+      return NextResponse.json({ status: 'approved', paymentId: pago.paymentId })
+    }
+
+    const plan = PLANES_MP[pago.planTipo as PlanMPKey]
 
     const paymentApi = new Payment(mp)
     const result = await paymentApi.create({
       body: {
         ...formData,
+        transaction_amount: pago.amount,
+        description: plan?.titulo ?? pago.planTipo,
+        external_reference: pago.id,
+        notification_url: `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://re-viva.vercel.app'}/api/payments/webhook`,
         metadata: {
           userId: payload.userId,
+          planTipo: pago.planTipo,
+          paymentDbId: pago.id,
         },
       },
+      requestOptions: { idempotencyKey: `${pago.id}-${String(formData.token ?? formData.payment_method_id ?? '')}` },
     })
 
-    // Actualizar el registro en la DB con el resultado
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const prefId = (result as any).preference_id as string | undefined
-    if (prefId) {
-      await prisma.payment.updateMany({
-        where: {
-          preferenceId: prefId,
-          userId: payload.userId,
-        },
-        data: {
-          paymentId: String(result.id),
-          status: result.status ?? 'unknown',
-        },
-      })
-    }
+    await registrarResultadoPago(pago.id, String(result.id), result.status ?? 'unknown')
 
     return NextResponse.json({
       status: result.status,

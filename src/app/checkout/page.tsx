@@ -148,7 +148,7 @@ function CheckoutContent() {
               fetch('/api/payments/process', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({ formData, preferenceId }),
               })
                 .then(r => r.json())
                 .then(data => {
