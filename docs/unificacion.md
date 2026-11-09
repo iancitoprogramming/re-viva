@@ -94,3 +94,8 @@ Ian había hecho en octubre otra rama con parte del mismo trabajo, sin mergear. 
 | Ian | Research de evidencia, catálogo tipado y checklist de links (`content/suplementos/`) | Base del catálogo de la web: ver `docs/entregables.md` §4. |
 | #29 | Bloque de transparencia de afiliados (CLAUDE.md §14) | En catálogo, documento de nutrición y mail de compras, en letra normal. |
 | — | Los 2 MealPlan de clientes | Decisión: no se conservan (los planes de comida se arman en los chats de Claude). La migración de borrado sigue como está. |
+
+## 8. `main` después de #32 (`/ingreso`, 8 nov)
+
+- `20261108000000_altas_ingreso` ya está aplicada a mano en producción (la tabla `altas` existe) y tampoco quedó registrada en `_prisma_migrations`. Es idempotente (`CREATE TABLE/INDEX IF NOT EXISTS`, RLS y `REVOKE`), así que `migrate deploy` la vuelve a correr sin cambiar nada.
+- El aviso de alta nueva salía por Gmail SMTP; en Vercel no hay `GMAIL_USER` ni `GMAIL_APP_PASSWORD`, así que nunca habría llegado. Ahora usa `enviarMail()` (Resend) como el resto, con `ALTA_NOTIFICACION_EMAIL` o `TRAINER_EMAIL` de destino.

@@ -18,7 +18,7 @@ import { TEXTO_TRANSPARENCIA_AFILIADOS } from '@/lib/suplementos'
 const TRAINER_EMAIL = process.env.TRAINER_EMAIL!
 const FROM_EMAIL    = process.env.RESEND_FROM_EMAIL ?? 'REVIVA IGZ <noreply@revivabyigz.com>'
 
-type Mail = { from: string; to: string; subject: string; html: string }
+type Mail = { from: string; to: string; subject: string } & ({ html: string; text?: string } | { text: string; html?: string })
 
 // Todos los envíos pasan por acá. Resend NO tira excepción cuando la API
 // rechaza el mail: devuelve { error }. Si no se mira, el fallo pasa callado
@@ -586,4 +586,58 @@ export async function enviarListaCompras(datos: {
     console.error('[EMAIL] Error lista de compras:', (err as Error).message)
     return false
   }
+}
+
+// ─── EMAIL: alta nueva desde el formulario público /ingreso ──────────────────
+// Va al entrenador, no al cliente. Cuerpo en texto plano con la ficha completa
+// —la misma que genera la vista interna— para poder leer el alta desde el
+// celular sin entrar al panel. Al final, el link directo a la ficha.
+//
+// Si falta configuración, lanza con un mensaje claro: el endpoint lo loguea y
+// devuelve 200 igual, porque el alta ya quedó guardada.
+export async function enviarNotificacionAlta(
+  nombre: string,
+  altaId: string,
+  prompt: string,
+  alertas: { tipo: string; texto: string }[],
+): Promise<void> {
+  const destino = process.env.ALTA_NOTIFICACION_EMAIL ?? process.env.TRAINER_EMAIL
+
+  if (!destino) {
+    throw new Error(
+      'Falta ALTA_NOTIFICACION_EMAIL (o TRAINER_EMAIL): no hay a quién avisar del alta nueva.',
+    )
+  }
+
+  const base = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://revivabyigz.com'
+  const link = `${base}/admin/altas/${altaId}`
+
+  const bloqueAlertas = alertas.length
+    ? alertas.map(a => `${a.tipo === 'stop' ? '[ATENCIÓN]' : a.tipo === 'ok' ? '[OK]' : '[AVISO]'} ${a.texto}`).join('\n')
+    : 'Sin alertas.'
+
+  const cuerpo = [
+    'ALERTAS',
+    bloqueAlertas,
+    '',
+    '─────────────────────────────────────────',
+    '',
+    prompt,
+    '',
+    '─────────────────────────────────────────',
+    '',
+    `Ficha completa: ${link}`,
+  ].join('\n')
+
+  console.log(`[EMAIL] Notificando alta nueva a: ${destino}`)
+
+  // Sale por Resend como todo el resto: GMAIL_* nunca estuvo cargado en Vercel.
+  await enviarMail({
+    from:    FROM_EMAIL,
+    to:      destino,
+    subject: `Alta Re-Viva — ${nombre}`,
+    text:    cuerpo,
+  })
+
+  console.log(`[EMAIL] Alta ${altaId} notificada OK`)
 }
