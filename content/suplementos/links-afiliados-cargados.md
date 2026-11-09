@@ -1,5 +1,15 @@
 # Links de afiliado — generados 2026-11-04
 
+## Revisión 2026-11-09
+
+Revisión semanal de los 14 links de la migración `20261104000100_catalogo_segun_research` (leída de `main`). Los 14 responden 200 y caen en `/social/goldenvalhalla` con el producto destacado y su precio.
+
+- **Precio movido >15%:** `balanza-cocina` $16.999 → $22.999 (+35,3%).
+- Movimientos menores (<15%), actualizados abajo: `botella` $20.360 → $22.990 (+12,9%), `beta-alanina` $33.099 → $36.435 (+10,1%), `whey` $102.000 → $96.300 (−5,6%), `magnesio` $17.460 → $17.485 (+0,1%).
+- Sin cambios (9): balanza-personal, cinta-metrica, shaker, creatina, vitamina-d, omega-3, colageno, vitamina-c, electrolitos.
+- Caídos / no verificados: ninguno.
+
+
 > Generados desde la cuenta de afiliado **IGZTRAINER** (Mercado Libre Argentina),
 > con la etiqueta `goldenwalhalla` (la única cargada en la cuenta).
 > Formato pedido en `links-afiliados.md`: `slug · nombre exacto · link · precio`.
@@ -43,7 +53,7 @@
 | Slug | Producto | Precio | Link |
 |---|---|---|---|
 | `whey` | 100% Whey Protein Proteína 2 Lb Gold Nutrition® Sabor Neutro | $85.035 | https://meli.la/1sh8db9 |
-| `whey` | True Made Whey Protein Ena 1kg Concentrada Isolada Truemade Sabor Chocolate | $102.000 | https://meli.la/2FR9owa |
+| `whey` | True Made Whey Protein Ena 1kg Concentrada Isolada Truemade Sabor Chocolate | $96.300 | https://meli.la/2FR9owa |
 | `whey` | Proteína ENA Sport True Made de Suero Sabor Cookies & Cream 930 g | $99.939 | https://meli.la/2ZbxV4H |
 
 ### Omega-3
@@ -77,11 +87,11 @@ Sin link. El motor recomienda café.
 | `colageno` | Colágeno Hidrolizado Bebible 300g Sin TACC WPN Sin Sabor | $30.600 | https://meli.la/2NSpyL7 |
 | `vitamina-c` | Vitamina C Nature Made 500 Mg 100 Tabletas Importada | $52.283 | https://meli.la/1xu4Jyt |
 | `vitamina-c` | Natuliv Vitamina C Comprimidos X 30 Unidades Sin Sabor | $5.900 | https://meli.la/2tUkD3G |
-| `magnesio` | Bisglicinato de Magnesio ENA Sport Wellness Series x 60 cáps | $17.460 | https://meli.la/2aDaTvq |
+| `magnesio` | Bisglicinato de Magnesio ENA Sport Wellness Series x 60 cáps | $17.485 | https://meli.la/2aDaTvq |
 | `magnesio` | Magnesio Bisglicinato Vegano Pack X 2 Natier X 50 Cápsulas | $41.999 | https://meli.la/1PoaVLw |
 | `electrolitos` | Electrolitos en Polvo Sin Azúcar 150g — 30 porciones, sodio/potasio/magnesio + vit C | $42.680 | https://meli.la/2s38CMt |
 | `electrolitos` | Polvo Electrolitos Vegano Sin Azúcar Venture Pal 170g | $59.999 | https://meli.la/2q2feym |
-| `beta-alanina` | Beta Alanine 100% Pure X 300 Grs — Star Nutrition Sin Sabor | $33.099 | https://meli.la/1FVecYD |
+| `beta-alanina` | Beta Alanine 100% Pure X 300 Grs — Star Nutrition Sin Sabor | $36.435 | https://meli.la/1FVecYD |
 | `beta-alanina` | Beta Alanina Swork Nutrition Polvo 300g Frasco Neutro | $21.436 | https://meli.la/29wzEpu |
 
 > Magnesio: los dos son bisglicinato, ninguno es óxido. ✔
@@ -93,7 +103,7 @@ Sin link. El motor recomienda café.
 
 | Slug | Producto | Precio | Link |
 |---|---|---|---|
-| `balanza-cocina` | Balanza De Cocina Digital Gadnic 5kg — Precisión 1g, LCD, **función tara**, puesta en cero | $16.999 | https://meli.la/1zauWn6 |
+| `balanza-cocina` | Balanza De Cocina Digital Gadnic 5kg — Precisión 1g, LCD, **función tara**, puesta en cero | $22.999 | https://meli.la/1zauWn6 |
 | `balanza-cocina` | Balanza De Cocina Gadnic Digital 5kg — Precisión 1g, vidrio templado, LCD, **función tara** | $32.799 | https://meli.la/2ri2BwR |
 | `balanza-personal` | Balanza Digital Personal Slim Silfab BD-P200 (sin medición de grasa) | $26.000 | https://meli.la/1KWJyYi |
 | `balanza-personal` | Balanza Digital Personal Ultra Prex Silfab BD-P202 (sin medición de grasa) | $29.300 | https://meli.la/2nXdY8w |
@@ -101,7 +111,7 @@ Sin link. El motor recomienda café.
 | `cinta-metrica` | Cinta Métrica Corporal F For Medir Cintura | $16.500 | https://meli.la/2pvTHTr |
 | `shaker` | Shaker ENA Sport Bottle 600 Ml — bola mezcladora, tapa flip-top, libre de BPA | $17.451 | https://meli.la/2cg2LnX |
 | `shaker` | Vaso Batidor Shaker 600ml Con Resorte Mezclador (rojo) | $14.999 | https://meli.la/2qTqC9t |
-| `botella` | Botella Acero Inoxidable MTL 1 Litro Térmica Doble Pared | $20.360 | https://meli.la/29c6HHD |
+| `botella` | Botella Acero Inoxidable MTL 1 Litro Térmica Doble Pared | $22.990 | https://meli.la/29c6HHD |
 | `botella` | Botella Térmica Southport By Gadnic 1 Litro Acero Inox, 3 tapas | $31.647 | https://meli.la/1LY8mYV |
 
 > Ninguna de las botellas de 1 L que aparecen primero trae marcas de medición —
