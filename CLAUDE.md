@@ -19,6 +19,7 @@
 11. [Reglas para Claude](#11-reglas-para-claude)
 12. [Contexto de Marca y Negocio](#12-contexto-de-marca-y-negocio)
 13. [Metodología de Entrenamiento — Defaults IGZ](#13-metodología-de-entrenamiento--defaults-igz)
+14. [Links de Afiliado en Entregables](#14-links-de-afiliado-en-entregables)
 
 ---
 
@@ -806,4 +807,37 @@ Medicación actual:
 
 ---
 
-*Última actualización: 2026-05-18.*
+## 14. LINKS DE AFILIADO EN ENTREGABLES
+
+> Regla de transparencia obligatoria. Aplica a **todo entregable** que
+> incluya productos: suplementos, accesorios o equipamiento. Sin excepción,
+> en todos los formatos (PDF, doc, mensaje, plan en la app).
+
+**Todo documento que incluya productos debe cerrar con el bloque de transparencia.**
+
+### Texto fijo
+
+> **Sobre los links de esta sección**
+> Los enlaces son links de afiliado: si comprás a través de ellos,
+> recibo una comisión de la plataforma. No modifica el precio que
+> pagás vos.
+> Los productos están elegidos por composición, dosis por porción y
+> relación precio-calidad al momento de armar el plan. Si conseguís
+> el mismo producto más barato en otro lado, compralo ahí.
+> Ningún suplemento de esta lista es imprescindible para que el plan
+> funcione. Si querés, lo revisamos y priorizamos según tu
+> presupuesto.
+
+### Reglas de aplicación
+
+- El bloque va en tipografía y jerarquía normales, no en letra chica.
+- Recomendar solo lo que se recomendaría sin comisión. Ante la duda,
+  no incluir el producto.
+- Si el cliente pregunta si necesita algo, la respuesta se da sin
+  mirar el link.
+- No incluir suplementos en planes de clientes con restricción
+  presupuestaria declarada, salvo que lo pidan.
+
+---
+
+*Última actualización: 2026-08-18.*
