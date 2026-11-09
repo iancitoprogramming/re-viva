@@ -45,3 +45,6 @@ next-env.d.ts
 # Handoff de sesión: queda local. El repo es público y el doc tiene
 # precios internos e identificadores de infra.
 HANDOFF.md
+
+# Claude Code: config local (las skills del proyecto sí se commitean)
+.claude/settings.local.json

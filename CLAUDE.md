@@ -559,6 +559,7 @@ git push origin main
 - Optimizar UX — reducir fricción
 - Proponer mejoras si se detecta fricción técnica o de usuario
 - Detectar incongruencias entre el código y el comportamiento esperado
+- Al empezar una sesión, leer `HANDOFF.md` si existe (último relevo, local y fuera de git). Al cerrar una sesión larga, correr `/relevo`
 
 ### Nunca
 - Complejizar sin necesidad
@@ -567,7 +568,7 @@ git push origin main
 - Agregar dependencias sin justificación clara
 - Cambiar el schema de Prisma sin evaluar el impacto en las migraciones
 - Usar `git add -A` o `git add .` sin revisar qué se está incluyendo
-- Commitear `.claude/`, `.env`, archivos de credenciales
+- Commitear `.env`, archivos de credenciales ni la config local de `.claude/` (`settings.local.json`, memoria). Lo que sí va al repo: `.claude/skills/` (skills del proyecto, ej. `/relevo`) y `.claude/launch.json`
 
 ### Al modificar código
 - Leer el archivo antes de editarlo
