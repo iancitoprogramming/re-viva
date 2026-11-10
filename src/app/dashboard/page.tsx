@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import BiometricSetup from '@/components/BiometricSetup'
+import { EstadoDebitoAutomatico } from '@/components/DebitoAutomatico'
 import { ALIAS, WHATSAPP_COMPROBANTE, INSTAGRAM_URL } from '@/lib/constants'
 import type { TipoCheckIn, ArchivoData } from '@/types'
 
@@ -315,15 +316,23 @@ export default function DashboardPage() {
               {estadoVenc === 'PROXIMO' && (
                 <div className="bg-amber-50 border border-amber-300 rounded-2xl px-5 py-4">
                   <p className="text-amber-800 font-semibold text-sm">⏰ Tu plan vence en {diasRestantes} día{diasRestantes !== 1 ? 's' : ''}</p>
+                  {plan.tipoPlan && (
+                    <Link href={`/checkout?plan=${plan.tipoPlan}`} className="text-amber-700 text-xs mt-1 font-semibold underline block">Renovar ahora →</Link>
+                  )}
                   <a href="https://wa.me/5491122835621?text=Hola%20Ian%2C%20quiero%20renovar%20mi%20plan" target="_blank" rel="noopener noreferrer" className="text-amber-700 text-xs mt-1 font-semibold underline block">Hablá con Ian para renovar →</a>
                 </div>
               )}
               {estadoVenc === 'VENCIDO' && (
                 <div className="bg-red-50 border border-red-200 rounded-2xl px-5 py-4">
                   <p className="text-red-700 font-semibold text-sm">Tu plan está vencido</p>
+                  {plan.tipoPlan && (
+                    <Link href={`/checkout?plan=${plan.tipoPlan}`} className="text-red-600 text-xs mt-1 font-semibold underline block">Renovar ahora →</Link>
+                  )}
                   <a href="https://wa.me/5491122835621?text=Hola%20Ian%2C%20quiero%20renovar%20mi%20plan" target="_blank" rel="noopener noreferrer" className="text-red-600 text-xs mt-1 font-semibold underline block">Contactá a Ian para renovar →</a>
                 </div>
               )}
+
+              <EstadoDebitoAutomatico />
 
               {/* Protocolo */}
               <div className="bg-primary text-surface rounded-2xl p-6">

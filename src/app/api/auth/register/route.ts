@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { crearToken } from '@/lib/auth'
+import { DEMASIADOS_INTENTOS, ipDe, permitirIntento } from '@/lib/rateLimit'
 
 export async function POST(request: Request) {
   try {
@@ -12,6 +13,11 @@ export async function POST(request: Request) {
     }
     if (password.length < 6) {
       return NextResponse.json({ error: 'La contraseña debe tener al menos 6 caracteres.' }, { status: 400 })
+    }
+
+    // 10 cuentas por IP por hora: frena altas automáticas sin molestar a nadie real.
+    if (!(await permitirIntento(`registro:${ipDe(request)}`, 10, 60 * 60))) {
+      return NextResponse.json({ error: DEMASIADOS_INTENTOS }, { status: 429 })
     }
 
     // Verificar si el email ya está registrado

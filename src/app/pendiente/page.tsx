@@ -5,6 +5,7 @@
 import { Suspense, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import WhatsAppIcon from '@/components/WhatsAppIcon'
+import { AltaDebitoAutomatico } from '@/components/DebitoAutomatico'
 import { ALIAS, INSTAGRAM_URL, WHATSAPP_NUMBER, MP_SUSCRIPCION_POR_PLAN, PLANES_MP, PRECIO_TRANSFERENCIA, type PlanMPKey } from '@/lib/constants'
 
 const pesos = (n: number) => `$${n.toLocaleString('es-AR')}`
@@ -67,22 +68,7 @@ function PendienteContent() {
         )}
 
         {/* Opción 0: Débito automático (solo planes mensuales online) */}
-        {suscripcionHref && (
-          <a
-            href={suscripcionHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full flex items-center justify-between bg-emerald-700 hover:bg-emerald-800 text-white px-6 py-4 rounded-2xl font-semibold transition-all shadow-sm active:scale-[0.98] cursor-pointer mb-2 no-underline"
-          >
-            <span>Suscribirme con débito automático</span>
-            <span className="text-xs font-normal opacity-80">Mercado Pago · cancelás cuando quieras</span>
-          </a>
-        )}
-        {suscripcionHref && (
-          <p className="text-xs text-gray-500 text-center mb-4">
-            Se renueva solo cada mes. Así no cortás el proceso por olvidarte de pagar.
-          </p>
-        )}
+        {suscripcionHref && <AltaDebitoAutomatico planTipo={plan} linkAlternativo={suscripcionHref} />}
 
         {/* Opción 1: Pagar con Mercado Pago */}
         <a

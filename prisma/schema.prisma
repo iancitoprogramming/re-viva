@@ -31,6 +31,37 @@ model User {
   plansToRegenerate PlanToRegenerate[]
   webAuthnCredentials WebAuthnCredential[]
   cursosProgreso    CursoProgreso[]
+  suscripciones     Suscripcion[]
+}
+
+// ─── SUSCRIPCIONES — débito automático de Mercado Pago ───────────────────────
+// Una por alta de débito automático creada desde la web (preapproval de MP).
+// El id viaja como external_reference: así el webhook sabe de quién es cada cobro.
+model Suscripcion {
+  id            String    @id @default(cuid())
+  userId        String
+  planTipo      String
+  monto         Float
+  payerEmail    String // mail de la cuenta de Mercado Pago que paga
+  preapprovalId String?   @unique // id de MP; null hasta que MP responde
+  estado        String    @default("pending") // pending | authorized | paused | cancelled
+  ultimoCobroEn DateTime?
+  proximoCobro  DateTime?
+  creadoEn      DateTime  @default(now())
+  actualizadoEn DateTime  @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+// ─── LÍMITE DE INTENTOS — login, registro y recuperación ─────────────────────
+model RateLimitHit {
+  id       String   @id @default(cuid())
+  clave    String
+  creadoEn DateTime @default(now())
+
+  @@index([clave, creadoEn])
 }
 
 // ─── LISTA DE COMPRAS SEMANAL ────────────────────────────────────────────────

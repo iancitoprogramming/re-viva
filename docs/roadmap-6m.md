@@ -80,7 +80,7 @@ El presencial tiene techo de horas. El salto sale del online, y el online solo e
 2. **Dashboard del cliente:** sus documentos, el estado de cada entregable y sus videos. Hoy solo ve los macros.
 3. **Check-in semanal de 2 minutos** con recordatorio automático. Es lo que justifica los $88.000 por mes y lo que sostiene la garantía.
 4. **Un solo formulario de entrada.** Hoy hay dos (`/onboarding` y `/ingreso`) que piden casi lo mismo. Queda `/ingreso` como puerta, y la cuenta se crea al pagar.
-5. Protección de rutas y límite de intentos en login.
+5. Protección de rutas y límite de intentos en login (hecho, ver `docs/pendientes.md`).
 
 ### Fase 2 · Instagram y TikTok (diciembre)
 
@@ -94,7 +94,7 @@ El plan de implementación se arma cuando estén los videos, porque el contenido
 
 ### Fase 3 · Retener y subir el ticket (enero y febrero)
 
-1. Débito automático registrado en el sistema. Hoy los links `mpago.la` cobran, pero la web no se entera.
+1. Débito automático registrado en el sistema (hecho en código; falta la prueba real con Mercado Pago, ver `docs/pendientes.md`).
 2. Paso de On Demand a Online al terminar las 10 semanas, con el pago del On Demand a cuenta.
 3. Oferta de dúo y trío a los individuales, con lista de espera por horario.
 4. Referidos: un mes bonificado por cliente traído.

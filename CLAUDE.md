@@ -31,6 +31,10 @@
 
 **Roadmap y estado real (auditoría nov 2026):** `docs/roadmap-6m.md`. Leerlo antes de proponer features.
 
+**Handoff (qué está hecho, qué falta probar y qué sigue):** `docs/pendientes.md`. La sección 10 de este archivo está desactualizada en los puntos que ahí se listan.
+
+**Protección de rutas:** `src/proxy.ts` (en Next 16 el middleware se llama proxy). **Límite de intentos:** `src/lib/rateLimit.ts`. **Débito automático:** `src/lib/suscripciones.ts` + `POST /api/payments/suscripcion`; el webhook atiende `payment` y `subscription_preapproval`.
+
 **Biblioteca de ejercicios:** el catálogo vive en `src/lib/ejercicios/catalogo.ts` (por estación; agregar siempre al final de la estación para no correr los códigos). La DB solo guarda el link del video (`EjercicioVideo`). Guía de grabación: `npx tsx scripts/generar-guia-grabacion.ts` → `docs/Guia-Grabacion-Ejercicios.docx`. Carga en `/admin/ejercicios`, público en `/ejercicios`.
 
 **Docs de negocio y operación:** `docs/oferta-reviva.md` (oferta Hormozi), `docs/entregables.md` (estructura de los DOCX, flujo de armado, catálogo, listas de compras), `docs/plantillas/*.docx` (plantillas con marca, se regeneran con `npx tsx scripts/generar-plantillas-docx.ts`).

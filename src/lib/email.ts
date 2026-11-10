@@ -653,3 +653,24 @@ export async function enviarNotificacionAlta(
 
   console.log(`[EMAIL] Alta ${altaId} notificada OK`)
 }
+
+// ─── Aviso corto al trainer (bajas de débito automático, cobros rechazados) ───
+export async function enviarAvisoTrainer(asunto: string, lineas: string[]): Promise<void> {
+  const escapar = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  try {
+    await enviarMail({
+      from:    FROM_EMAIL,
+      to:      TRAINER_EMAIL,
+      subject: asunto,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; background: #F8F5EF; padding: 32px 20px;">
+          <div style="background: #FFFFFF; border-radius: 16px; border: 1px solid #DDD8CC; padding: 28px;">
+            <p style="color: #1A2416; font-size: 17px; font-weight: 700; margin: 0 0 16px 0;">${escapar(asunto)}</p>
+            ${lineas.map(l => `<p style="color: #4A5544; font-size: 14px; line-height: 1.6; margin: 0 0 10px 0;">${escapar(l)}</p>`).join('')}
+          </div>
+        </div>`,
+    })
+  } catch (error) {
+    console.error('[EMAIL] Aviso al trainer no enviado:', (error as Error)?.message)
+  }
+}

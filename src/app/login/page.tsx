@@ -12,7 +12,8 @@ function LoginContent() {
   const resetOk      = searchParams.get('resetOk') === '1'
   // redirect: solo aceptar paths internos (empieza con / y no contiene ://)
   const redirectRaw  = searchParams.get('redirect') ?? ''
-  const redirectTo   = redirectRaw.startsWith('/') && !redirectRaw.includes('://') ? redirectRaw : null
+  // "//otro-sitio.com" y "/\otro-sitio.com" también empiezan con "/": el navegador los lee como externos.
+  const redirectTo   = /^\/(?![/\\])/.test(redirectRaw) && !redirectRaw.includes('://') ? redirectRaw : null
   const [modo, setModo] = useState<'login' | 'registro'>(
     searchParams.get('modo') === 'registro' ? 'registro' : 'login'
   )
