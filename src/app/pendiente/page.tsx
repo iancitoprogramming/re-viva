@@ -5,26 +5,10 @@
 import { Suspense, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import WhatsAppIcon from '@/components/WhatsAppIcon'
-import { ALIAS, WHATSAPP_COMPROBANTE, INSTAGRAM_URL, WHATSAPP_NUMBER, MP_SUSCRIPCION_POR_PLAN } from '@/lib/constants'
+import { AltaDebitoAutomatico } from '@/components/DebitoAutomatico'
+import { ALIAS, INSTAGRAM_URL, WHATSAPP_NUMBER, MP_SUSCRIPCION_POR_PLAN, PLANES_MP, PRECIO_TRANSFERENCIA, type PlanMPKey } from '@/lib/constants'
 
-function QRImage() {
-  const [error, setError] = useState(false)
-  if (error) {
-    return (
-      <div className="w-32 h-32 bg-gray-100 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center p-3 text-center">
-        <span className="text-xs text-gray-400 font-medium leading-snug">Subir qr-pago.png a /public</span>
-      </div>
-    )
-  }
-  return (
-    <img
-      src="/qr-pago.png"
-      alt="QR de Pago REVIVA.IGZ"
-      className="w-32 h-32 rounded-xl object-cover"
-      onError={() => setError(true)}
-    />
-  )
-}
+const pesos = (n: number) => `$${n.toLocaleString('es-AR')}`
 
 function PendienteContent() {
   const searchParams = useSearchParams()
@@ -32,18 +16,25 @@ function PendienteContent() {
   const plan   = searchParams.get('plan') ?? ''
 
   const [aliasCopiado, setAliasCopiado] = useState(false)
-  const [mostrarQR, setMostrarQR] = useState(false)
 
   const copiarAlias = () => {
     navigator.clipboard.writeText(ALIAS)
     setAliasCopiado(true)
-    setMostrarQR(true)
     setTimeout(() => setAliasCopiado(false), 3000)
   }
 
   const checkoutHref = plan ? `/checkout?plan=${plan}` : '/checkout'
   // Planes mensuales online: débito automático de MP (no hay que acordarse de pagar cada mes)
   const suscripcionHref = MP_SUSCRIPCION_POR_PLAN[plan] ?? null
+
+  // Qué eligió y cuánto sale: sin esto el cliente no sabe cuánto transferir.
+  const planInfo = plan in PLANES_MP ? PLANES_MP[plan as PlanMPKey] : null
+  const montoTransferencia = planInfo ? (PRECIO_TRANSFERENCIA[plan] ?? planInfo.monto) : null
+  const comprobanteHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+    planInfo && montoTransferencia
+      ? `Hola Ian, te envío mi comprobante de pago de ${pesos(montoTransferencia)} por "${planInfo.titulo}" para comenzar con REVIVA.`
+      : 'Hola Ian, te envío mi comprobante de pago para comenzar con REVIVA.',
+  )}`
 
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-8">
@@ -65,23 +56,19 @@ function PendienteContent() {
           </div>
         </div>
 
+        {/* Plan elegido y precio */}
+        {planInfo && (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Tu plan</p>
+              <p className="font-semibold text-gray-900 text-sm leading-snug">{planInfo.titulo}</p>
+            </div>
+            <p className="text-emerald-700 font-bold text-xl whitespace-nowrap">{pesos(planInfo.monto)}</p>
+          </div>
+        )}
+
         {/* Opción 0: Débito automático (solo planes mensuales online) */}
-        {suscripcionHref && (
-          <a
-            href={suscripcionHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full flex items-center justify-between bg-emerald-700 hover:bg-emerald-800 text-white px-6 py-4 rounded-2xl font-semibold transition-all shadow-sm active:scale-[0.98] cursor-pointer mb-2 no-underline"
-          >
-            <span>Suscribirme con débito automático</span>
-            <span className="text-xs font-normal opacity-80">Mercado Pago · cancelás cuando quieras</span>
-          </a>
-        )}
-        {suscripcionHref && (
-          <p className="text-xs text-gray-500 text-center mb-4">
-            Se renueva solo cada mes. Así no cortás el proceso por olvidarte de pagar.
-          </p>
-        )}
+        {suscripcionHref && <AltaDebitoAutomatico planTipo={plan} linkAlternativo={suscripcionHref} />}
 
         {/* Opción 1: Pagar con Mercado Pago */}
         <a
@@ -117,7 +104,9 @@ function PendienteContent() {
             </h2>
 
             <p className="text-sm text-gray-600 mb-4">
-              Transferí el valor del plan al siguiente alias para activar tu cuenta.
+              {montoTransferencia
+                ? <>Transferí <strong>{pesos(montoTransferencia)}</strong> al siguiente alias para activar tu cuenta.{planInfo && montoTransferencia < planInfo.monto ? ' Es el precio con descuento por transferencia.' : ''}</>
+                : 'Transferí el valor del plan al siguiente alias para activar tu cuenta.'}
             </p>
 
             <div className="bg-gray-50 rounded-2xl p-4 flex items-center justify-between mb-2 border border-gray-100">
@@ -128,12 +117,6 @@ function PendienteContent() {
               >
                 {aliasCopiado ? '¡Copiado!' : 'Copiar'}
               </button>
-            </div>
-
-            {/* QR — aparece al copiar el alias */}
-            <div className={`transition-all duration-500 ease-in-out overflow-hidden flex flex-col items-center ${mostrarQR ? 'max-h-64 opacity-100 mt-4' : 'max-h-0 opacity-0'}`}>
-              <p className="text-xs text-gray-500 mb-2">O escaneá el código QR:</p>
-              <QRImage />
             </div>
 
             <hr className="my-6 border-gray-100" />
@@ -148,7 +131,7 @@ function PendienteContent() {
             </p>
 
             <a
-              href={WHATSAPP_COMPROBANTE}
+              href={comprobanteHref}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-4 py-4 rounded-xl font-medium transition-all shadow-sm active:scale-[0.98] cursor-pointer"

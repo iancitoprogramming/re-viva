@@ -3,29 +3,47 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
+import { DEMASIADOS_INTENTOS, ipDe, permitirIntento } from '@/lib/rateLimit'
 
 export async function POST(request: Request) {
   try {
-    const { email, codigo, nuevaPassword } = await request.json()
+    const { email: emailCrudo, codigo, nuevaPassword } = await request.json()
 
-    if (!email || !codigo || !nuevaPassword) {
+    if (typeof emailCrudo !== 'string' || typeof codigo !== 'string' || typeof nuevaPassword !== 'string'
+      || !emailCrudo || !codigo || !nuevaPassword) {
       return NextResponse.json({ error: 'Todos los campos son obligatorios.' }, { status: 400 })
     }
     if (nuevaPassword.length < 6) {
       return NextResponse.json({ error: 'La contraseña debe tener al menos 6 caracteres.' }, { status: 400 })
     }
+    const email = emailCrudo.trim()
 
-    // Buscar usuario
+    // El código tiene 6 dígitos: sin límite se adivina por fuerza bruta en
+    // minutos. 5 intentos por cuenta cada 15 minutos, que es lo que dura el
+    // código, y 30 por IP.
+    const permitido =
+      await permitirIntento(`reset-ip:${ipDe(request)}`, 30, 15 * 60) &&
+      await permitirIntento(`reset:${email.toLowerCase()}`, 5, 15 * 60)
+
     const usuario = await prisma.user.findUnique({ where: { email } })
+
+    if (!permitido) {
+      // Se quema el código vigente: hay que pedir uno nuevo.
+      if (usuario) {
+        await prisma.resetToken.updateMany({ where: { userId: usuario.id, usado: false }, data: { usado: true } })
+      }
+      return NextResponse.json({ error: `${DEMASIADOS_INTENTOS} Vas a tener que pedir un código nuevo.` }, { status: 429 })
+    }
+
     if (!usuario) {
-      return NextResponse.json({ error: 'Código inválido o expirado.' }, { status: 400 })
+      return NextResponse.json({ error: 'El código es inválido o ya expiró.' }, { status: 400 })
     }
 
     // Buscar el código válido más reciente
     const token = await prisma.resetToken.findFirst({
       where: {
         userId: usuario.id,
-        codigo,
+        codigo: codigo.trim(),
         usado:  false,
         expiresAt: { gt: new Date() }, // no expirado
       },

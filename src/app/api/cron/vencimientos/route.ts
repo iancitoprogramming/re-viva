@@ -17,17 +17,16 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const ahora  = new Date()
-  // Ventana: planes que vencen entre hoy y los próximos 7 días
-  const en7    = new Date(ahora.getTime() + 7 * 24 * 60 * 60 * 1000)
-  // Límite inferior: no enviar si queda menos de 6 días (ya fue notificado)
-  const en6    = new Date(ahora.getTime() + 6 * 24 * 60 * 60 * 1000)
+  // Dos avisos: a 7 días y el día anterior. Cada ventana dura 24 h, así el
+  // cron diario agarra cada plan una sola vez por aviso.
+  const DIA = 24 * 60 * 60 * 1000
+  const ahora = Date.now()
+  const ventana = (dias: number) => ({
+    fechaVencimiento: { gt: new Date(ahora + (dias - 1) * DIA), lte: new Date(ahora + dias * DIA) },
+  })
 
   const planes = await prisma.nutritionalPlan.findMany({
-    where: {
-      estado:          'ACTIVO',
-      fechaVencimiento: { gt: en6, lte: en7 },
-    },
+    where: { estado: 'ACTIVO', OR: [ventana(7), ventana(1)] },
     include: { user: { select: { nombre: true, email: true } } },
   })
 
@@ -37,7 +36,8 @@ export async function GET(request: Request) {
     await enviarRecordatorioVencimiento(
       plan.user.nombre,
       plan.user.email,
-      plan.fechaVencimiento!
+      plan.fechaVencimiento!,
+      plan.tipoPlan,
     )
   }
 

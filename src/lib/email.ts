@@ -11,7 +11,7 @@ import {
   LUGARES_COME_AFUERA, SESIONES_COCINA, SUPERMERCADOS,
 } from '@/lib/cuestionario'
 import { agruparPorCategoria, cantidadLegible } from '@/lib/compras'
-import { PRECIO_GESTION_COMPRA, WHATSAPP_COMPRA_DFY, WHATSAPP_VIDEOLLAMADA } from '@/lib/constants'
+import { PLANES_MP, PRECIO_GESTION_COMPRA, WHATSAPP_COMPRA_DFY, WHATSAPP_VIDEOLLAMADA } from '@/lib/constants'
 import { SITE_URL } from '@/lib/site'
 import { TEXTO_TRANSPARENCIA_AFILIADOS } from '@/lib/suplementos'
 
@@ -407,8 +407,13 @@ export async function enviarFelicitacionCumpleanos(
 export async function enviarRecordatorioVencimiento(
   nombre: string,
   email: string,
-  fechaVencimiento: Date
+  fechaVencimiento: Date,
+  tipoPlan?: string | null,
 ): Promise<void> {
+  // Renovación en un clic: checkout con el mismo plan ya elegido.
+  const renovarUrl = tipoPlan && tipoPlan in PLANES_MP
+    ? `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://re-viva.vercel.app'}/checkout?plan=${encodeURIComponent(tipoPlan)}`
+    : null
   const diasRestantes = Math.ceil((fechaVencimiento.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
   const fechaStr = fechaVencimiento.toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })
   const dashUrl  = `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://reviva.igztrainer.com'}/login?redirect=/dashboard`
@@ -437,8 +442,15 @@ export async function enviarRecordatorioVencimiento(
               Tu plan de REVIVA está por vencer. Si querés continuar con tu proceso, este es el momento de renovar.
             </p>
             <p style="color: #6B7B64; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0;">
-              Hablame por WhatsApp y coordinamos la continuidad de tu proceso.
+              ${renovarUrl ? 'Renovás en un minuto desde el botón, o hablame por WhatsApp y lo coordinamos.' : 'Hablame por WhatsApp y coordinamos la continuidad de tu proceso.'}
             </p>
+            ${renovarUrl ? `
+            <div style="text-align: center; margin-bottom: 12px;">
+              <a href="${renovarUrl}"
+                 style="display: inline-block; background: #2D5A3D; color: white; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: 700; font-size: 14px;">
+                Renovar ahora →
+              </a>
+            </div>` : ''}
             <div style="text-align: center; margin-bottom: 16px;">
               <a href="${waUrl}"
                  style="display: inline-block; background: #25D366; color: white; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: 700; font-size: 14px;">
@@ -640,4 +652,25 @@ export async function enviarNotificacionAlta(
   })
 
   console.log(`[EMAIL] Alta ${altaId} notificada OK`)
+}
+
+// ─── Aviso corto al trainer (bajas de débito automático, cobros rechazados) ───
+export async function enviarAvisoTrainer(asunto: string, lineas: string[]): Promise<void> {
+  const escapar = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  try {
+    await enviarMail({
+      from:    FROM_EMAIL,
+      to:      TRAINER_EMAIL,
+      subject: asunto,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; background: #F8F5EF; padding: 32px 20px;">
+          <div style="background: #FFFFFF; border-radius: 16px; border: 1px solid #DDD8CC; padding: 28px;">
+            <p style="color: #1A2416; font-size: 17px; font-weight: 700; margin: 0 0 16px 0;">${escapar(asunto)}</p>
+            ${lineas.map(l => `<p style="color: #4A5544; font-size: 14px; line-height: 1.6; margin: 0 0 10px 0;">${escapar(l)}</p>`).join('')}
+          </div>
+        </div>`,
+    })
+  } catch (error) {
+    console.error('[EMAIL] Aviso al trainer no enviado:', (error as Error)?.message)
+  }
 }
