@@ -74,7 +74,8 @@ Hecho:
 
 Falta:
 
-- **Segundo registro A del dominio sin `www`.** Hoy `@` tiene un solo A (`216.198.79.1`), y desde algunas redes esa IP no responde. Contra `64.29.17.1` el redirect 308 a `www` anda. En Namecheap → Advanced DNS hay que agregar `A @ 64.29.17.1` y dejar el que está. Son las dos IPs que recomienda Vercel.
+- ~~Segundo registro A del dominio sin `www`~~. **Hecho el 13/11:** `@` tiene `216.198.79.1` y `64.29.17.1`. Probado en Chrome: `revivabyigz.com` redirige a `https://www.revivabyigz.com/` y carga.
+- **Push del dominio a la cuenta de Namecheap de Ian.** Hoy el dominio sigue en la cuenta del dev, así que cualquier cambio de DNS (por ejemplo los registros de Resend) depende de él.
 - **Mercado Pago → Webhooks:** URL `https://www.revivabyigz.com/api/payments/webhook`, eventos **Pagos** y **Planes y suscripciones**. Hasta que se cambie, las notificaciones siguen yendo a `re-viva.vercel.app`, que sigue andando, así que no se pierden.
 - El dev puede borrar su proyecto de Vercel.
 
