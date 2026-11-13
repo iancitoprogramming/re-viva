@@ -134,7 +134,7 @@ export default function RecuperarPage() {
                   <FormInput
                     label="Nueva contraseña"
                     type="password"
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder="Mínimo 8 caracteres"
                     value={nuevaPass}
                     onChange={e => { setNuevaPass(e.target.value); setError('') }}
                     required

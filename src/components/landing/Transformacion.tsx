@@ -58,7 +58,7 @@ export default function Transformacion() {
         {/* Quote */}
         <div className="mt-16 bg-primary rounded-2xl px-8 py-8">
           <p className="font-serif text-xl sm:text-2xl text-ivory leading-snug mb-3">
-            "Controla tu cuerpo.<br />Controla tu vida."
+            &ldquo;Controla tu cuerpo.<br />Controla tu vida.&rdquo;
           </p>
           <p className="text-ivory/50 text-xs uppercase tracking-widest">Principio REVIVA</p>
         </div>

@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
   const tienePerfil = !!user.perfil
   const planEstado = user.plan?.estado ?? null
 
-  const res = NextResponse.json({ ok: true, esAdmin, tienePerfil, planEstado, nombre: user.nombre })
+  const res = NextResponse.json({ ok: true, esAdmin, tienePerfil, planEstado, planTipo: user.plan?.tipoPlan ?? null, nombre: user.nombre })
   res.cookies.set('re-viva-token', token, {
     httpOnly: true,
     sameSite: 'lax',

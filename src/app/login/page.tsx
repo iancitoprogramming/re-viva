@@ -19,7 +19,7 @@ function LoginContent() {
   )
   const [loading, setLoading]         = useState(false)
   const [error, setError]             = useState('')
-  const [form, setForm]               = useState({ nombre: '', email: '', password: '' })
+  const [form, setForm]               = useState({ nombre: '', email: searchParams.get('email') ?? '', password: '' })
   const [biometricLoading, setBiometricLoading] = useState(false)
   const [biometricAvailable, setBiometricAvailable] = useState(false)
 
@@ -36,6 +36,15 @@ function LoginContent() {
       check()
     }
   }, [modo])
+
+  // Vuelve a /pendiente con el nombre y el plan que había elegido, así ve el monto.
+  function destinoPendiente(data: { nombre?: string; planTipo?: string | null }): string {
+    const params = new URLSearchParams()
+    if (data.nombre) params.set('nombre', data.nombre.split(' ')[0])
+    if (data.planTipo) params.set('plan', data.planTipo)
+    const query = params.toString()
+    return query ? `/pendiente?${query}` : '/pendiente'
+  }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
@@ -67,8 +76,7 @@ function LoginContent() {
       if (data.esAdmin) return router.push('/admin')
       if (!data.tienePerfil) return router.push('/onboarding')
       if (data.planEstado === 'PENDIENTE') {
-        const nombre = data.nombre ? `?nombre=${encodeURIComponent(data.nombre.split(' ')[0])}` : ''
-        return router.push(`/pendiente${nombre}`)
+        return router.push(destinoPendiente(data))
       }
       router.push('/dashboard')
     } catch (err: unknown) {
@@ -112,8 +120,7 @@ function LoginContent() {
       } else if (!data.tienePerfil) {
         router.push('/onboarding')
       } else if (data.planEstado === 'PENDIENTE') {
-        const nombre = data.nombre ? `?nombre=${encodeURIComponent(data.nombre.split(' ')[0])}` : ''
-        router.push(`/pendiente${nombre}`)
+        router.push(destinoPendiente(data))
       } else {
         router.push('/dashboard')
       }
@@ -207,11 +214,11 @@ function LoginContent() {
                 label="Contraseña"
                 name="password"
                 type="password"
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Mínimo 8 caracteres"
                 value={form.password}
                 onChange={handleChange}
                 required
-                minLength={6}
+                minLength={modo === 'registro' ? 8 : undefined}
               />
 
               {error && (

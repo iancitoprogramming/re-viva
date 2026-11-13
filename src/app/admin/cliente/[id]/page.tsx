@@ -168,6 +168,17 @@ export default function ClienteDetallePage() {
     cargarCliente()
   }, [id, router, cargarCliente])
 
+  async function archivarPlan(archivar: boolean) {
+    if (archivar && !confirm(`¿Archivar el plan de ${cliente?.nombre}? Deja de contar como cliente activo y no recibe más avisos.`)) return
+    const res = await fetch(`/api/admin/archivar-plan/${id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ archivar }),
+    })
+    if (res.ok) cargarCliente()
+    else alert((await res.json().catch(() => ({}))).error ?? 'No se pudo cambiar el estado del plan.')
+  }
+
   async function eliminarCliente() {
     if (!confirm(`¿Eliminar a ${cliente?.nombre}? Esta acción es reversible desde la DB pero no desde el panel.`)) return
     setDeletingClient(true)
@@ -344,6 +355,22 @@ export default function ClienteDetallePage() {
               >
                 WhatsApp →
               </a>
+              {cliente.plan?.estado === 'ACTIVO' && (
+                <button
+                  onClick={() => archivarPlan(true)}
+                  className="text-xs text-ink-muted border border-edge rounded-lg px-2.5 py-1 hover:bg-background transition-all"
+                >
+                  Archivar plan
+                </button>
+              )}
+              {cliente.plan?.estado === 'ARCHIVADO' && (
+                <button
+                  onClick={() => archivarPlan(false)}
+                  className="text-xs text-primary border border-primary/30 rounded-lg px-2.5 py-1 hover:bg-primary/5 transition-all"
+                >
+                  Reactivar plan
+                </button>
+              )}
               <button
                 onClick={eliminarCliente}
                 disabled={deletingClient}

@@ -54,8 +54,6 @@
 | IA | Anthropic (pipeline de planes) |
 | Archivos | Vercel Blob |
 
-**Dependencia notable sin uso:** `@supabase/supabase-js` está en `package.json` pero nunca se importa en el código. El proyecto usa Prisma directo con `pg` para la DB. No hace falta Supabase client SDK. Se puede remover.
-
 ---
 
 ## 2. ESTRUCTURA DE CARPETAS
@@ -119,7 +117,7 @@ re-viva/
 └── CLAUDE.md               — Este archivo
 ```
 
-**No hay `middleware.ts`.** La protección de rutas se hace client-side (redirect en `useEffect` si `/api/auth/me` devuelve 401). Esto es funcional pero no ideal para seguridad — ver Issues Pendientes.
+**Protección de rutas:** `src/proxy.ts` (en Next 16 el middleware se llama proxy) corta `/admin`, `/dashboard` y los cursos sin sesión válida. Las páginas además redirigen del lado del cliente.
 
 ---
 
@@ -471,45 +469,14 @@ O desde la CLI de Vercel con las env vars correspondientes.
 
 ## 10. ISSUES PENDIENTES
 
-Listados por prioridad:
+La lista viva está en `docs/pendientes.md`. Resueltos en nov 2026: protección de rutas (`src/proxy.ts`), límite de intentos (`src/lib/rateLimit.ts`), dependencia de Supabase, estado ARCHIVADO, contraseña mínima de 8, entregables visibles en el dashboard.
 
-### Alta prioridad
+Siguen abiertos:
 
-**1. Sin middleware de protección de rutas**
-No hay `middleware.ts`. Las rutas `/admin/*` y `/dashboard` solo están protegidas client-side. Un atacante que sepa las rutas de la API puede acceder directamente. El check de admin en las rutas API es correcto, pero las páginas en sí se renderizan antes de verificar.
-Fix sugerido: Crear `middleware.ts` en la raíz que verifique el JWT en `re-viva-token` y redirija si no hay sesión válida.
-
-**2. Sin rate limiting**
-`/api/auth/login` y `/api/auth/recuperar` no tienen rate limiting. Son vulnerables a brute force y spam.
-Fix sugerido: Usar Vercel Edge Config + IP-based rate limiting, o middleware con un contador en memoria/Redis.
-
-**3. Dominio `revivabyigz.com` sin verificar en Resend**
-El código ya manda por Resend, pero hasta que no estén los 4 registros DNS (DKIM, SPF y MX en `send`, DMARC) la API rechaza todo. El DNS está en Namecheap y lo administra el dev externo.
-
-### Media prioridad
-
-**4. `@supabase/supabase-js` instalado pero sin usar** (verificado: 0 imports en `src/` y `scripts/`)
-Dependencia fantasma. Pesa ~500kb.
-Fix: `npm uninstall @supabase/supabase-js`
-
-**5. Estado ARCHIVADO no implementado**
-El enum `EstadoPlan.ARCHIVADO` existe en el schema pero no hay ninguna ruta ni UI para archivar planes.
-Fix sugerido: Agregar botón "Archivar" en `/admin/cliente/[id]` y ruta `POST /api/admin/archivar-plan/[id]`.
-
-**6. Cliente no ve el progreso de entrega de componentes**
-El trainer puede marcar componentes como entregados, pero el dashboard del cliente solo muestra los macros. No hay visibilidad del estado de los 5 componentes (alimentación, entrenamiento, suplementación, meal prep, lista de compras).
-Fix sugerido: Agregar sección de "Estado de tu plan" en `/dashboard` que muestre cada componente y su estado.
-
-### Baja prioridad
-
-**7. QR de pago puede estar faltando**
-`/public/qr-pago.png` — verificar que el archivo exista. La página `/pendiente` tiene fallback si no está.
-
-**8. Contraseña mínimo 6 caracteres**
-La validación en el registro permite contraseñas de 6 chars. Considerar subir a 8 mínimo.
-
-**9. Sin logging estructurado**
-Los errores se loggean con `console.error` sin estructura. En producción, Vercel captura stdout pero no hay contexto. Fix futuro: integrar Sentry o Logtail.
+1. **Dominio `revivabyigz.com` sin verificar en Resend.** Hasta que estén los 4 registros DNS (DKIM, SPF y MX en `send`, DMARC) no sale ningún mail. El DNS está en Namecheap y lo administra el dev externo.
+2. **Migraciones sin aplicar en producción** y workflow `migrate.yml` fallando. Ver `docs/unificacion.md` §3–5.
+3. **Circuito de Mercado Pago sin prueba real** (pago único y débito automático).
+4. **Sin logging estructurado.** Los errores van a `console.error`.
 
 ---
 

@@ -35,11 +35,25 @@ export async function POST(request: Request) {
 
     const token = crearToken({ userId: usuario.id, email: usuario.email, nombre: usuario.nombre })
 
+    // Plan que venía comprando: el anotado en su plan o, si todavía no pagó,
+    // el del último intento de pago. /pendiente lo usa para mostrar el monto.
+    let planTipo = usuario.plan?.tipoPlan ?? null
+    if (!planTipo && usuario.plan?.estado === 'PENDIENTE') {
+      const ultimo = await prisma.payment.findFirst({
+        where: { userId: usuario.id, NOT: { planTipo: { startsWith: 'ebook-' } } },
+        orderBy: { creadoEn: 'desc' },
+        select: { planTipo: true },
+      })
+      planTipo = ultimo?.planTipo ?? null
+    }
+
     const response = NextResponse.json({
       ok: true,
       tienePerfil: !!usuario.perfil,
       esAdmin: esAdmin(usuario.email),
       planEstado: usuario.plan?.estado ?? null,
+      planTipo,
+      nombre: usuario.nombre,
     })
     response.cookies.set('re-viva-token', token, {
       httpOnly: true,

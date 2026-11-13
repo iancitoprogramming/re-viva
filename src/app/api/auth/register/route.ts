@@ -11,8 +11,8 @@ export async function POST(request: Request) {
     if (!nombre || !email || !password) {
       return NextResponse.json({ error: 'Todos los campos son obligatorios.' }, { status: 400 })
     }
-    if (password.length < 6) {
-      return NextResponse.json({ error: 'La contraseña debe tener al menos 6 caracteres.' }, { status: 400 })
+    if (password.length < 8) {
+      return NextResponse.json({ error: 'La contraseña debe tener al menos 8 caracteres.' }, { status: 400 })
     }
 
     // 10 cuentas por IP por hora: frena altas automáticas sin molestar a nadie real.
