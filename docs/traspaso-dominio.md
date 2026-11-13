@@ -64,6 +64,20 @@ Los registros A de `revivabyigz.com` y `www` ya apuntan a Vercel (`76.76.21.21`)
    - `/login` con credenciales malas devuelve "credenciales inválidas", no error interno
 7. Con todo andando, el dev puede borrar su proyecto de Vercel.
 
+## Estado al cierre (13/11/2026)
+
+Hecho:
+
+- Dominio en la cuenta de Ian y verificado en el proyecto `re-viva`. `www.revivabyigz.com` sirve esta app (deploy `dpl_7Nkbr1b48tCjXgMRm6bz2v3A5PhQ`).
+- Variables de producción actualizadas y redeploy hecho: `NEXT_PUBLIC_BASE_URL`, `NEXT_PUBLIC_SITE_URL`, `WEBAUTHN_RPID=revivabyigz.com`, `WEBAUTHN_ORIGIN`.
+- En `www`: `/`, `/ads`, `/suplementos`, `/ejercicios`, `/login`, `/pendiente` y `/sitemap.xml` responden 200; `/entrenadores` 308. El canonical apunta a `https://www.revivabyigz.com`. El login con credenciales malas da 401.
+
+Falta:
+
+- **Segundo registro A del dominio sin `www`.** Hoy `@` tiene un solo A (`216.198.79.1`), y desde algunas redes esa IP no responde. Contra `64.29.17.1` el redirect 308 a `www` anda. En Namecheap → Advanced DNS hay que agregar `A @ 64.29.17.1` y dejar el que está. Son las dos IPs que recomienda Vercel.
+- **Mercado Pago → Webhooks:** URL `https://www.revivabyigz.com/api/payments/webhook`, eventos **Pagos** y **Planes y suscripciones**. Hasta que se cambie, las notificaciones siguen yendo a `re-viva.vercel.app`, que sigue andando, así que no se pierden.
+- El dev puede borrar su proyecto de Vercel.
+
 ## Pendientes del HANDOFF que siguen abiertos
 
 - **Plan de Vercel:** el Hobby es solo para uso personal y no comercial. Este sitio cobra, así que corresponde Pro.

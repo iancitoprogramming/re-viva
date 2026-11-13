@@ -2,7 +2,7 @@
 
 Estado al 9 de noviembre de 2026, rama `claude/project-audit-optimization-e22039` (PR #34). Contexto y números en `docs/roadmap-6m.md`.
 
-**13/11:** traspaso del dominio en curso. Ya está agregado en Vercel, sin verificar. La base de Supabase estaba pausada: se reactivó y las migraciones quedaron al día. El punto 1 de abajo (migraciones) está hecho. Pasos en `docs/traspaso-dominio.md`.
+**13/11:** `www.revivabyigz.com` ya sirve esta app (v1.0.0). Las migraciones están al día. Falta un registro A extra y el webhook de MP: ver `docs/traspaso-dominio.md`.
 
 ## Hecho en esta rama
 

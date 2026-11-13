@@ -525,10 +525,28 @@ Los errores se loggean con `console.error` sin estructura. En producción, Verce
 ### CRLF en Windows
 Los archivos usan LF (Unix). El `.gitattributes` en la raíz ya tiene `* text=auto eol=lf`. Si Git muestra warnings de "LF will be replaced by CRLF", es normal en Windows — los archivos en disco tendrán CRLF pero Git commitea LF. No es un error. Para normalizar todos los archivos: `git add --renormalize .`
 
+### Dos versiones del sitio: preview y producción (regla fija)
+
+- **Producción** = rama `main` = `https://www.revivabyigz.com`. Lo que entra a `main` lo ven los clientes al minuto.
+- **Preview** = cualquier otra rama. Vercel le arma una URL propia (`re-viva-git-<rama>-…vercel.app`) y la publica como comentario en el PR.
+- **Nunca pushear directo a `main`.** Todo cambio va por rama + PR. Se mergea recién cuando:
+  1. el build de la preview está en verde en Vercel;
+  2. `npx tsc --noEmit` y `npx tsx --test tests/*.test.ts` pasan;
+  3. las páginas que tocó el cambio se abrieron en la URL de preview y funcionan.
+- **Ojo: hoy la preview usa la misma base y las mismas credenciales de Mercado Pago que producción.** En preview se puede mirar y navegar, pero no hacer pagos reales, altas de prueba ni cambios en `/admin` sin saber que impactan en datos reales. Separarlas es tarea pendiente.
+- **Si algo sale mal en producción:** Vercel → Deployments → el deploy anterior → **Instant Rollback**. Se vuelve atrás en segundos, sin tocar git.
+- Cambios de base (migraciones): siempre con backup antes y `npx prisma migrate status` para ver qué va a correr.
+
+### Versiones
+
+- Versión en `package.json` (semver) + tag `vX.Y.Z` en `main` + entrada en `CHANGELOG.md`.
+- **Patch** (`1.0.1`): arreglos. **Minor** (`1.1.0`): algo nuevo que el cliente o Ian ven. **Major** (`2.0.0`): un cambio que obliga a los clientes a hacer algo distinto (volver a loguearse, nuevo flujo de pago).
+- El PR sube la versión y escribe la entrada del changelog. Después del merge: `git tag vX.Y.Z <sha del merge> && git push origin vX.Y.Z`.
+
 ### Flujo de trabajo Git (siempre seguir este orden)
 ```bash
-# 1. Verificar estado
-git status
+# 1. Rama nueva desde main actualizado
+git fetch origin && git switch -c tipo/descripcion-corta origin/main
 
 # 2. Stagear solo los archivos del task (nunca git add -A ciego)
 git add <archivos específicos>
@@ -539,13 +557,15 @@ git commit -m "tipo: descripción corta
 - detalle 1
 - detalle 2
 
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+Co-Authored-By: Claude <noreply@anthropic.com>"
 
-# 4. Antes de pushear, sincronizar con remote
-git pull --rebase origin main   # Si hay conflictos, resolverlos y continuar
+# 4. Push de la rama y PR (Vercel arma la preview)
+git push -u origin tipo/descripcion-corta
+gh pr create --base main
 
-# 5. Push
-git push origin main
+# 5. Chequear la preview (ver arriba), mergear y taggear la versión
+gh pr merge --merge
+git fetch origin && git tag vX.Y.Z origin/main && git push origin vX.Y.Z
 ```
 
 **Convenciones de commit:**
