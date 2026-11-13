@@ -19,15 +19,21 @@ En Vercel, proyecto `re-viva` (team `iancitoprogramming's projects`):
 
 Mientras no se verifiquen, el sitio sigue sirviéndose desde el proyecto del dev. No cambió nada para los visitantes.
 
-## Bloqueante: la base está pausada
+## Antes de verificar: la base
 
-El proyecto `re-viva` de Supabase figura **INACTIVE** (pausado). Hoy `POST /api/auth/login` en `re-viva.vercel.app` devuelve 500. Si el dominio se pasa así, la landing carga pero el registro, el login y el cobro fallan.
+El proyecto `re-viva` de Supabase estaba **pausado** y el login de `re-viva.vercel.app` devolvía 500. **Se reactivó el 13/11/2026.** Ahora el login responde 401 con credenciales malas, que es lo correcto.
 
-Antes de verificar el dominio:
+Las migraciones de la unificación ya están aplicadas en producción. Faltan tres:
 
-1. Reactivar el proyecto en Supabase (Dashboard → proyecto `re-viva` → Restore).
-2. Correr las migraciones pendientes (`docs/unificacion.md` §5, con backup antes).
-3. Confirmar que el login de `re-viva.vercel.app` responde 401 con credenciales malas, no 500.
+| Migración | Qué hace | Sin ella |
+|---|---|---|
+| `20261104000100_catalogo_segun_research` | Borra los 10 suplementos genéricos **sin link** y carga los 14 del research, activos y con link de afiliado | `/suplementos` muestra el catálogo viejo |
+| `20261110000000_ejercicio_video` | Crea `EjercicioVideo` (idempotente) | La biblioteca de ejercicios se ve vacía |
+| `20261110010000_suscripciones_rate_limit` | Crea `Suscripcion` y `RateLimitHit` (idempotente) | El débito automático por API falla y el límite de intentos queda en memoria |
+
+Para aplicarlas: backup en Supabase y después `DATABASE_URL="<conexión directa 5432>" npx prisma migrate deploy` (`docs/unificacion.md` §5).
+
+Ojo: si Supabase vuelve a pausar el proyecto por inactividad, el sitio deja de loguear. Con el dominio y tráfico real no debería pasar. Si pasa, la solución es el plan Pro de Supabase.
 
 ## Pasos del cambio (hacerlos en una sola sentada)
 
