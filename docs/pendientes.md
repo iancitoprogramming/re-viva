@@ -2,6 +2,8 @@
 
 Estado al 9 de noviembre de 2026, rama `claude/project-audit-optimization-e22039` (PR #34). Contexto y números en `docs/roadmap-6m.md`.
 
+**13/11:** traspaso del dominio en curso. Ya está agregado en Vercel, sin verificar. La base de Supabase está pausada. Pasos en `docs/traspaso-dominio.md`.
+
 ## Hecho en esta rama
 
 | Bloque | Archivos clave | Estado |
