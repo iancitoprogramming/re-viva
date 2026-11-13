@@ -23,15 +23,15 @@ Mientras no se verifiquen, el sitio sigue sirviéndose desde el proyecto del dev
 
 El proyecto `re-viva` de Supabase estaba **pausado** y el login de `re-viva.vercel.app` devolvía 500. **Se reactivó el 13/11/2026.** Ahora el login responde 401 con credenciales malas, que es lo correcto.
 
-Las migraciones de la unificación ya están aplicadas en producción. Faltan tres:
+**Migraciones al día (13/11/2026).** `prisma migrate status` mostraba tres pendientes y se aplicaron con `prisma migrate deploy`:
 
-| Migración | Qué hace | Sin ella |
-|---|---|---|
-| `20261104000100_catalogo_segun_research` | Borra los 10 suplementos genéricos **sin link** y carga los 14 del research, activos y con link de afiliado | `/suplementos` muestra el catálogo viejo |
-| `20261110000000_ejercicio_video` | Crea `EjercicioVideo` (idempotente) | La biblioteca de ejercicios se ve vacía |
-| `20261110010000_suscripciones_rate_limit` | Crea `Suscripcion` y `RateLimitHit` (idempotente) | El débito automático por API falla y el límite de intentos queda en memoria |
+| Migración | Resultado |
+|---|---|
+| `20261104000100_catalogo_segun_research` | Hay 14 suplementos activos y con link. Los 10 genéricos que se borraron (inactivos, sin link) están respaldados en `docs/respaldo/suplementos-genericos-2026-11-13.json` |
+| `20261110000000_ejercicio_video` | Tabla `EjercicioVideo` creada, con RLS |
+| `20261110010000_suscripciones_rate_limit` | Tablas `Suscripcion` y `RateLimitHit` creadas, con RLS |
 
-Para aplicarlas: backup en Supabase y después `DATABASE_URL="<conexión directa 5432>" npx prisma migrate deploy` (`docs/unificacion.md` §5).
+Chequeado en `re-viva.vercel.app`: `/`, `/suplementos`, `/ejercicios` y `/pendiente` responden 200, y `/entrenadores` 308.
 
 Ojo: si Supabase vuelve a pausar el proyecto por inactividad, el sitio deja de loguear. Con el dominio y tráfico real no debería pasar. Si pasa, la solución es el plan Pro de Supabase.
 
