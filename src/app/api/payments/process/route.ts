@@ -8,6 +8,7 @@ import { obtenerTokenDeRequest, verificarToken } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { PLANES_MP, type PlanMPKey } from '@/lib/constants'
 import { registrarResultadoPago } from '@/lib/pagos'
+import { urlNotificacion } from '@/lib/mpWebhook'
 
 const mp = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN!,
@@ -41,14 +42,23 @@ export async function POST(request: Request) {
 
     const plan = PLANES_MP[pago.planTipo as PlanMPKey]
 
+    // Del brick se toma solo lo que identifica el medio de pago y al pagador.
+    // Monto, descripción y referencias los pone el servidor.
+    const { token: cardToken, issuer_id, payment_method_id, installments, payer } = formData
+
     const paymentApi = new Payment(mp)
     const result = await paymentApi.create({
       body: {
-        ...formData,
+        token: cardToken as string | undefined,
+        issuer_id: issuer_id as number | undefined,
+        payment_method_id: payment_method_id as string | undefined,
+        installments: installments as number | undefined,
+        payer: payer as Record<string, never> | undefined,
         transaction_amount: pago.amount,
         description: plan?.titulo ?? pago.planTipo,
         external_reference: pago.id,
-        notification_url: `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://re-viva.vercel.app'}/api/payments/webhook`,
+        statement_descriptor: 'REVIVA IGZ',
+        notification_url: urlNotificacion(),
         metadata: {
           userId: payload.userId,
           planTipo: pago.planTipo,
