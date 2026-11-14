@@ -26,7 +26,7 @@ Estado al 9 de noviembre de 2026, rama `claude/project-audit-optimization-e22039
    - que la fila de `Suscripcion` pase a `authorized` (evento `subscription_preapproval`);
    - que el cobro cree un `Payment` con `preferenceId = suscripcion:<id>`. Esto depende de que el pago traiga el `external_reference` de la suscripción o `metadata.preapproval_id`. **Es el supuesto menos seguro del diseño:** si el pago llega sin ninguno de los dos, mirar el log `[Webhook MP] Pago … sin registro local`, ver qué campo trae el id de la suscripción y sumarlo en `procesarPago` (`src/app/api/payments/webhook/route.ts`);
    - que cancelar desde el dashboard deje la suscripción en `cancelled` y llegue el aviso al trainer.
-5. **Variables en Vercel** que siguen faltando: `CRON_SECRET`, `RESEND_FROM_EMAIL`, `NEXT_PUBLIC_SITE_URL`, `ANTHROPIC_API_KEY`, `ALTA_NOTIFICACION_EMAIL`.
+5. **Variables en Vercel** que siguen faltando: `ALTA_NOTIFICACION_EMAIL` (opcional: si falta, los avisos van a `TRAINER_EMAIL`). Las demás se cargaron el 13-14/11. La generación con IA se eliminó en v1.1.0, así que `ANTHROPIC_API_KEY` ya no hace falta.
 
 ## Segunda tanda (13 de noviembre)
 
