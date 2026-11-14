@@ -184,7 +184,7 @@ function ModalRegistrar({ onClose, onSuccess }: { onClose: () => void; onSuccess
           </div>
           <div>
             <label className="text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-1 block">Contraseña temporal</label>
-            <input value={password} onChange={e => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres"
+            <input value={password} onChange={e => setPassword(e.target.value)} placeholder="Mínimo 8 caracteres"
               className="w-full bg-surface border border-edge rounded-xl px-4 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:border-primary transition-colors" required />
           </div>
           <div>

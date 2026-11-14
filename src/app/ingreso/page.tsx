@@ -10,6 +10,7 @@
 // entienda por qué se pregunta sin que se le muestre la justificación interna.
 
 import { useCallback, useMemo, useState } from 'react'
+import Link from 'next/link'
 import {
   CAMPOS_POR_PASO,
   COMIDAS,
@@ -298,6 +299,18 @@ export default function IngresoPage() {
             Voy a leerlo entero antes de escribirte. Si algo me cierra raro, te pregunto por WhatsApp
             antes de armar nada. El plan sale dentro de las 72 horas hábiles.
           </p>
+          <div className="mx-auto mt-8 max-w-[440px] rounded-2xl border border-edge bg-surface p-6">
+            <p className="font-semibold text-ink">¿Todavía no elegiste tu plan?</p>
+            <p className="mt-1 text-sm text-ink-secondary">
+              Elegilo y dejá el pago hecho. Así arrancamos apenas esté armado.
+            </p>
+            <Link
+              href="/#planes"
+              className="mt-4 inline-block rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-ivory"
+            >
+              Ver planes y precios
+            </Link>
+          </div>
         </div>
       </main>
     )

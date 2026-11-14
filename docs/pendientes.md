@@ -26,15 +26,25 @@ Estado al 9 de noviembre de 2026, rama `claude/project-audit-optimization-e22039
    - que cancelar desde el dashboard deje la suscripción en `cancelled` y llegue el aviso al trainer.
 5. **Variables en Vercel** que siguen faltando: `CRON_SECRET`, `RESEND_FROM_EMAIL`, `NEXT_PUBLIC_SITE_URL`, `ANTHROPIC_API_KEY`, `ALTA_NOTIFICACION_EMAIL`.
 
-## Lo que queda (para el próximo modelo)
+## Segunda tanda (13 de noviembre)
 
-Ordenado por impacto. Ninguna requiere decisiones de arquitectura.
+| Hecho | Dónde |
+|---|---|
+| Recordatorio de check-in los lunes a clientes con seguimiento que no reportaron en 7 días | `src/app/api/cron/checkins/route.ts`, `vercel.json` |
+| Archivar y reactivar planes desde la ficha del cliente | `src/app/api/admin/archivar-plan/[id]/route.ts` |
+| El login vuelve a `/pendiente` con el plan elegido (se ve el monto) | `src/app/api/auth/login/route.ts`, `src/app/login/page.tsx` |
+| Contraseña mínima de 8 en registro, reset y alta manual | rutas de auth |
+| `/ingreso` termina con "Ver planes y precios"; el cuestionario se prellena con lo cargado en `/ingreso` (mismo mail) | `src/app/api/onboarding/prefill/route.ts`, `src/app/onboarding/page.tsx` |
+| Plantilla de entrenamiento con campo propio para el link del video | `scripts/generar-plantillas-docx.ts` |
+| Lint: de 12 errores a 6 | — |
 
-1. **Un solo formulario de entrada.** Hoy `/onboarding` (con cuenta) y `/ingreso` (sin cuenta, tabla `altas`) piden casi lo mismo. Decisión tomada en el roadmap: `/ingreso` es la puerta y la cuenta se crea al pagar. Falta: al terminar `/ingreso`, mostrar planes y llevar a registro con el mail precargado; al registrarse con el mismo mail, vincular el `Alta` y saltear `/onboarding`.
-2. **Recordatorio de check-in semanal.** Existe `POST /api/checkin` y la UI en el dashboard; falta el cron que avise a los activos que no mandaron check-in en 7 días (mismo patrón que `src/app/api/cron/vencimientos/route.ts`).
-3. **Videos en el documento de entrenamiento.** `scripts/generar-plantillas-docx.ts` dice "link a video" como texto. Usar `linkEjercicio(slug)` de `src/lib/ejercicios/video.ts`.
-4. **Estado ARCHIVADO.** El enum existe, falta ruta y botón en `/admin/cliente/[id]`. Sirve para sacar de "activos" a los 24 planes sin vencimiento que ya no son clientes.
-5. **Login pierde el plan elegido.** `src/app/login/page.tsx` manda a `/pendiente?nombre=…` sin `plan`; leer `tipoPlan` del plan pendiente o del último `Payment`.
-6. **Lint:** 11 errores preexistentes (`npx eslint`), casi todos comillas sin escapar y un `setState` en efecto.
-7. **Contraseña mínima de 8** en registro y reset (servidor y mensajes del cliente).
-8. **`CLAUDE.md` §10 está desactualizado:** el middleware, el rate limiting, la dependencia de Supabase y la visibilidad de entregables en el dashboard ya están resueltos.
+**Decisión sobre los dos formularios.** No se saltea `/onboarding` para quien viene de `/ingreso`. En `/ingreso` el objetivo y el sueño son texto libre, no existe la adherencia y hay un solo consentimiento; el perfil pide categorías cerradas y cuatro consentimientos legales. Convertir uno en otro sería inventar datos de salud y aceptaciones que la persona no dio. Se prellena lo que coincide exacto (sexo, edad, altura, peso, días, estrés, domingo, objetivo en sus palabras) y el resto se pide.
+
+**Sin probar contra la base** (acá no hay una): el cron de check-ins, el archivado y el prellenado. Sí se probó que rechazan pedidos sin permiso (503, 403 y 401).
+
+## Lo que queda
+
+1. **Las pruebas reales de arriba** (Mercado Pago y migraciones). Es lo único que bloquea cobrar.
+2. **Lint:** quedan 6 errores, todos `setState` dentro de un efecto o cálculo impuro en render (`checkout`, `ThemeToggle`, `CursoLayout`, `admin/revisiones/[planId]`, `admin/cliente/[id]`). Cambian comportamiento: tocarlos con la app corriendo contra una base.
+3. **Unificar de verdad los formularios:** requiere que `/ingreso` pida objetivo, adherencia y los cuatro consentimientos como opciones cerradas. Es una decisión de Ian sobre qué preguntar, no de código.
+4. **Plan de Instagram y TikTok** (Fase 2 del roadmap), cuando estén los videos.

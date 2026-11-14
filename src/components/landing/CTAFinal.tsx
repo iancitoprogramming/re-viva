@@ -88,7 +88,7 @@ export default function CTAFinal() {
         <p data-reveal-child
            className="text-xs font-serif italic"
            style={{ color: IVORY25 }}>
-          "Controla tu cuerpo. Controla tu vida."
+          &ldquo;Controla tu cuerpo. Controla tu vida.&rdquo;
         </p>
 
       </div>

@@ -179,6 +179,28 @@ function OnboardingForm() {
       .catch(() => {})
   }, [router, plan, destinoPendiente])
 
+  // Si ya llenó /ingreso con este mail, se traen los datos que coinciden para
+  // que no los cargue dos veces. Solo pisa campos que siguen vacíos.
+  const [prellenado, setPrellenado] = useState(false)
+  useEffect(() => {
+    fetch('/api/onboarding/prefill')
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => {
+        const p = d?.prefill as Record<string, string> | null | undefined
+        if (!p) return
+        setForm(prev => {
+          const nuevo = { ...prev } as Record<string, unknown>
+          for (const [k, v] of Object.entries(p)) {
+            const actual = nuevo[k]
+            if (v && k in nuevo && (actual === '' || (k === 'disponibilidadDomingo' && actual === 'no'))) nuevo[k] = v
+          }
+          return nuevo as typeof prev
+        })
+        setPrellenado(true)
+      })
+      .catch(() => {})
+  }, [])
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value, type } = e.target
     const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
@@ -281,6 +303,11 @@ function OnboardingForm() {
             {/* ── PASO 1: BÁSICOS ──────────────────────────────── */}
             {paso === 1 && (
               <>
+                {prellenado && (
+                  <p className="text-sm text-ink-secondary bg-primary/5 border border-primary/15 rounded-xl px-4 py-3">
+                    Ya cargamos lo que nos contaste en el formulario de ingreso. Revisalo y completá lo que falta.
+                  </p>
+                )}
                 <FormSelect label="Género" name="genero" options={opcionesGenero}
                   value={form.genero} onChange={handleChange} required />
 

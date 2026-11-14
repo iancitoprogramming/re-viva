@@ -174,10 +174,11 @@ function plantillaEntrenamiento(): Document {
 
     h1('5. Tus sesiones'),
     nota('Cada sesión cubre los 4 patrones: empuje, tracción, bisagra de cadera y sentadilla. En recomposición: máximo 16–20 series totales por sesión. "Cómo" = 1 línea, lo justo para hacerlo bien.'),
+    nota('Link del video: /admin/ejercicios → botón "Copiar link" del ejercicio. La clave técnica de cada uno también está ahí.'),
     ...['Día A — Fuerza', 'Día B — Hipertrofia', 'Día C — Metabólico'].flatMap(dia => [
       h2(dia),
       tabla(['Ejercicio', 'Series × reps', 'Descanso', 'RIR', 'Cómo'], [
-        ['{{ejercicio}}', '{{3 × 5}}', '{{2–3 min}}', '{{2}}', '{{clave técnica en 1 línea + link a video}}'],
+        ['{{ejercicio}}', '{{3 × 5}}', '{{2–3 min}}', '{{2}}', '{{clave técnica en 1 línea}} · {{link del video}}'],
         ['{{ejercicio}}', '{{}}', '{{}}', '{{}}', '{{}}'],
         ['{{ejercicio}}', '{{}}', '{{}}', '{{}}', '{{}}'],
         ['{{ejercicio}}', '{{}}', '{{}}', '{{}}', '{{}}'],

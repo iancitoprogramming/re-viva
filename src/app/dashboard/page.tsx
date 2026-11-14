@@ -226,6 +226,17 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* ── Plan ARCHIVADO ───────────────────────────── */}
+        {plan?.estado === 'ARCHIVADO' && (
+          <div className="bg-surface rounded-2xl border border-edge shadow-sm p-6 text-center">
+            <p className="font-semibold text-ink mb-1">Tu plan terminó</p>
+            <p className="text-sm text-ink-muted mb-4">Cuando quieras retomar, elegí un plan y seguimos donde lo dejaste.</p>
+            <Link href="/#planes" className="inline-block bg-primary text-[#EDE8DF] px-5 py-2.5 rounded-xl font-semibold text-sm">
+              Ver planes
+            </Link>
+          </div>
+        )}
+
         {/* ── Plan PENDIENTE ───────────────────────────── */}
         {(!plan || plan.estado === 'PENDIENTE') && (
           <div className="space-y-4">

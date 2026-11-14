@@ -674,3 +674,40 @@ export async function enviarAvisoTrainer(asunto: string, lineas: string[]): Prom
     console.error('[EMAIL] Aviso al trainer no enviado:', (error as Error)?.message)
   }
 }
+
+// ─── Recordatorio de check-in semanal (cron de los lunes) ────────────────────
+export async function enviarRecordatorioCheckin(nombre: string, email: string): Promise<void> {
+  const dashUrl = `${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://re-viva.vercel.app'}/login?redirect=/dashboard`
+  const primerNombre = nombre.split(' ')[0].replace(/[<>&]/g, '')
+  try {
+    await enviarMail({
+      from:    FROM_EMAIL,
+      to:      email,
+      subject: `${primerNombre}, ¿cómo fue tu semana?`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; background: #F8F5EF; padding: 32px 20px;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <span style="font-size: 22px; font-weight: 700; color: #2D5A3D; letter-spacing: 2px;">REVIVA</span>
+            <span style="font-size: 12px; color: #9B9589; margin-left: 6px;">by IGZ Trainer</span>
+          </div>
+          <div style="background: #FFFFFF; border-radius: 16px; border: 1px solid #DDD8CC; padding: 32px;">
+            <p style="color: #1A2416; font-size: 16px; margin: 0 0 12px 0;">Hola, <strong>${primerNombre}</strong></p>
+            <p style="color: #6B7B64; font-size: 14px; line-height: 1.6; margin: 0 0 12px 0;">
+              Esta semana no me llegó tu check-in. Son dos minutos: peso, cómo te fue con las sesiones y cómo venís con la comida.
+            </p>
+            <p style="color: #6B7B64; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0;">
+              Con eso ajusto el plan. Sin eso, ajusto a ciegas.
+            </p>
+            <div style="text-align: center;">
+              <a href="${dashUrl}"
+                 style="display: inline-block; background: #2D5A3D; color: white; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: 700; font-size: 14px;">
+                Hacer mi check-in →
+              </a>
+            </div>
+          </div>
+        </div>`,
+    })
+  } catch (error) {
+    console.error('[EMAIL] Recordatorio de check-in no enviado:', (error as Error)?.message)
+  }
+}

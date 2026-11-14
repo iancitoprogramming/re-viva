@@ -12,6 +12,7 @@ function crearCliente() {
     connectionString: process.env.DATABASE_URL!,
     ssl: { rejectUnauthorized: false }, // Necesario para conectar a Supabase
   })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- tipos de pg y del adapter no coinciden
   const adapter = new PrismaPg(pool as any)
   return new PrismaClient({ adapter })
 }
