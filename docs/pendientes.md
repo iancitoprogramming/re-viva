@@ -19,12 +19,12 @@ Estado al 9 de noviembre de 2026, rama `claude/project-audit-optimization-e22039
 ## Antes de mergear o apenas se mergea
 
 1. **Migraciones.** Hay dos nuevas, idempotentes: `20261110000000_ejercicio_video` y `20261110010000_suscripciones_rate_limit`. Sin ellas: la biblioteca se ve vacía, el límite de intentos cae a memoria (débil) y el débito automático por API devuelve error (el botón ofrece el link `mpago.la` de respaldo). Pasos en `docs/unificacion.md` §5. No se tocó producción.
-2. **Mercado Pago, panel de webhooks:** tildar los eventos **Pagos** y **Planes y suscripciones**, con la URL `https://<dominio>/api/payments/webhook`.
+2. **Mercado Pago, panel de webhooks (modo productivo):** URL `https://www.revivabyigz.com/api/payments/webhook`, eventos **Pagos** y **Planes y suscripciones** (este último cubre `subscription_preapproval` y `subscription_authorized_payment`). Si al guardar MP genera una clave secreta nueva, copiarla a `MP_WEBHOOK_SECRET` en Vercel y redeployar. Migración `20261114000000_payment_mp_id_unico` (v1.1.1) aplicada en producción el 14/11/2026.
 3. **Prueba real de pago único:** comprar un ebook. Tiene que quedar `Payment.status = approved`, aparecer en `/admin/ebooks-pendientes` y llegar el mail al trainer.
 4. **Prueba real de débito automático:** suscribirse a `online-mensual` desde `/pendiente?plan=online-mensual`. Verificar, en este orden:
    - que MP acepte el alta con el mail ingresado (si el mail no coincide con la cuenta de MP, el alta falla: por eso se pregunta);
    - que la fila de `Suscripcion` pase a `authorized` (evento `subscription_preapproval`);
-   - que el cobro cree un `Payment` con `preferenceId = suscripcion:<id>`. Esto depende de que el pago traiga el `external_reference` de la suscripción o `metadata.preapproval_id`. **Es el supuesto menos seguro del diseño:** si el pago llega sin ninguno de los dos, mirar el log `[Webhook MP] Pago … sin registro local`, ver qué campo trae el id de la suscripción y sumarlo en `procesarPago` (`src/app/api/payments/webhook/route.ts`);
+   - que el cobro cree un `Payment` con `preferenceId = suscripcion:<id>`. Desde v1.1.1 lo registra el evento `subscription_authorized_payment` (consulta `/authorized_payments/{id}`, que trae el `preapproval_id`), así que ya no depende de qué campos traiga el pago. Si no aparece, buscar en los logs `[Webhook MP]`;
    - que cancelar desde el dashboard deje la suscripción en `cancelled` y llegue el aviso al trainer.
 5. **Variables en Vercel** que siguen faltando: `ALTA_NOTIFICACION_EMAIL` (opcional: si falta, los avisos van a `TRAINER_EMAIL`). Las demás se cargaron el 13-14/11. La generación con IA se eliminó en v1.1.0, así que `ANTHROPIC_API_KEY` ya no hace falta.
 

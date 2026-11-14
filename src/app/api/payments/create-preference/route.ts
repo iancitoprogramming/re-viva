@@ -7,6 +7,7 @@ import { MercadoPagoConfig, Preference } from 'mercadopago'
 import { obtenerTokenDeRequest, verificarToken } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { PLANES_MP, type PlanMPKey } from '@/lib/constants'
+import { urlNotificacion } from '@/lib/mpWebhook'
 
 const mp = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN!,
@@ -60,7 +61,8 @@ export async function POST(request: Request) {
           pending: `${baseUrl}/checkout/pending`,
         },
         auto_return: 'approved',
-        notification_url: `${baseUrl}/api/payments/webhook`,
+        notification_url: urlNotificacion(),
+        statement_descriptor: 'REVIVA IGZ',
         external_reference: pago.id,
         metadata: {
           userId: payload.userId,

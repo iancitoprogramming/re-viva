@@ -381,7 +381,7 @@ model Payment {
   userId       String
   planTipo     String
   preferenceId String
-  paymentId    String?
+  paymentId    String?  @unique // id del pago en MP: un cobro, una fila
   status       String   @default("pending")
   amount       Float
   currency     String   @default("ARS")

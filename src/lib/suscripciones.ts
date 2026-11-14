@@ -10,6 +10,7 @@ import { prisma } from '@/lib/prisma'
 import { PLAN_LABELS } from '@/lib/constants'
 import { nuevoVencimiento } from '@/lib/periodoSuscripcion'
 import { enviarAvisoTrainer, enviarNotificacionPagoAprobado } from '@/lib/email'
+import { REVERSIONES } from '@/lib/mpWebhook'
 
 type SuscripcionConUsuario = NonNullable<Awaited<ReturnType<typeof buscarSuscripcion>>>
 
@@ -26,35 +27,48 @@ export function buscarSuscripcion(referencia?: string | null, preapprovalId?: st
 }
 
 // Un cobro de la suscripción (el primero o cualquier renovación). Idempotente:
-// MP puede avisar varias veces del mismo pago.
+// MP avisa el mismo cobro dos veces (evento `payment` y evento
+// `subscription_authorized_payment`), a veces en paralelo. El índice único de
+// Payment.paymentId y el UPDATE condicional garantizan que solo una invocación
+// registre el cambio, así el vencimiento se corre una sola vez.
 export async function registrarCobroSuscripcion(
   suscripcion: SuscripcionConUsuario,
   mpPaymentId: string,
   status: string,
   monto: number,
 ): Promise<void> {
-  const previo = await prisma.payment.findFirst({ where: { paymentId: mpPaymentId } })
-  if (previo?.status === status) return
-  const yaEstabaAprobado = previo?.status === 'approved'
+  const previo = await prisma.payment.findUnique({ where: { paymentId: mpPaymentId } })
 
   if (previo) {
-    await prisma.payment.update({ where: { id: previo.id }, data: { status } })
-  } else {
-    await prisma.payment.create({
-      data: {
-        userId: suscripcion.userId,
-        planTipo: suscripcion.planTipo,
-        preferenceId: `suscripcion:${suscripcion.id}`,
-        paymentId: mpPaymentId,
-        status,
-        amount: monto,
-      },
+    if (previo.status === status) return
+    if (previo.status === 'approved' && !REVERSIONES.has(status)) return
+    const { count } = await prisma.payment.updateMany({
+      where: { id: previo.id, status: previo.status },
+      data:  { status },
     })
+    if (count === 0) return // otra invocación lo cambió primero
+  } else {
+    try {
+      await prisma.payment.create({
+        data: {
+          userId: suscripcion.userId,
+          planTipo: suscripcion.planTipo,
+          preferenceId: `suscripcion:${suscripcion.id}`,
+          paymentId: mpPaymentId,
+          status,
+          amount: monto,
+        },
+      })
+    } catch (error) {
+      // P2002: el otro aviso del mismo cobro lo creó primero.
+      if ((error as { code?: string })?.code === 'P2002') return
+      throw error
+    }
   }
 
   const etiqueta = PLAN_LABELS[suscripcion.planTipo] ?? suscripcion.planTipo
 
-  if (status === 'approved' && !yaEstabaAprobado) {
+  if (status === 'approved') {
     await prisma.suscripcion.update({
       where: { id: suscripcion.id },
       data:  { estado: 'authorized', ultimoCobroEn: new Date() },
@@ -76,6 +90,15 @@ export async function registrarCobroSuscripcion(
     }
 
     void enviarNotificacionPagoAprobado(suscripcion.user.nombre, suscripcion.user.email, suscripcion.planTipo, monto)
+    return
+  }
+
+  if (REVERSIONES.has(status)) {
+    void enviarAvisoTrainer(`${status === 'refunded' ? 'Devolución' : 'Contracargo'}: ${suscripcion.user.nombre}`, [
+      `Un cobro del débito automático de ${suscripcion.user.nombre} (${suscripcion.user.email}) pasó a "${status}".`,
+      `Plan: ${etiqueta}. Monto: $${monto.toLocaleString('es-AR')}.`,
+      'El vencimiento no se tocó: revisalo a mano.',
+    ])
     return
   }
 
