@@ -51,7 +51,6 @@
 | Deploy | Vercel |
 | Tipado | TypeScript |
 | Pagos | Mercado Pago (checkout propio + links de suscripción) |
-| IA | Anthropic (pipeline de planes) |
 | Archivos | Vercel Blob |
 
 ---
@@ -162,8 +161,6 @@ CRON_SECRET="string_aleatorio"   # Si falta, /api/cron/* responde 503
 # Vercel Blob (archivos de clientes en el back office)
 REVIVA_READ_WRITE_TOKEN="vercel_blob_rw_..."
 
-# IA
-ANTHROPIC_API_KEY="sk-ant-..."   # Pipeline de generación de planes
 
 # Formulario de ingreso (/ingreso)
 ALTA_NOTIFICACION_EMAIL="ian@igztrainer.com"   # Aviso de alta nueva (sale por Resend). Si falta, cae en TRAINER_EMAIL
@@ -253,7 +250,6 @@ Las páginas verifican `/api/auth/me` en `useEffect`:
 | POST | `/api/payments/create-preference` | JWT cookie | Crea preferencia de pago en MP |
 | POST | `/api/payments/process` | JWT cookie | Procesa el pago del brick |
 | POST | `/api/payments/webhook` | Firma MP | Notificación asíncrona de Mercado Pago |
-| POST | `/api/plans/generate` · `/generate-batch` | Admin JWT | Generación de planes con IA |
 | GET | `/api/cron/cumpleanos` | CRON_SECRET | Saludo de cumpleaños (diario, 12 UTC) |
 | GET | `/api/cron/vencimientos` | CRON_SECRET | Aviso de vencimiento a 7 días |
 | POST | `/api/ingreso` | Ninguna | Alta pública del formulario `/ingreso` (rate limit + honeypot) |
@@ -270,8 +266,6 @@ Las páginas verifican `/api/auth/me` en `useEffect`:
 | GET/POST/DELETE | `/api/admin/archivos/[userId]` | Admin JWT | Archivos del cliente (Vercel Blob) |
 | GET | `/api/admin/ebooks-pendientes` | Admin JWT | Ebooks pagados sin entregar |
 | POST | `/api/admin/ebooks/[id]/entregar` | Admin JWT | Marca el ebook como entregado |
-| GET | `/api/admin/reviews` · `/[planId]` | Admin JWT | Revisión de planes generados |
-| POST | `/api/admin/reviews/[planId]/approve` · `/reject` · `/regenerate` | Admin JWT | Aprueba, rechaza o regenera |
 | GET | `/api/test/mp` | Admin JWT | Diagnóstico de credenciales de MP |
 | PATCH | `/api/admin/entrega/[id]` | Admin JWT | Actualiza estado de entrega de un componente |
 | GET/POST | `/api/admin/suplementos` | Admin JWT | Catálogo de suplementos (+ clics 30 días) / alta |

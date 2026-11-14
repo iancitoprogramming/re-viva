@@ -308,7 +308,9 @@ enum EstadoEntrega {
   ENTREGADO
 }
 
-// ─── PIPELINE DE GENERACIÓN DE PLANES ───────────────────────────────────────
+// ─── PIPELINE DE GENERACIÓN DE PLANES (sin uso desde v1.1.0) ─────────────────
+// El código que las usaba (generación con IA) se borró. Las tablas quedan para
+// no perder historial; sacarlas pide una migración destructiva.
 // Registro de cada llamada al motor IA (auditoría y costos).
 model PlanGeneration {
   id           String   @id @default(cuid())
