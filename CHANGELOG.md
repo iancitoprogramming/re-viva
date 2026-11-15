@@ -2,6 +2,10 @@
 
 Versiones del sitio en producción (`https://www.revivabyigz.com`). Cómo se numeran: `CLAUDE.md` §11, "Versiones".
 
+## 1.1.3 — 2026-11-15
+
+- **El mail de cliente nuevo sale con el formato de la ficha.** Quien se registra por la landing (registro → `/onboarding`) generaba el mail viejo en tabla HTML; ahora llega igual que el alta de `/ingreso`: alertas arriba (consentimientos sin aceptar, lesión actual, condiciones médicas, guía para comer afuera, FBEOD en 3x…), ficha en texto plano con el pre-cálculo IGZ y link directo a `/admin/cliente/[id]`. Asunto: `Nuevo cliente Re-Viva — <nombre>`. Ficha en `src/lib/fichaCliente.ts`, destino `ALTA_NOTIFICACION_EMAIL` (o `TRAINER_EMAIL`).
+
 ## 1.1.2 — 2026-11-15
 
 - **El panel admin ya no lista a las cuentas admin como clientes.** La cuenta del trainer aparecía en "Pendientes de activación" y "Sin perfil", y sumaba en los contadores. `/api/admin/clientes` excluye los emails de `ADMIN_EMAILS` (helper `emailsAdmin()` en `src/lib/auth.ts`).
