@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { obtenerTokenDeRequest, verificarToken } from '@/lib/auth'
 import { correrMotorIGZ } from '@/lib/igzEngine'
 import { enviarNotificacionNuevoCliente } from '@/lib/email'
+import { construirFichaCliente } from '@/lib/fichaCliente'
 import type { OnboardingData } from '@/types'
 import { HORARIOS_ENTRENAMIENTO, FRECUENCIA_COME_AFUERA, SESIONES_COCINA } from '@/lib/cuestionario'
 
@@ -190,9 +191,16 @@ export async function POST(request: Request) {
       },
     })
 
-    // Enviar email al trainer (no bloqueamos si falla)
+    // Enviar email al trainer con la ficha (no bloqueamos si falla)
     try {
-      await enviarNotificacionNuevoCliente(payload.nombre, payload.email, body, igz)
+      const ficha = construirFichaCliente({
+        nombre: payload.nombre, email: payload.email, creadoEn: new Date(),
+        perfil: { ...body, ...consentimientos, alergias, intolerancias, alimentosQueNoConsume,
+          condicionesMedicasDeclaradas, lesionesActuales, lesionesPasadas, medicacionActual,
+          obstaculos, lugaresComeAfuera, suplementosActuales, flagsEspeciales },
+        igz,
+      })
+      await enviarNotificacionNuevoCliente(payload.nombre, payload.userId, ficha.prompt, ficha.alertas)
     } catch (emailError) {
       console.error('[ONBOARDING] Error enviando email:', emailError)
     }

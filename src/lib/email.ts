@@ -4,12 +4,8 @@
 // (revivabyigz.com). Si no lo está, Resend rechaza el envío.
 
 import { Resend } from 'resend'
-import type { OnboardingData, IGZResult } from '@/types'
 import type { CategoriaCompra } from '@prisma/client'
-import {
-  etiqueta, etiquetas, OBSTACULOS, HORARIOS_ENTRENAMIENTO, FRECUENCIA_COME_AFUERA,
-  LUGARES_COME_AFUERA, SESIONES_COCINA, SUPERMERCADOS,
-} from '@/lib/cuestionario'
+import { etiqueta, SUPERMERCADOS } from '@/lib/cuestionario'
 import { agruparPorCategoria, cantidadLegible } from '@/lib/compras'
 import { PLANES_MP, PRECIO_GESTION_COMPRA, WHATSAPP_COMPRA_DFY, WHATSAPP_VIDEOLLAMADA } from '@/lib/constants'
 import { SITE_URL } from '@/lib/site'
@@ -30,15 +26,6 @@ async function enviarMail(mail: Mail): Promise<void> {
 
   const { error } = await new Resend(apiKey).emails.send(mail)
   if (error) throw new Error(`Resend rechazó el envío — ${error.name}: ${error.message}`)
-}
-
-// Etiquetas legibles para los enums
-const labels = {
-  genero:    { MASCULINO: 'Masculino', FEMENINO: 'Femenino' },
-  objetivo:  { VOLUMEN: 'Volumen', DEFINICION: 'Definición', RECOMPOSICION: 'Recomposición' },
-  estres:    { BAJO: 'Bajo', MEDIO: 'Medio', ALTO: 'Alto' },
-  adherencia:{ BAJA: 'Baja', MEDIA: 'Media', ALTA: 'Alta' },
-  clasif:    { VOLUMEN: 'VOLUMEN', DEFINICION: 'DEFINICIÓN', RECOMPOSICION: 'RECOMPOSICIÓN' },
 }
 
 // ─── EMAIL: código de recuperación de contraseña ─────────────────────────────
@@ -92,110 +79,6 @@ export async function enviarCodigoRecuperacion(
     const e = err as Error
     console.error('[EMAIL] Error al enviar código de recuperación:', e.message)
     return { ok: false, error: e.message }
-  }
-}
-
-// ─── EMAIL: notificación al trainer — nuevo cliente ───────────────────────────
-export async function enviarNotificacionNuevoCliente(
-  nombreCliente: string,
-  emailCliente: string,
-  perfil: OnboardingData,
-  igz: IGZResult
-) {
-  console.log(`[EMAIL] Notificando nuevo cliente a trainer: ${TRAINER_EMAIL}`)
-
-  try {
-    await enviarMail({
-      from:    FROM_EMAIL,
-      to:      TRAINER_EMAIL,
-      subject: `Nuevo cliente: ${nombreCliente}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #F8F5EF; padding: 24px 16px;">
-
-          <div style="background: #2D5A3D; color: white; padding: 20px 24px; border-radius: 12px 12px 0 0;">
-            <p style="margin: 0; font-size: 11px; opacity: 0.7; text-transform: uppercase; letter-spacing: 2px;">REVIVA · IGZ Trainer</p>
-            <h1 style="margin: 6px 0 0 0; font-size: 20px;">Nuevo cliente registrado</h1>
-          </div>
-
-          <div style="background: white; padding: 24px; border-radius: 0 0 12px 12px; border: 1px solid #DDD8CC; border-top: none;">
-
-            <h2 style="color: #1A2416; font-size: 17px; margin: 0 0 4px 0;">${nombreCliente}</h2>
-            <p style="color: #9B9589; margin: 0 0 20px 0; font-size: 13px;">${emailCliente}</p>
-
-            <hr style="border: none; border-top: 1px solid #DDD8CC; margin: 0 0 20px 0;" />
-
-            <h3 style="color: #1A2416; font-size: 14px; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 1px;">Datos del formulario</h3>
-            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-              ${[
-                ['Género',             labels.genero[perfil.genero as keyof typeof labels.genero]],
-                ['Edad',               `${perfil.edad} años`],
-                ['Peso / Altura',      `${perfil.peso} kg / ${perfil.altura} cm`],
-                ['Objetivo',           labels.objetivo[perfil.objetivo as keyof typeof labels.objetivo]],
-                ['Días entrenamiento', `${perfil.diasEntrenamiento} días/semana`],
-                ['Nivel de estrés',    labels.estres[perfil.nivelEstres as keyof typeof labels.estres]],
-                ['Horas de sueño',     `${perfil.horasSueno} hs/noche`],
-                ['Adherencia',         labels.adherencia[perfil.adherencia as keyof typeof labels.adherencia]],
-                ['Horario entrenamiento', etiqueta(HORARIOS_ENTRENAMIENTO, perfil.horarioEntrenamiento)],
-                ['Come afuera',        `${etiqueta(FRECUENCIA_COME_AFUERA, perfil.comeAfuera)}${perfil.lugaresComeAfuera?.length ? ` (${etiquetas(LUGARES_COME_AFUERA, perfil.lugaresComeAfuera)})` : ''}`],
-                ['Cocina',             etiqueta(SESIONES_COCINA, perfil.sesionesCocina)],
-                ['Supermercado',       etiqueta(SUPERMERCADOS, perfil.supermercado)],
-                ['Obstáculos',         etiquetas(OBSTACULOS, perfil.obstaculos)],
-                ['Resultado soñado',   perfil.resultadoSonado || '—'],
-              ].map(([k, v], i) => `
-                <tr style="background: ${i % 2 === 0 ? '#F8F5EF' : '#FFFFFF'};">
-                  <td style="padding: 8px 12px; color: #6B7B64; width: 45%;">${k}</td>
-                  <td style="padding: 8px 12px; font-weight: 600; color: #1A2416;">${v}</td>
-                </tr>
-              `).join('')}
-              ${perfil.preferenciasAlimentarias ? `
-                <tr style="background: #F8F5EF;">
-                  <td style="padding: 8px 12px; color: #6B7B64; vertical-align: top;">Preferencias</td>
-                  <td style="padding: 8px 12px; font-weight: 600; color: #1A2416;">${perfil.preferenciasAlimentarias}</td>
-                </tr>
-              ` : ''}
-              ${perfil.lesiones ? `
-                <tr style="background: #FEF9EC;">
-                  <td style="padding: 8px 12px; color: #6B7B64; vertical-align: top;">⚠️ Lesiones</td>
-                  <td style="padding: 8px 12px; font-weight: 600; color: #1A2416;">${perfil.lesiones}</td>
-                </tr>
-              ` : ''}
-            </table>
-
-            <hr style="border: none; border-top: 1px solid #DDD8CC; margin: 20px 0;" />
-
-            <h3 style="color: #1A2416; font-size: 14px; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 1px;">Pre-cálculo Motor IGZ</h3>
-            <div style="background: #F0F7F3; border: 1px solid #C9D9C9; border-radius: 10px; padding: 16px;">
-              <p style="margin: 0 0 10px 0; font-size: 15px; font-weight: 700; color: #2D5A3D;">
-                ${labels.clasif[igz.clasificacion as keyof typeof labels.clasif]}
-              </p>
-              <table style="width: 100%; font-size: 13px;">
-                ${[
-                  ['Calorías', `${igz.calorias} kcal/día`],
-                  ['Proteína', `${igz.proteina}g`],
-                  ['Hidratos', `${igz.hidratos}g`],
-                  ['Grasas',   `${igz.grasas}g`],
-                ].map(([k, v]) => `
-                  <tr>
-                    <td style="color: #2D5A3D; padding: 3px 0;">${k}</td>
-                    <td style="font-weight: 700; color: #1A2416;">${v}</td>
-                  </tr>
-                `).join('')}
-              </table>
-            </div>
-
-            <p style="margin-top: 20px; font-size: 12px; color: #9B9589; text-align: center;">
-              REVIVA · IGZ Trainer · Email automático
-            </p>
-          </div>
-        </div>
-      `,
-    })
-
-    console.log('[EMAIL] Notificación trainer enviada OK')
-
-  } catch (err: unknown) {
-    // No lanzar — la notificación al trainer no debe bloquear el onboarding del cliente
-    console.error('[EMAIL] Error notificando trainer:', (err as Error).message)
   }
 }
 
@@ -621,14 +504,54 @@ export async function enviarNotificacionAlta(
     )
   }
 
-  const base = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://revivabyigz.com'
-  const link = `${base}/admin/altas/${altaId}`
+  console.log(`[EMAIL] Notificando alta nueva a: ${destino}`)
 
+  // Sale por Resend como todo el resto: GMAIL_* nunca estuvo cargado en Vercel.
+  await enviarMail({
+    from:    FROM_EMAIL,
+    to:      destino,
+    subject: `Alta Re-Viva — ${nombre}`,
+    text:    cuerpoFicha(alertas, prompt, `${baseUrlAdmin()}/admin/altas/${altaId}`),
+  })
+
+  console.log(`[EMAIL] Alta ${altaId} notificada OK`)
+}
+
+// ─── EMAIL: nuevo cliente desde registro + /onboarding ───────────────────────
+// Mismo formato que el alta de /ingreso: alertas, ficha en texto plano y link
+// al cliente en el panel. Lanza si falla; el onboarding lo loguea y sigue.
+export async function enviarNotificacionNuevoCliente(
+  nombre: string,
+  userId: string,
+  prompt: string,
+  alertas: { tipo: string; texto: string }[],
+): Promise<void> {
+  const destino = process.env.ALTA_NOTIFICACION_EMAIL ?? process.env.TRAINER_EMAIL
+  if (!destino) {
+    throw new Error('Falta ALTA_NOTIFICACION_EMAIL (o TRAINER_EMAIL): no hay a quién avisar del cliente nuevo.')
+  }
+
+  console.log(`[EMAIL] Notificando nuevo cliente a: ${destino}`)
+
+  await enviarMail({
+    from:    FROM_EMAIL,
+    to:      destino,
+    subject: `Nuevo cliente Re-Viva — ${nombre}`,
+    text:    cuerpoFicha(alertas, prompt, `${baseUrlAdmin()}/admin/cliente/${userId}`),
+  })
+
+  console.log(`[EMAIL] Nuevo cliente ${userId} notificado OK`)
+}
+
+const baseUrlAdmin = () => process.env.NEXT_PUBLIC_BASE_URL ?? 'https://revivabyigz.com'
+
+// Cuerpo de texto plano compartido por los dos avisos de alta (/ingreso y onboarding).
+function cuerpoFicha(alertas: { tipo: string; texto: string }[], prompt: string, link: string): string {
   const bloqueAlertas = alertas.length
     ? alertas.map(a => `${a.tipo === 'stop' ? '[ATENCIÓN]' : a.tipo === 'ok' ? '[OK]' : '[AVISO]'} ${a.texto}`).join('\n')
     : 'Sin alertas.'
 
-  const cuerpo = [
+  return [
     'ALERTAS',
     bloqueAlertas,
     '',
@@ -640,18 +563,6 @@ export async function enviarNotificacionAlta(
     '',
     `Ficha completa: ${link}`,
   ].join('\n')
-
-  console.log(`[EMAIL] Notificando alta nueva a: ${destino}`)
-
-  // Sale por Resend como todo el resto: GMAIL_* nunca estuvo cargado en Vercel.
-  await enviarMail({
-    from:    FROM_EMAIL,
-    to:      destino,
-    subject: `Alta Re-Viva — ${nombre}`,
-    text:    cuerpo,
-  })
-
-  console.log(`[EMAIL] Alta ${altaId} notificada OK`)
 }
 
 // ─── Aviso corto al trainer (bajas de débito automático, cobros rechazados) ───
