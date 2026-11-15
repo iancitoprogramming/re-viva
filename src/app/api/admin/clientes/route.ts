@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { obtenerTokenDeRequest, verificarToken, esAdmin } from '@/lib/auth'
+import { obtenerTokenDeRequest, verificarToken, esAdmin, emailsAdmin } from '@/lib/auth'
 
 export async function GET(request: Request) {
   const token = obtenerTokenDeRequest(request)
@@ -16,15 +16,17 @@ export async function GET(request: Request) {
   const limit    = Math.min(30, Math.max(10, parseInt(searchParams.get('limit') ?? '20', 10)))
   const skip     = (page - 1) * limit
 
+  // Las cuentas admin no son clientes: no se listan ni se cuentan.
+  const base = { deletedAt: null, email: { notIn: emailsAdmin() } }
   const where = busqueda
     ? {
-        deletedAt: null,
+        ...base,
         OR: [
           { nombre: { contains: busqueda, mode: 'insensitive' as const } },
           { email:  { contains: busqueda, mode: 'insensitive' as const } },
         ],
       }
-    : { deletedAt: null }
+    : base
 
   const [clientes, total] = await Promise.all([
     prisma.user.findMany({

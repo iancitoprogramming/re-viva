@@ -33,10 +33,14 @@ export function obtenerTokenDeRequest(request: Request): string | null {
   return null
 }
 
+// Emails con acceso a /admin (env ADMIN_EMAILS, separados por coma)
+export function emailsAdmin(): string[] {
+  return (process.env.ADMIN_EMAILS ?? '').split(',').map(e => e.trim()).filter(Boolean)
+}
+
 // Verifica si el usuario autenticado es admin
 export function esAdmin(email: string): boolean {
-  const admins = (process.env.ADMIN_EMAILS ?? '').split(',').map(e => e.trim())
-  return admins.includes(email)
+  return emailsAdmin().includes(email)
 }
 
 // Devuelve el payload si la request es de un admin; null si no (responder 403).
