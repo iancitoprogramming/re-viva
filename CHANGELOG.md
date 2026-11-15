@@ -2,6 +2,10 @@
 
 Versiones del sitio en producción (`https://www.revivabyigz.com`). Cómo se numeran: `CLAUDE.md` §11, "Versiones".
 
+## 1.1.2 — 2026-11-15
+
+- **El panel admin ya no lista a las cuentas admin como clientes.** La cuenta del trainer aparecía en "Pendientes de activación" y "Sin perfil", y sumaba en los contadores. `/api/admin/clientes` excluye los emails de `ADMIN_EMAILS` (helper `emailsAdmin()` en `src/lib/auth.ts`).
+
 ## 1.1.1 — 2026-11-14
 
 Cobro con Mercado Pago, listo para la prueba real.
