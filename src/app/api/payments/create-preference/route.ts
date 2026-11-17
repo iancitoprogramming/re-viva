@@ -56,9 +56,9 @@ export async function POST(request: Request) {
           email: payload.email,
         },
         back_urls: {
-          success: `${baseUrl}/checkout/success`,
-          failure: `${baseUrl}/checkout/failure`,
-          pending: `${baseUrl}/checkout/pending`,
+          success: `${baseUrl}/checkout/success?plan=${planTipo}`,
+          failure: `${baseUrl}/checkout/failure?plan=${planTipo}`,
+          pending: `${baseUrl}/checkout/pending?plan=${planTipo}`,
         },
         auto_return: 'approved',
         notification_url: urlNotificacion(),

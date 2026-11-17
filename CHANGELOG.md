@@ -2,6 +2,11 @@
 
 Versiones del sitio en producción (`https://www.revivabyigz.com`). Cómo se numeran: `CLAUDE.md` §11, "Versiones".
 
+## 1.1.4 — 2026-11-16
+
+- **Pagar con la cuenta de Mercado Pago ya no falla.** En el checkout, la opción "Cuenta de Mercado Pago" mandaba el pago al cobro con tarjeta sin datos de tarjeta, y el comprador terminaba en la página de error. Ahora el Brick lo lleva a Mercado Pago y el resultado lo registra el webhook. Se detectó en la primera compra real (ebook, 16/11).
+- Las páginas de éxito, pendiente y error muestran el plan también cuando el comprador vuelve desde Mercado Pago.
+
 ## 1.1.3 — 2026-11-15
 
 - **El mail de cliente nuevo sale con el formato de la ficha.** Quien se registra por la landing (registro → `/onboarding`) generaba el mail viejo en tabla HTML; ahora llega igual que el alta de `/ingreso`: alertas arriba (consentimientos sin aceptar, lesión actual, condiciones médicas, guía para comer afuera, FBEOD en 3x…), ficha en texto plano con el pre-cálculo IGZ y link directo a `/admin/cliente/[id]`. Asunto: `Nuevo cliente Re-Viva — <nombre>`. Ficha en `src/lib/fichaCliente.ts`, destino `ALTA_NOTIFICACION_EMAIL` (o `TRAINER_EMAIL`).

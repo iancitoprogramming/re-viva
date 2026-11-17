@@ -142,7 +142,14 @@ function CheckoutContent() {
             console.error('[Payment Brick]', err)
             setError('Ocurrió un error al cargar el sistema de pago. Intentá de nuevo.')
           },
-          onSubmit: ({ formData }: { formData: Record<string, unknown> }) => {
+          onSubmit: ({ selectedPaymentMethod, formData }: { selectedPaymentMethod?: string; formData?: Record<string, unknown> }) => {
+            // "Cuenta de Mercado Pago": no hay datos de tarjeta. El Brick lleva al
+            // comprador a Mercado Pago con la preferencia; el resultado vuelve por
+            // las back_urls y el webhook lo registra. Mandarlo a /process lo hacía
+            // fallar siempre.
+            if (selectedPaymentMethod === 'wallet_purchase' || !formData) {
+              return Promise.resolve()
+            }
             setProcesando(true)
             return new Promise<void>((resolve, reject) => {
               fetch('/api/payments/process', {
