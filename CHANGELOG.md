@@ -2,6 +2,15 @@
 
 Versiones del sitio en producción (`https://www.revivabyigz.com`). Cómo se numeran: `CLAUDE.md` §11, "Versiones".
 
+## 1.2.0 — 2026-11-20
+
+Formulario de ingreso (`/ingreso`), tras recorrerlo completo desde el celular:
+
+- **Borrador automático.** Lo cargado se guarda en el navegador a cada cambio. Si la persona cierra la pestaña (pasa seguido en el navegador de WhatsApp), al volver ve "Tenés un formulario a medio completar" con *Seguir donde lo dejé* / *Empezar de cero*. Se borra al enviar y vence a los 14 días.
+- **Botones "Ninguno", "Ninguna" y "No tomo nada"** en las tres preguntas obligatorias que pedían escribirlo a mano (cae mal, alergias, medicación).
+- **Aviso si días y sesiones no coinciden.** Si en Horarios marcó 3 días y en Entrenamiento las sesiones suman otro número, se le avisa (no bloquea).
+- Las casillas "no la hago" de las comidas tienen nombre accesible.
+
 ## 1.1.5 — 2026-11-20
 
 - **El cobro pasa a la página de Mercado Pago (Checkout Pro).** El formulario de pago embebido (Payment Brick) falló en las dos compras reales: la preferencia se creaba pero el pago nunca llegaba a existir en MP. Ahora `/checkout` muestra el plan y un botón "Pagar con Mercado Pago" que abre la página oficial: tarjeta, débito, dinero en cuenta o efectivo, sin necesidad de cuenta, y con el motivo del rechazo a la vista del comprador. El resultado vuelve por las back_urls y lo registra el webhook.
