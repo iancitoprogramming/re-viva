@@ -2,14 +2,15 @@
 
 // Formulario de ingreso público — un paso por pantalla, siete en total.
 // Pensado para completar desde el celular (la mayoría entra por un link de
-// WhatsApp). El estado vive en un único objeto en memoria: no hay guardado
-// parcial ni borrador en localStorage en esta versión.
+// WhatsApp). El estado vive en un único objeto en memoria y se guarda como
+// borrador en localStorage a cada cambio: si se cierra la pestaña (pasa mucho
+// en el navegador de WhatsApp), al volver se ofrece seguir donde quedó.
 //
 // La redacción de las preguntas, los hints y los mensajes de error son los del
 // prototipo aprobado. No reescribir: están calibrados para que el cliente
 // entienda por qué se pregunta sin que se le muestre la justificación interna.
 
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import {
   CAMPOS_POR_PASO,
@@ -31,6 +32,32 @@ const PASOS = [
   'Entrenamiento',
   'Cómo seguimos',
 ]
+
+// ─── Borrador ────────────────────────────────────────────────────────────────
+
+const CLAVE_BORRADOR = 'reviva-ingreso-borrador'
+const VIDA_BORRADOR  = 14 * 24 * 60 * 60 * 1000
+
+type Borrador = { form: IngresoForm; paso: number; mismaHora: boolean; t: number }
+
+function leerBorradorCrudo(): string | null {
+  try { return localStorage.getItem(CLAVE_BORRADOR) } catch { return null }
+}
+
+function parsearBorrador(crudo: string | null): Borrador | null {
+  if (!crudo) return null
+  try {
+    const b = JSON.parse(crudo) as Borrador
+    if (!b?.form || typeof b.paso !== 'number' || Date.now() - b.t > VIDA_BORRADOR) return null
+    return { ...b, form: { ...formVacio(), ...b.form } }
+  } catch { return null }
+}
+
+function borrarBorrador() {
+  try { localStorage.removeItem(CLAVE_BORRADOR) } catch { /* sin storage */ }
+}
+
+const sinSuscripcion = () => () => {}
 
 // ─── Estilos compartidos ─────────────────────────────────────────────────────
 
@@ -141,6 +168,17 @@ function Radios({
   )
 }
 
+function BotonNinguno({ texto, onPick }: { texto: string; onPick: () => void }) {
+  return (
+    <button
+      type="button" onClick={onPick}
+      className="self-start rounded-full border border-edge bg-surface px-3.5 py-1.5 text-xs font-semibold text-ink-secondary transition-colors hover:border-gold/50"
+    >
+      {texto}
+    </button>
+  )
+}
+
 function Sub({ children }: { children: React.ReactNode }) {
   return (
     <div className="mt-1 flex flex-col gap-4 border-l-2 border-edge pl-3.5">
@@ -159,6 +197,28 @@ export default function IngresoPage() {
   const [enviando, setEnviando]   = useState(false)
   const [enviado, setEnviado]     = useState(false)
   const [errorEnvio, setErrorEnvio] = useState('')
+  const [descartado, setDescartado] = useState(false)
+
+  // Borrador guardado de una visita anterior. Se ofrece, no se aplica solo.
+  const borradorCrudo = useSyncExternalStore(sinSuscripcion, leerBorradorCrudo, () => null)
+  const borrador = useMemo(
+    () => (descartado || paso > 0 ? null : parsearBorrador(borradorCrudo)),
+    [borradorCrudo, descartado, paso],
+  )
+
+  useEffect(() => {
+    if (paso === 0 || enviado) return
+    try {
+      localStorage.setItem(CLAVE_BORRADOR, JSON.stringify({ form, paso, mismaHora, t: Date.now() }))
+    } catch { /* sin storage: sigue funcionando sin borrador */ }
+  }, [form, paso, mismaHora, enviado])
+
+  function retomar(b: Borrador) {
+    setForm(b.form)
+    setMismaHora(b.mismaHora)
+    setPaso(Math.min(Math.max(b.paso, 1), PASOS.length - 1))
+    window.scrollTo({ top: 0 })
+  }
 
   const set = useCallback(<K extends keyof IngresoForm>(k: K, v: IngresoForm[K]) => {
     setForm(f => ({ ...f, [k]: v }))
@@ -277,6 +337,7 @@ export default function IngresoPage() {
         return
       }
 
+      borrarBorrador()
       setEnviado(true)
       window.scrollTo({ top: 0 })
     } catch {
@@ -317,6 +378,10 @@ export default function IngresoPage() {
   }
 
   const e = errores
+  const nSesiones = [form.sesiones_con_entrenador, form.sesiones_solo].map(v => (v.trim() === '' ? null : Number(v)))
+  const totalSesiones = (nSesiones[0] ?? 0) + (nSesiones[1] ?? 0)
+  const sesionesNoCoinciden = nSesiones.every(n => n !== null && Number.isFinite(n))
+    && form.dias.length > 0 && totalSesiones !== form.dias.length
 
   return (
     <main className="min-h-screen bg-ivory pb-32">
@@ -359,6 +424,28 @@ export default function IngresoPage() {
         {/* ── Paso 0 — Antes de empezar ── */}
         {paso === 0 && (
           <section>
+            {borrador && (
+              <div className="mb-6 rounded-xl border border-gold bg-gold-light px-4 py-4">
+                <p className="text-[15px] font-bold text-ink">Tenés un formulario a medio completar</p>
+                <p className="mt-1 text-[13px] text-ink-secondary">
+                  Quedaste en {PASOS[borrador.paso]} ({borrador.paso + 1} de {PASOS.length}).
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button" onClick={() => retomar(borrador)}
+                    className="rounded-xl bg-ink px-5 py-2.5 text-sm font-bold text-ivory"
+                  >
+                    Seguir donde lo dejé
+                  </button>
+                  <button
+                    type="button" onClick={() => { borrarBorrador(); setDescartado(true) }}
+                    className="rounded-xl border border-edge px-5 py-2.5 text-sm font-bold text-ink-secondary"
+                  >
+                    Empezar de cero
+                  </button>
+                </div>
+              </div>
+            )}
             <h1 className="font-serif text-[clamp(26px,6vw,34px)] leading-tight text-ink">
               Esto define tu plan. Nada de lo que respondas es relleno.
             </h1>
@@ -543,6 +630,7 @@ export default function IngresoPage() {
                         <label className="flex cursor-pointer items-center gap-1.5 whitespace-nowrap text-xs text-ink-secondary">
                           <input
                             type="checkbox" checked={apagada} className="accent-gold"
+                            aria-label={`No hago ${c.label.toLowerCase()}`}
                             onChange={ev => setComida(c.k, ev.target.checked ? null : '')}
                           />
                           no la hago
@@ -621,6 +709,7 @@ export default function IngresoPage() {
               >
                 <textarea id="cae_mal" rows={3} className={`${cls(e.cae_mal)} min-h-[88px] resize-y`}
                   value={form.cae_mal} onChange={ev => set('cae_mal', ev.target.value)} />
+                {!form.cae_mal.trim() && <BotonNinguno texto="Ninguno" onPick={() => set('cae_mal', 'ninguno')} />}
               </Campo>
 
               <Campo
@@ -630,6 +719,7 @@ export default function IngresoPage() {
               >
                 <textarea id="alergias" rows={3} className={`${cls(e.alergias)} min-h-[88px] resize-y`}
                   value={form.alergias} onChange={ev => set('alergias', ev.target.value)} />
+                {!form.alergias.trim() && <BotonNinguno texto="Ninguna" onPick={() => set('alergias', 'ninguna')} />}
               </Campo>
 
               <Campo
@@ -748,6 +838,7 @@ export default function IngresoPage() {
               >
                 <textarea id="medicacion" rows={3} className={`${cls(e.medicacion)} min-h-[88px] resize-y`}
                   value={form.medicacion} onChange={ev => set('medicacion', ev.target.value)} />
+                {!form.medicacion.trim() && <BotonNinguno texto="No tomo nada" onPick={() => set('medicacion', 'nada')} />}
               </Campo>
 
               <div className="flex flex-wrap gap-3">
@@ -834,6 +925,13 @@ export default function IngresoPage() {
                     </Campo>
                   </div>
                 </div>
+                {sesionesNoCoinciden && (
+                  <p className="rounded-xl border border-gold/60 bg-gold-light px-4 py-3 text-[13px] text-ink">
+                    En tus horarios marcaste {form.dias.length} {form.dias.length === 1 ? 'día' : 'días'} de
+                    entrenamiento y acá suman {totalSesiones}. Si no coincide, corregí uno de los dos. Si esos
+                    días hacés otra cosa, contámelo abajo en &quot;otro deporte&quot;.
+                  </p>
+                )}
               </Campo>
 
               <Campo id="duracion_sesion" label="¿Cuánto tiempo real tenés por sesión?">
