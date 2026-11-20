@@ -1,8 +1,6 @@
 // Registro del resultado de un pago de Mercado Pago.
-// Lo usan /api/payments/process (respuesta inmediata del brick) y
-// /api/payments/webhook (notificación asíncrona). Es idempotente: MP puede
-// avisar varias veces del mismo pago, y el brick y el webhook pueden llegar
-// al mismo tiempo. La transición a "approved" se gana con un UPDATE
+// Lo usa /api/payments/webhook (notificación asíncrona). Es idempotente: MP
+// puede avisar varias veces del mismo pago, a veces en paralelo. La transición a "approved" se gana con un UPDATE
 // condicional, así los efectos (ebook, mail) corren una sola vez.
 
 import { prisma } from '@/lib/prisma'

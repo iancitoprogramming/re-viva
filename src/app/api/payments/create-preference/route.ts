@@ -77,7 +77,7 @@ export async function POST(request: Request) {
       data:  { preferenceId: result.id! },
     })
 
-    return NextResponse.json({ preferenceId: result.id })
+    return NextResponse.json({ preferenceId: result.id, initPoint: result.init_point })
   } catch (error: unknown) {
     const e = error as { message?: string; cause?: unknown; status?: number }
     const cause = e?.cause ?? error

@@ -1,26 +1,11 @@
-// Página de checkout con Mercado Pago Payment Brick
-// Flujo: selección de plan → create-preference → Payment Brick → process → redirect
+// Checkout: selección de plan → create-preference → página de Mercado Pago
+// (Checkout Pro) → back_urls /checkout/{success,pending,failure} + webhook
 
 'use client'
 
-import { Suspense, useEffect, useRef, useState, useCallback } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { loadMercadoPago } from '@mercadopago/sdk-js'
 import { PLANES_MP, type PlanMPKey } from '@/lib/constants'
-
-declare global {
-  interface Window {
-    MercadoPago: new (publicKey: string, options?: Record<string, unknown>) => {
-      bricks: () => {
-        create: (
-          brick: string,
-          containerId: string,
-          config: Record<string, unknown>,
-        ) => Promise<{ unmount: () => void }>
-      }
-    }
-  }
-}
 
 const PLANES_VISIBLES: { key: PlanMPKey; label: string; precio: string }[] = [
   { key: 'on-demand',                    label: 'On Demand',                          precio: '$33.000 pago único'   },
@@ -47,17 +32,21 @@ const PLANES_VISIBLES: { key: PlanMPKey; label: string; precio: string }[] = [
 function CheckoutContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const brickRef = useRef<{ unmount: () => void } | null>(null)
 
   const planFromUrl = searchParams.get('plan') as PlanMPKey | null
   const [selectedPlan, setSelectedPlan] = useState<PlanMPKey | null>(
     planFromUrl && planFromUrl in PLANES_MP ? planFromUrl : null,
   )
-  const [preferenceId, setPreferenceId] = useState<string | null>(null)
-  const [brickReady, setBrickReady]     = useState(false)
-  const [loadingPref, setLoadingPref]   = useState(false)
-  const [procesando, setProcesando]     = useState(false)
-  const [error, setError]               = useState<string | null>(null)
+  const [urlPago, setUrlPago]         = useState<string | null>(null)
+  const [yendo, setYendo]             = useState(false)
+  const [error, setError]             = useState<string | null>(null)
+  const loadingPref = !!selectedPlan && !urlPago && !error
+
+  const elegirPlan = (plan: PlanMPKey | null) => {
+    setSelectedPlan(plan)
+    setUrlPago(null)
+    setError(null)
+  }
 
   // Verificar sesión activa — preservar el plan en la URL de redirect
   useEffect(() => {
@@ -70,13 +59,14 @@ function CheckoutContent() {
       .catch(() => router.replace(`/login?redirect=${encodeURIComponent(redirectPath)}&modo=registro`))
   }, [router, searchParams])
 
-  // Crear preferencia cuando se selecciona el plan
+  // Crear la preferencia cuando se elige el plan. El cobro se hace en la página
+  // de Mercado Pago (Checkout Pro): acepta todos los medios, muestra el motivo
+  // si algo se rechaza, y el resultado vuelve por las back_urls y el webhook.
+  // Antes era un Payment Brick embebido: dos compras reales fallaron sin que
+  // el pago llegara a existir en MP.
   useEffect(() => {
     if (!selectedPlan) return
-    setLoadingPref(true)
-    setPreferenceId(null)
-    setBrickReady(false)
-    setError(null)
+    let cancelado = false
 
     fetch('/api/payments/create-preference', {
       method: 'POST',
@@ -86,118 +76,13 @@ function CheckoutContent() {
       .then(r => r.json())
       .then(data => {
         if (data.error) throw new Error(data.detail ? `${data.error}: ${data.detail}` : data.error)
-        setPreferenceId(data.preferenceId)
+        if (!data.initPoint) throw new Error('Mercado Pago no devolvió el link de pago.')
+        if (!cancelado) setUrlPago(data.initPoint)
       })
-      .catch(err => setError(err.message ?? 'No se pudo iniciar el pago.'))
-      .finally(() => setLoadingPref(false))
+      .catch(err => { if (!cancelado) setError(err.message ?? 'No se pudo iniciar el pago.') })
+
+    return () => { cancelado = true }
   }, [selectedPlan])
-
-  // Inicializar Payment Brick cuando llega preferenceId
-  const handlePlanSelect = useCallback((plan: PlanMPKey) => {
-    setSelectedPlan(plan)
-  }, [])
-
-  useEffect(() => {
-    if (!preferenceId || !selectedPlan) return
-
-    const plan = PLANES_MP[selectedPlan]
-    let controller: { unmount: () => void } | null = null
-    let cancelled = false
-
-    const initBrick = async () => {
-      // Destruir brick anterior si existe
-      if (brickRef.current) {
-        brickRef.current.unmount()
-        brickRef.current = null
-      }
-
-      await loadMercadoPago()
-      if (cancelled) return
-
-      const mp = new window.MercadoPago(
-        process.env.NEXT_PUBLIC_MP_PUBLIC_KEY!,
-        { locale: 'es-AR' },
-      )
-      const bricksBuilder = mp.bricks()
-
-      controller = await bricksBuilder.create('payment', 'payment-brick-container', {
-        initialization: {
-          amount: plan.monto,
-          preferenceId,
-        },
-        customization: {
-          paymentMethods: {
-            creditCard:        'all',
-            debitCard:         'all',
-            ticket:            'all',
-            bankTransfer:      'all',
-            atm:               'all',
-            onboarding_credits:'all',
-            wallet_purchase:   'all',
-          },
-        },
-        callbacks: {
-          onReady: () => setBrickReady(true),
-          onError: (err: unknown) => {
-            console.error('[Payment Brick]', err)
-            setError('Ocurrió un error al cargar el sistema de pago. Intentá de nuevo.')
-          },
-          onSubmit: ({ selectedPaymentMethod, formData }: { selectedPaymentMethod?: string; formData?: Record<string, unknown> }) => {
-            // "Cuenta de Mercado Pago": no hay datos de tarjeta. El Brick lleva al
-            // comprador a Mercado Pago con la preferencia; el resultado vuelve por
-            // las back_urls y el webhook lo registra. Mandarlo a /process lo hacía
-            // fallar siempre.
-            if (selectedPaymentMethod === 'wallet_purchase' || !formData) {
-              return Promise.resolve()
-            }
-            setProcesando(true)
-            return new Promise<void>((resolve, reject) => {
-              fetch('/api/payments/process', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ formData, preferenceId }),
-              })
-                .then(r => r.json())
-                .then(data => {
-                  resolve()
-                  const params = new URLSearchParams({ plan: selectedPlan })
-                  if (data.status === 'approved') {
-                    router.push(`/checkout/success?${params}`)
-                  } else if (data.status === 'pending' || data.status === 'in_process') {
-                    router.push(`/checkout/pending?${params}`)
-                  } else {
-                    router.push(`/checkout/failure?${params}`)
-                    reject(new Error(data.status))
-                  }
-                })
-                .catch(err => {
-                  console.error('[process]', err)
-                  setProcesando(false)
-                  reject(err)
-                })
-            })
-          },
-        },
-      })
-
-      if (cancelled) {
-        controller.unmount()
-      } else {
-        brickRef.current = controller
-      }
-    }
-
-    initBrick().catch(err => {
-      console.error('[initBrick]', err)
-      setError('No se pudo inicializar el sistema de pago.')
-    })
-
-    return () => {
-      cancelled = true
-      controller?.unmount()
-      brickRef.current = null
-    }
-  }, [preferenceId, selectedPlan, router])
 
   // ── Plan no seleccionado: mostrar selector ────────────────────────────────
   if (!selectedPlan) {
@@ -213,7 +98,7 @@ function CheckoutContent() {
             {PLANES_VISIBLES.map(p => (
               <button
                 key={p.key}
-                onClick={() => handlePlanSelect(p.key)}
+                onClick={() => elegirPlan(p.key)}
                 className="bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-between hover:border-emerald-500 hover:shadow-sm transition-all text-left cursor-pointer"
               >
                 <div>
@@ -253,7 +138,7 @@ function CheckoutContent() {
           <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6 text-red-700 text-sm">
             {error}
             <button
-              onClick={() => { setError(null); setSelectedPlan(null) }}
+              onClick={() => elegirPlan(null)}
               className="block mt-2 text-red-600 underline text-xs cursor-pointer"
             >
               Intentar de nuevo
@@ -269,24 +154,23 @@ function CheckoutContent() {
           </div>
         )}
 
-        {/* Overlay procesando pago */}
-        {procesando && (
-          <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-50">
-            <div className="w-10 h-10 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin mb-4" />
-            <p className="text-gray-700 font-semibold">Procesando tu pago...</p>
-            <p className="text-gray-500 text-sm mt-1">No cierres esta ventana.</p>
-          </div>
-        )}
-
-        {/* Payment Brick */}
-        {preferenceId && !error && (
-          <div className={`bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden transition-opacity duration-300 ${brickReady ? 'opacity-100' : 'opacity-0'}`}>
-            {!brickReady && (
-              <div className="flex justify-center items-center p-10">
-                <div className="w-8 h-8 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin" />
-              </div>
-            )}
-            <div id="payment-brick-container" />
+        {/* Ir a Mercado Pago */}
+        {urlPago && !error && (
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8 text-center">
+            <a
+              href={urlPago}
+              onClick={() => setYendo(true)}
+              className="flex items-center justify-center gap-2 w-full bg-[#009EE3] hover:bg-[#0089c7] text-white font-semibold rounded-2xl py-4 transition-colors"
+            >
+              {yendo ? 'Abriendo Mercado Pago…' : 'Pagar con Mercado Pago'}
+            </a>
+            <p className="text-gray-500 text-sm mt-4 leading-relaxed">
+              Tarjeta de crédito o débito, dinero en cuenta o efectivo.
+              No hace falta tener cuenta de Mercado Pago.
+            </p>
+            <p className="text-gray-400 text-xs mt-2">
+              El pago lo procesa Mercado Pago. Al terminar volvés acá.
+            </p>
           </div>
         )}
 
@@ -294,12 +178,7 @@ function CheckoutContent() {
         {!loadingPref && (
           <p className="text-center mt-5">
             <button
-              onClick={() => {
-                setSelectedPlan(null)
-                setPreferenceId(null)
-                setBrickReady(false)
-                setError(null)
-              }}
+              onClick={() => elegirPlan(null)}
               className="text-sm text-gray-400 hover:text-gray-600 underline cursor-pointer"
             >
               Cambiar plan
