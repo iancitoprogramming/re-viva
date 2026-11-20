@@ -50,7 +50,7 @@
 | Email | Resend (SDK oficial, `src/lib/email.ts`) |
 | Deploy | Vercel |
 | Tipado | TypeScript |
-| Pagos | Mercado Pago (checkout propio + links de suscripción) |
+| Pagos | Mercado Pago (Checkout Pro por redirect + débito automático por API) |
 | Archivos | Vercel Blob |
 
 ---
@@ -248,7 +248,6 @@ Las páginas verifican `/api/auth/me` en `useEffect`:
 | GET/POST | `/api/curso/progreso` | JWT cookie | Progreso en los cursos |
 | GET | `/api/archivos/[id]` | JWT cookie | Descarga un archivo del cliente |
 | POST | `/api/payments/create-preference` | JWT cookie | Crea preferencia de pago en MP |
-| POST | `/api/payments/process` | JWT cookie | Procesa el pago del brick |
 | POST | `/api/payments/webhook` | Firma MP | Notificación asíncrona de Mercado Pago |
 | GET | `/api/cron/cumpleanos` | CRON_SECRET | Saludo de cumpleaños (diario, 12 UTC) |
 | GET | `/api/cron/vencimientos` | CRON_SECRET | Aviso de vencimiento a 7 días |

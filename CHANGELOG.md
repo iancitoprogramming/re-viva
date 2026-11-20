@@ -2,6 +2,11 @@
 
 Versiones del sitio en producción (`https://www.revivabyigz.com`). Cómo se numeran: `CLAUDE.md` §11, "Versiones".
 
+## 1.1.5 — 2026-11-20
+
+- **El cobro pasa a la página de Mercado Pago (Checkout Pro).** El formulario de pago embebido (Payment Brick) falló en las dos compras reales: la preferencia se creaba pero el pago nunca llegaba a existir en MP. Ahora `/checkout` muestra el plan y un botón "Pagar con Mercado Pago" que abre la página oficial: tarjeta, débito, dinero en cuenta o efectivo, sin necesidad de cuenta, y con el motivo del rechazo a la vista del comprador. El resultado vuelve por las back_urls y lo registra el webhook.
+- Se eliminan `/api/payments/process` y la dependencia `@mercadopago/sdk-js`.
+
 ## 1.1.4 — 2026-11-16
 
 - **Pagar con la cuenta de Mercado Pago ya no falla.** En el checkout, la opción "Cuenta de Mercado Pago" mandaba el pago al cobro con tarjeta sin datos de tarjeta, y el comprador terminaba en la página de error. Ahora el Brick lo lleva a Mercado Pago y el resultado lo registra el webhook. Se detectó en la primera compra real (ebook, 16/11).
