@@ -1,5 +1,14 @@
 # Links de afiliado — generados 2026-11-04
 
+## Revisión 2026-11-23
+
+Revisión semanal de los 14 links de la migración `20261104000100_catalogo_segun_research` (leída de `main`). Los 14 responden 200 y caen en `/social/goldenvalhalla` con el producto destacado y su precio (extraído del título del producto destacado).
+
+- **Precios movidos >15% vs. referencia de la migración (persisten desde semanas anteriores):** `balanza-cocina` $16.999 → $22.999 (+35,3%); `shaker` $17.451 → $20.676 (+18,5%).
+- Movimientos menores (<15%), actualizados abajo: botella $22.990 (+12,9%), magnesio $19.125 (+9,5%), balanza-personal $28.250 (+8,7%), beta-alanina $35.390 (+6,9%, bajó vs. semana pasada), creatina $75.900 (+6,6%), whey $108.000 (+5,9%), vitamina-d $34.919 (+5,8%), vitamina-c $53.900 (+3,1%), electrolitos $41.990 (−1,6%, bajó vs. semana pasada).
+- Sin cambios (3): cinta-metrica, colageno, omega-3.
+- Caídos / no verificados: ninguno.
+
 ## Revisión 2026-11-16
 
 Revisión semanal de los 14 links de la migración `20261104000100_catalogo_segun_research` (leída de `main`). Los 14 responden 200 y caen en `/social/goldenvalhalla` con el producto destacado y su precio. Precio extraído del título del producto destacado.
@@ -98,9 +107,9 @@ Sin link. El motor recomienda café.
 | `vitamina-c` | Natuliv Vitamina C Comprimidos X 30 Unidades Sin Sabor | $5.900 | https://meli.la/2tUkD3G |
 | `magnesio` | Bisglicinato de Magnesio ENA Sport Wellness Series x 60 cáps | $19.125 | https://meli.la/2aDaTvq |
 | `magnesio` | Magnesio Bisglicinato Vegano Pack X 2 Natier X 50 Cápsulas | $41.999 | https://meli.la/1PoaVLw |
-| `electrolitos` | Electrolitos en Polvo Sin Azúcar 150g — 30 porciones, sodio/potasio/magnesio + vit C | $43.999 | https://meli.la/2s38CMt |
+| `electrolitos` | Electrolitos en Polvo Sin Azúcar 150g — 30 porciones, sodio/potasio/magnesio + vit C | $41.990 | https://meli.la/2s38CMt |
 | `electrolitos` | Polvo Electrolitos Vegano Sin Azúcar Venture Pal 170g | $59.999 | https://meli.la/2q2feym |
-| `beta-alanina` | Beta Alanine 100% Pure X 300 Grs — Star Nutrition Sin Sabor | $36.436 | https://meli.la/1FVecYD |
+| `beta-alanina` | Beta Alanine 100% Pure X 300 Grs — Star Nutrition Sin Sabor | $35.390 | https://meli.la/1FVecYD |
 | `beta-alanina` | Beta Alanina Swork Nutrition Polvo 300g Frasco Neutro | $21.436 | https://meli.la/29wzEpu |
 
 > Magnesio: los dos son bisglicinato, ninguno es óxido. ✔
@@ -120,7 +129,7 @@ Sin link. El motor recomienda café.
 | `cinta-metrica` | Cinta Métrica Corporal F For Medir Cintura | $16.500 | https://meli.la/2pvTHTr |
 | `shaker` | Shaker ENA Sport Bottle 600 Ml — bola mezcladora, tapa flip-top, libre de BPA | $20.676 | https://meli.la/2cg2LnX |
 | `shaker` | Vaso Batidor Shaker 600ml Con Resorte Mezclador (rojo) | $14.999 | https://meli.la/2qTqC9t |
-| `botella` | Botella Acero Inoxidable MTL 1 Litro Térmica Doble Pared | $20.990 | https://meli.la/29c6HHD |
+| `botella` | Botella Acero Inoxidable MTL 1 Litro Térmica Doble Pared | $22.990 | https://meli.la/29c6HHD |
 | `botella` | Botella Térmica Southport By Gadnic 1 Litro Acero Inox, 3 tapas | $31.647 | https://meli.la/1LY8mYV |
 
 > Ninguna de las botellas de 1 L que aparecen primero trae marcas de medición —
